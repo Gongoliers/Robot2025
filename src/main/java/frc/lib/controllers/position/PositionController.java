@@ -7,5 +7,5 @@ package frc.lib.controllers.position;
  * of position controllers in the future much simpler
  */
 public interface PositionController {
-    
+  
 }

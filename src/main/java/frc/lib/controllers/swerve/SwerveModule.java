@@ -7,5 +7,5 @@ package frc.lib.controllers.swerve;
  * of swerve modules in the future much simpler
  */
 public interface SwerveModule {
-    
+  
 }
