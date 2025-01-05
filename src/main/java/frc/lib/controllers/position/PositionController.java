@@ -17,7 +17,7 @@ public interface PositionController {
     /** Current velocity in rotations per second */
     public double velRotationsPerSec = 0.0;
 
-    /** Current accleration in rotations per second per second */
+    /** Current acceleration in rotations per second per second */
     public double accRotationsPerSecPerSec = 0.0;
 
     /** Current voltage */
