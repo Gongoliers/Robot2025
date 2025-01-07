@@ -4,17 +4,33 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
 
-  private final RobotContainer m_robotContainer;
+  /** Robot container */
+  private RobotContainer robotContainer;
 
-  public Robot() {
-    m_robotContainer = new RobotContainer();
+  /** Command to run during autonomous */
+  private Command autonomousCommand;
+
+  /**
+   * Returns true if on red alliance
+   * 
+   * @return true if on red alliance
+   */
+  public static boolean isRedAlliance() {
+    return DriverStation.getAlliance().isPresent()
+      && DriverStation.getAlliance().get() == Alliance.Red;
+  }
+
+  @Override
+  public void robotInit() {
+    robotContainer = RobotContainer.getInstance();
   }
 
   @Override
@@ -33,10 +49,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    autonomousCommand = robotContainer.getAutonomousCommand();
 
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
+    if (autonomousCommand != null) {
+      autonomousCommand.schedule();
     }
   }
 
@@ -48,8 +64,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
+    if (autonomousCommand != null) {
+      autonomousCommand.cancel();
     }
   }
 
