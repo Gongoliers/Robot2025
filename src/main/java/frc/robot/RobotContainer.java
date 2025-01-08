@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.lib.Telemetry;
 import frc.robot.odometry.Odometry;
 import frc.robot.swerve.Swerve;
 
@@ -35,6 +36,8 @@ public class RobotContainer {
 
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
+
+    Telemetry.initializeTabs(odometry, swerve);
 
     configureDefaultCommands();
     configureBindings();

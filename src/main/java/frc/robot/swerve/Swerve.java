@@ -6,10 +6,12 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.DriveRequest;
+import frc.lib.Subsystem;
 import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.MotionProfileConfig;
 import frc.lib.configs.FeedbackControllerConfig.FeedbackControllerBuilder;
@@ -23,7 +25,7 @@ import frc.robot.odometry.Odometry;
 import java.util.function.Function;
 
 /** Swerve subsystem */
-public class Swerve extends SubsystemBase {
+public class Swerve extends Subsystem {
   
   /** Swerve subsystem singleton */
   private static Swerve instance = null;
@@ -124,6 +126,13 @@ public class Swerve extends SubsystemBase {
     for (SwerveModule swerve : swerves) {
       swerve.periodic();
     }
+  }
+
+  @Override
+  public void initializeTab() {
+
+    // get shuffleboard tab
+    ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
   }
 
   /**

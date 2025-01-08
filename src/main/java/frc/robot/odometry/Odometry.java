@@ -8,17 +8,19 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.CAN;
+import frc.lib.Subsystem;
 import frc.lib.sensors.Gyroscope;
 import frc.lib.sensors.Gyroscope.GyroscopeValues;
 import frc.robot.swerve.Swerve;
 
 /** Odometry subsystem */
-public class Odometry extends SubsystemBase {
+public class Odometry extends Subsystem {
   
   /** Odometry subsystem singleton */
   private static Odometry instance = null;
@@ -83,6 +85,15 @@ public class Odometry extends SubsystemBase {
       modulePositionsSupplier.get());
 
     field.setRobotPose(getPosition());
+  }
+
+  @Override
+  public void initializeTab() {
+
+    // get shuffleboard tab
+    ShuffleboardTab tab = Shuffleboard.getTab("Odometry");
+
+    tab.add(field);
   }
 
   /**
