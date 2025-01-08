@@ -92,7 +92,6 @@ public class Odometry extends Subsystem {
 
   @Override
   public void initializeTab() {
-
     // get shuffleboard tab
     ShuffleboardTab tab = Shuffleboard.getTab("Odometry");
 

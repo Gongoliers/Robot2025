@@ -6,8 +6,11 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.DriveRequest;
@@ -23,6 +26,7 @@ import frc.robot.RobotConstants;
 import frc.robot.odometry.Odometry;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /** Swerve subsystem */
 public class Swerve extends Subsystem {
@@ -130,9 +134,42 @@ public class Swerve extends Subsystem {
 
   @Override
   public void initializeTab() {
-
     // get shuffleboard tab
     ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
+
+    Swerve.addSwerveModuleStates(tab, "Swerve Module States", this::getModuleStates);
+    Swerve.addSwerveModuleStates(tab, "Swerve Module Setpoints", this::getModuleSetpoints)
+
+    for (int i = 0; i < 4; i++) {
+      SwerveModule swerve = swerves[i];
+
+      // get swerve module's list widget (acts as a sub-table in NT)
+      ShuffleboardLayout swerveColumn = tab.getLayout("Module " + i, BuiltInLayouts.kList);
+
+      swerveColumn.addDouble("Angle (deg)", () -> swerve.getState().angle.getDegrees());
+      swerveColumn.addDouble("Velocity (mps)", () -> swerve.getState().speedMetersPerSecond);
+      swerveColumn.addDouble("Setpoint Angle (deg)", () -> swerve.getSetpoint().angle.getDegrees());
+      swerveColumn.addDouble("Setpoint Velocity (mps)", () -> swerve.getSetpoint().speedMetersPerSecond);
+    }
+  }
+
+  private static SuppliedValueWidget<double[]> addSwerveModuleStates(
+      ShuffleboardTab tab, String title, Supplier<SwerveModuleState[]> swerveModuleStatesSupplier) {
+
+    return tab.addDoubleArray(
+      title, 
+      () -> {
+        SwerveModuleState[] states = swerveModuleStatesSupplier.get();
+        double[] doubles = new double[8];
+
+        for (int i = 0; i < 4; i++) {
+          SwerveModuleState state = states[i];
+          doubles[2*i] = state.angle.getDegrees();
+          doubles[2*i+1] = state.speedMetersPerSecond;
+        }
+
+        return doubles;
+      });
   }
 
   /**
