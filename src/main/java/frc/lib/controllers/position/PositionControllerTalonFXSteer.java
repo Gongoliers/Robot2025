@@ -104,6 +104,9 @@ public class PositionControllerTalonFXSteer implements PositionController {
     motor.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
   }
 
+  @Override
+  public void periodic() {}
+
   private double calculateFeedforward(double measurementRotations, double setpointRotations) {
     if (feedback.atSetpoint() == false) {
       if (measurementRotations > setpointRotations) {

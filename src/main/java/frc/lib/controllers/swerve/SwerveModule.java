@@ -39,4 +39,7 @@ public interface SwerveModule {
    * @return the swerve module's current position
    */
   public SwerveModulePosition getPosition();
+
+  /** Called every periodic loop */
+  public void periodic();
 }

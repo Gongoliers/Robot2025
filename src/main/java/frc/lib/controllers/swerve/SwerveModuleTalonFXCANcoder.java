@@ -45,9 +45,6 @@ public class SwerveModuleTalonFXCANcoder implements SwerveModule {
 
   @Override
   public SwerveModuleState getState() {
-    steerMotor.getUpdatedVals(steerMotorValues);
-    driveMotor.getUpdatedVals(driveMotorValues);
-
     return new SwerveModuleState(
       driveMotorValues.velRotationsPerSec * wheelCircumference,
       Rotation2d.fromRotations(steerMotorValues.posRotations));
@@ -79,11 +76,17 @@ public class SwerveModuleTalonFXCANcoder implements SwerveModule {
 
   @Override
   public SwerveModulePosition getPosition() {
-    steerMotor.getUpdatedVals(steerMotorValues);
-    driveMotor.getUpdatedVals(driveMotorValues);
-
     return new SwerveModulePosition(
       driveMotorValues.posRotations * wheelCircumference,
       Rotation2d.fromRotations(steerMotorValues.posRotations));
+  }
+
+  @Override
+  public void periodic() {
+    steerMotor.getUpdatedVals(steerMotorValues);
+    driveMotor.getUpdatedVals(driveMotorValues);
+
+    steerMotor.periodic();
+    driveMotor.periodic();
   }
 }

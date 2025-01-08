@@ -8,10 +8,12 @@ import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.AbsoluteEncoderConfig.AbsoluteEncoderBuilder;
 import frc.lib.configs.MechanismConfig.MechanismBuilder;
 import frc.lib.controllers.position.PositionController;
+import frc.lib.controllers.position.PositionControllerSim;
 import frc.lib.controllers.position.PositionControllerTalonFXSteer;
 import frc.lib.controllers.swerve.SwerveModule;
 import frc.lib.controllers.swerve.SwerveModuleTalonFXCANcoder;
 import frc.lib.controllers.velocity.VelocityController;
+import frc.lib.controllers.velocity.VelocityControllerSim;
 import frc.lib.controllers.velocity.VelocityControllerTalonFXPIDF;
 import frc.robot.Robot;
 
@@ -202,8 +204,7 @@ public class SwerveFactory {
       return new PositionControllerTalonFXSteer(steer, azimuth, config, false);
     }
 
-    //TODO sim TalonFX steer motor
-    return new PositionControllerTalonFXSteer(steer, azimuth, config, false);
+    return new PositionControllerSim();
   }
 
   /**
@@ -218,7 +219,6 @@ public class SwerveFactory {
       return new VelocityControllerTalonFXPIDF(drive, config, false);
     }
 
-    //TODO sim TalonFX drive motor
-    return new VelocityControllerTalonFXPIDF(drive, config, false);
+    return new VelocityControllerSim();
   }
 }

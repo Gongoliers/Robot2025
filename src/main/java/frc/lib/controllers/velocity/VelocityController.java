@@ -50,4 +50,7 @@ public interface VelocityController {
    * @param velRotationsPerSec target velocity in rotations per second
    */
   public void setSetpoint(double velRotationsPerSec);
+
+  /** Called every periodic loop */
+  public void periodic();
 }

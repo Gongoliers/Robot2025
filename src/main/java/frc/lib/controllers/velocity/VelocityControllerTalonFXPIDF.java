@@ -94,4 +94,7 @@ public class VelocityControllerTalonFXPIDF implements VelocityController {
 
     motor.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
   }
+
+  @Override
+  public void periodic() {}
 }

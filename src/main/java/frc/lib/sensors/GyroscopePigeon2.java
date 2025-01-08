@@ -54,4 +54,7 @@ public class GyroscopePigeon2 implements Gyroscope {
   public void setYaw(double yawRotations) {
     gyroscope.setYaw(Units.rotationsToDegrees(yawRotations));
   }
+
+  @Override
+  public void periodic() {}
 }

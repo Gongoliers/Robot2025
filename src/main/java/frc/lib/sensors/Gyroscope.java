@@ -46,4 +46,7 @@ public interface Gyroscope {
    * @param yawRotations yaw in rotations
    */
   public void setYaw(double yawRotations);
+
+  /** Called every periodic loop */
+  public void periodic();
 }

@@ -51,4 +51,7 @@ public interface PositionController {
    * @param velRotationsPerSec target velocity in rotations per second
    */
   public void setSetpoint(double posRotations, double velRotationsPerSec);
+
+  /** Called every periodic loop */
+  public void periodic();
 }
