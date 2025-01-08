@@ -8,7 +8,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -93,7 +96,25 @@ public class Odometry extends Subsystem {
     // get shuffleboard tab
     ShuffleboardTab tab = Shuffleboard.getTab("Odometry");
 
-    tab.add(field);
+    // make position list widget (list widgets will act as sub-tables in NT)
+    ShuffleboardLayout position = tab.getLayout("Position", BuiltInLayouts.kList);
+
+    position.addDouble("X (m)", () -> getPosition().getX());
+    position.addDouble("Y (m)", () -> getPosition().getY());
+    position.addDouble("Field Rotation (deg)", () -> getFieldRelativeHeading().getDegrees());
+    position.addDouble("Driver Rotation (deg)", () -> getFieldRelativeHeading().getDegrees());
+
+    // make velocity list widget
+    ShuffleboardLayout velocity = tab.getLayout("Velocity", BuiltInLayouts.kList);
+
+    velocity.addDouble("X Velocity (mps)", () -> getVelocity().dx);
+    velocity.addDouble("Y Velocity (mps)", () -> getVelocity().dy);
+    velocity.addDouble("Angular Velocity (dps)", () -> Units.radiansToDegrees((getVelocity().dtheta)));
+
+    // make field list widget
+    ShuffleboardLayout field = tab.getLayout("Field", BuiltInLayouts.kList);
+
+    field.add("Field", this.field);
   }
 
   /**
