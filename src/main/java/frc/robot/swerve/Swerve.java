@@ -138,7 +138,7 @@ public class Swerve extends Subsystem {
     ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
 
     Swerve.addSwerveModuleStates(tab, "Swerve Module States", this::getModuleStates);
-    Swerve.addSwerveModuleStates(tab, "Swerve Module Setpoints", this::getModuleSetpoints)
+    Swerve.addSwerveModuleStates(tab, "Swerve Module Setpoints", this::getModuleSetpoints);
 
     for (int i = 0; i < 4; i++) {
       SwerveModule swerve = swerves[i];
