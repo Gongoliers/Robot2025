@@ -101,7 +101,7 @@ public class Odometry extends Subsystem {
     position.addDouble("X (m)", () -> getPosition().getX());
     position.addDouble("Y (m)", () -> getPosition().getY());
     position.addDouble("Field Rotation (deg)", () -> getFieldRelativeHeading().getDegrees());
-    position.addDouble("Driver Rotation (deg)", () -> getFieldRelativeHeading().getDegrees());
+    position.addDouble("Driver Rotation (deg)", () -> getDriverRelativeHeading().getDegrees());
 
     // make velocity list widget
     ShuffleboardLayout velocity = tab.getLayout("Velocity", BuiltInLayouts.kList);
@@ -109,6 +109,7 @@ public class Odometry extends Subsystem {
     velocity.addDouble("X Velocity (mps)", () -> getVelocity().dx);
     velocity.addDouble("Y Velocity (mps)", () -> getVelocity().dy);
     velocity.addDouble("Angular Velocity (dps)", () -> Units.radiansToDegrees((getVelocity().dtheta)));
+    velocity.addDouble("Velocity", () -> Math.hypot(getVelocity().dx, getVelocity().dy));
 
     // make field list widget
     ShuffleboardLayout field = tab.getLayout("Field", BuiltInLayouts.kList);

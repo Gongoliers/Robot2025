@@ -1,4 +1,9 @@
 {
+  "Joysticks": {
+    "window": {
+      "visible": false
+    }
+  },
   "keyboardJoysticks": [
     {
       "axisConfig": [
@@ -91,7 +96,11 @@
   ],
   "robotJoysticks": [
     {
-      "guid": "Keyboard1"
+      "guid": "Keyboard0"
+    },
+    {},
+    {
+      "guid": "Keyboard2"
     }
   ]
 }
