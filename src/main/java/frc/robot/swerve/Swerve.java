@@ -1,11 +1,14 @@
 package frc.robot.swerve;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
@@ -28,6 +31,8 @@ import frc.lib.controllers.swerve.SwerveModule;
 import frc.robot.RobotConstants;
 import frc.robot.odometry.Odometry;
 
+import static edu.wpi.first.units.Units.Rotation;
+
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -42,6 +47,9 @@ public class Swerve extends Subsystem {
 
   /** Swerve kinematics */
   private final SwerveDriveKinematics swerveKinematics;
+
+  /** Swerve chassis yaw PID */
+  private final PIDController yawPidController = new PIDController(25, 0, 0);
 
   /** Steer motor config */
   private final MechanismConfig steerConfig =
@@ -323,6 +331,15 @@ public class Swerve extends Subsystem {
         double rotationVelocity;
 
         rotationVelocity = request.rotationVelocityAxis() * Units.rotationsToRadians(rotationMotionProfileConfig.maxVelocity());
+
+        if (request.rotationMode() == DriveRequest.RotationMode.ALIGNING) {
+          Rotation2d angleMeasurement = Odometry.getInstance().getDriverRelativeHeading();
+          Rotation2d setpointAngle = request.headingAxis().getAngle();
+
+          if (Math.abs(angleMeasurement.getSin() - setpointAngle.getSin()) < 0.01) {
+            rotationVelocity = yawPidController.calculate(angleMeasurement.getRotations(), setpointAngle.getRotations());
+          }
+        }
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(
           request.translationAxis().getX() * translationMotionProfileConfig.maxVelocity(),

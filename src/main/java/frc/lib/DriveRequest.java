@@ -13,7 +13,7 @@ public record DriveRequest(
     double rotationVelocityAxis) {
   
   /** Translation mode */
-  private enum TranslationMode {
+  public enum TranslationMode {
     /** Field centric driving */
     FIELD_CENTRIC,
     /** Robot centric driving */
@@ -21,7 +21,7 @@ public record DriveRequest(
   }
 
   /** Rotation mode */
-  private enum RotationMode {
+  public enum RotationMode {
     /** Drifting (no rotation requested) */
     DRIFTING,
     /** Spinning (rotation velocity requested) */
