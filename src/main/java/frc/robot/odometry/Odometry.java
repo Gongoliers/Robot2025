@@ -180,6 +180,7 @@ public class Odometry extends Subsystem {
     return Commands.runOnce(
       () -> {
         gyroscope.setYaw(0.0);
+        setRotation(Rotation2d.fromDegrees(0.0));
       });
   }
 

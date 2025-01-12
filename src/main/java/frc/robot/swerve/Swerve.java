@@ -67,7 +67,7 @@ public class Swerve extends Subsystem {
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
           .continuous(true)
-          .kP(54.0)
+          .kP(20.0)
           .kD(0.15)
           .tolerance(Units.degreesToRotations(1.0))
           .build())
@@ -155,7 +155,7 @@ public class Swerve extends Subsystem {
       // get swerve module's list widget (acts as a sub-table in NT)
       ShuffleboardLayout swerveColumn = tab.getLayout("Module " + i, BuiltInLayouts.kList);
 
-      swerveColumn.addDouble("Angle (deg)", () -> swerve.getState().angle.getDegrees());
+      swerveColumn.addDouble("Angle (rot)", () -> swerve.getState().angle.getRotations());
       swerveColumn.addDouble("Velocity (mps)", () -> swerve.getState().speedMetersPerSecond);
       swerveColumn.addDouble("Setpoint Angle (deg)", () -> swerve.getSetpoint().angle.getDegrees());
       swerveColumn.addDouble("Setpoint Velocity (mps)", () -> swerve.getSetpoint().speedMetersPerSecond);

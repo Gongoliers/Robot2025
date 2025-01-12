@@ -13,7 +13,7 @@ public record AbsoluteEncoderConfig(
     boolean ccwPositive, 
     double sensorToMechRatio, 
     Rotation2d offset) {
-
+      
   /** Easier and more modular way to construct absolute encoder configs */
   public static class AbsoluteEncoderBuilder{
     private boolean ccwPositive;

@@ -83,6 +83,8 @@ public class PositionControllerTalonFXSteer implements PositionController {
 
   @Override
   public void getUpdatedVals(PositionControllerValues values) {
+    BaseStatusSignal.refreshAll(position, velocity, acceleration, volts, amps);
+
     values.posRotations = position.getValueAsDouble();
     values.velRotationsPerSec = velocity.getValueAsDouble();
     values.accRotationsPerSecPerSec = acceleration.getValueAsDouble();
@@ -97,7 +99,8 @@ public class PositionControllerTalonFXSteer implements PositionController {
   public void setSetpoint(double posRotations, double velRotationsPerSec) {
     double measuredPosRotations = position.getValueAsDouble();
 
-    double feedforwardVolts = calculateFeedforward(measuredPosRotations, posRotations);
+    double feedforwardVolts = 0.0;
+    //double feedforwardVolts = calculateFeedforward(measuredPosRotations, posRotations);
     
     double feedbackVolts = feedback.calculate(measuredPosRotations, posRotations);
 

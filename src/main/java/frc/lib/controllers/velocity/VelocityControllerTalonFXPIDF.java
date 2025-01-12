@@ -74,6 +74,8 @@ public class VelocityControllerTalonFXPIDF implements VelocityController {
 
   @Override
   public void getUpdatedVals(VelocityControllerValues values) {
+    BaseStatusSignal.refreshAll(position, velocity, acceleration, volts, amps);
+    
     values.posRotations = position.getValueAsDouble();
     values.velRotationsPerSec = velocity.getValueAsDouble();
     values.accRotationsPerSecPerSec = acceleration.getValueAsDouble();
