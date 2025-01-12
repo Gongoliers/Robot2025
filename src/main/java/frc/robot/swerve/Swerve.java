@@ -336,7 +336,7 @@ public class Swerve extends Subsystem {
           Rotation2d angleMeasurement = Odometry.getInstance().getDriverRelativeHeading();
           Rotation2d setpointAngle = request.headingAxis().getAngle();
 
-          if (Math.abs(angleMeasurement.getSin() - setpointAngle.getSin()) < 0.01) {
+          if (Math.abs(angleMeasurement.getSin() - setpointAngle.getSin()) > 0.01) {
             rotationVelocity = yawPidController.calculate(angleMeasurement.getRotations(), setpointAngle.getRotations());
           }
         }
