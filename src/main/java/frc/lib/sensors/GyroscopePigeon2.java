@@ -42,6 +42,8 @@ public class GyroscopePigeon2 implements Gyroscope {
 
   @Override
   public void getUpdatedVals(GyroscopeValues values) {
+    BaseStatusSignal.refreshAll(roll, pitch, yaw, rollVelocity, pitchVelocity, yawVelocity);
+    
     values.rollRotations = Units.degreesToRotations(roll.getValueAsDouble());
     values.pitchRotations = Units.degreesToRotations(pitch.getValueAsDouble());
     values.yawRotations = Units.degreesToRotations(yaw.getValueAsDouble());
