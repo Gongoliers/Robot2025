@@ -121,6 +121,9 @@ public class Swerve extends Subsystem {
         SwerveFactory.getNorthEastModuleTranslation(),
         SwerveFactory.getSouthEastModuleTranslation(),
         SwerveFactory.getSouthWestModuleTranslation());
+
+    yawPidController.enableContinuousInput(-0.5, 0.5);
+    yawPidController.setTolerance(0.01);
   }
 
   /** 
@@ -336,9 +339,7 @@ public class Swerve extends Subsystem {
           Rotation2d angleMeasurement = Odometry.getInstance().getDriverRelativeHeading();
           Rotation2d setpointAngle = request.headingAxis().getAngle();
 
-          if (Math.abs(angleMeasurement.getSin() - setpointAngle.getSin()) > 0.01) {
-            rotationVelocity = yawPidController.calculate(angleMeasurement.getRotations(), setpointAngle.getRotations());
-          }
+          rotationVelocity = yawPidController.calculate(angleMeasurement.getRotations(), setpointAngle.getRotations());
         }
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(
