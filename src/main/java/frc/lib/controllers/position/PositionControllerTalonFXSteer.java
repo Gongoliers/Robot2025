@@ -99,8 +99,7 @@ public class PositionControllerTalonFXSteer implements PositionController {
   public void setSetpoint(double posRotations, double velRotationsPerSec) {
     double measuredPosRotations = position.getValueAsDouble();
 
-    double feedforwardVolts = 0.0;
-    //double feedforwardVolts = calculateFeedforward(measuredPosRotations, posRotations);
+    double feedforwardVolts = calculateFeedforward(measuredPosRotations, posRotations);
     
     double feedbackVolts = feedback.calculate(measuredPosRotations, posRotations);
 
