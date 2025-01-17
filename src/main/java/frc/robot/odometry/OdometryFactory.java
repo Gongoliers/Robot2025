@@ -9,6 +9,8 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.CAN;
 import frc.lib.sensors.Gyroscope;
 import frc.robot.Robot;
+import frc.robot.RobotConstants;
+import frc.robot.RobotConstants.Subsystem;
 
 public class OdometryFactory {
   
@@ -20,7 +22,7 @@ public class OdometryFactory {
    * @return the gyroscope
    */
   public static Gyroscope createGyroscope(Odometry odometry, CAN gyroscopeCAN) {
-    if (Robot.isReal()) {
+    if (Robot.isReal() && RobotConstants.ENABLED_SUBSYSTEMS.contains(Subsystem.ODOMETRY)) {
       return new GyroscopePigeon2(gyroscopeCAN);
     }
 
@@ -33,7 +35,7 @@ public class OdometryFactory {
    * @return limelights class
    */
   public static Limelights createLimelights() {
-    if (Robot.isReal()) {
+    if (Robot.isReal() && RobotConstants.ENABLED_SUBSYSTEMS.contains(Subsystem.LIMELIGHT) && RobotConstants.ENABLED_SUBSYSTEMS.contains(Subsystem.ODOMETRY)) {
       return new Limelights3G();
     }
 
