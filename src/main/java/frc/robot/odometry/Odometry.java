@@ -2,6 +2,7 @@ package frc.robot.odometry;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,6 +21,7 @@ import frc.lib.CAN;
 import frc.lib.Subsystem;
 import frc.lib.sensors.Gyroscope;
 import frc.lib.sensors.Gyroscope.GyroscopeValues;
+import frc.lib.targetting.Limelights;
 import frc.robot.swerve.Swerve;
 
 /** Odometry subsystem */
@@ -33,6 +35,9 @@ public class Odometry extends Subsystem {
 
   /** Gyroscope values */
   private final GyroscopeValues gyroscopeValues = new GyroscopeValues();
+
+  /** Limelights for field pose estimation */
+  private final Limelights limelights;
 
   /** Supplies swerve module positions */
   private final Supplier<SwerveModulePosition[]> modulePositionsSupplier;
@@ -62,6 +67,10 @@ public class Odometry extends Subsystem {
         Rotation2d.fromRotations(gyroscopeValues.yawRotations), 
         modulePositionsSupplier.get(), 
         new Pose2d());
+    poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
+
+    limelights = OdometryFactory.createLimelights();
+    limelights.addLimelights("limelight1", "limelight2");
 
     field = new Field2d();
   }
@@ -83,6 +92,8 @@ public class Odometry extends Subsystem {
   public void periodic() {
     gyroscope.periodic();
     gyroscope.getUpdatedVals(gyroscopeValues);
+
+    limelights.addVisionMeasurements(poseEstimator);
 
     poseEstimator.update(
       Rotation2d.fromRotations(gyroscopeValues.yawRotations), 

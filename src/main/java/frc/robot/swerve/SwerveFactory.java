@@ -16,6 +16,8 @@ import frc.lib.controllers.velocity.VelocityController;
 import frc.lib.controllers.velocity.VelocityControllerSim;
 import frc.lib.controllers.velocity.VelocityControllerTalonFXPIDF;
 import frc.robot.Robot;
+import frc.robot.RobotConstants;
+import frc.robot.RobotConstants.Subsystem;
 
 /** Creates swerve hardware */
 public class SwerveFactory {
@@ -200,7 +202,7 @@ public class SwerveFactory {
   private static PositionController createSteerMotor(
       CAN steer, CAN azimuth, MechanismConfig config) {
     
-    if (Robot.isReal()) {
+    if (Robot.isReal() && RobotConstants.ENABLED_SUBSYSTEMS.contains(Subsystem.SWERVE)) {
       return new PositionControllerTalonFXSteer(steer, azimuth, config, false);
     }
 
@@ -215,7 +217,7 @@ public class SwerveFactory {
    * @return a drive motor
    */
   private static VelocityController createDriveMotor(CAN drive, MechanismConfig config) {
-    if (Robot.isReal()) {
+    if (Robot.isReal() && RobotConstants.ENABLED_SUBSYSTEMS.contains(Subsystem.SWERVE)) {
       return new VelocityControllerTalonFXPIDF(drive, config, false);
     }
 

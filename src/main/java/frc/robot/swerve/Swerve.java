@@ -8,14 +8,12 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -31,10 +29,7 @@ import frc.lib.controllers.swerve.SwerveModule;
 import frc.robot.RobotConstants;
 import frc.robot.odometry.Odometry;
 
-import static edu.wpi.first.units.Units.Rotation;
-
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /** Swerve subsystem */
 public class Swerve extends Subsystem {
@@ -121,6 +116,9 @@ public class Swerve extends Subsystem {
         SwerveFactory.getNorthEastModuleTranslation(),
         SwerveFactory.getSouthEastModuleTranslation(),
         SwerveFactory.getSouthWestModuleTranslation());
+
+    yawPidController.enableContinuousInput(-0.5, 0.5);
+    yawPidController.setTolerance(0.01);
   }
 
   /** 
@@ -336,9 +334,7 @@ public class Swerve extends Subsystem {
           Rotation2d angleMeasurement = Odometry.getInstance().getDriverRelativeHeading();
           Rotation2d setpointAngle = request.headingAxis().getAngle();
 
-          if (Math.abs(angleMeasurement.getSin() - setpointAngle.getSin()) > 0.01) {
-            rotationVelocity = yawPidController.calculate(angleMeasurement.getRotations(), setpointAngle.getRotations());
-          }
+          rotationVelocity = yawPidController.calculate(angleMeasurement.getRotations(), setpointAngle.getRotations());
         }
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(
