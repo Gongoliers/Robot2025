@@ -97,7 +97,7 @@ public class Swerve extends Subsystem {
 
   /** Rotation motion profile config */
   private final MotionProfileConfig rotationMotionProfileConfig =
-    new MotionProfileConfig(1.0, 0.0);
+    new MotionProfileConfig(1.0, 2);
   
   /** Initializes the swerve subsystem and configures swerve hardware */
   private Swerve() {
@@ -302,6 +302,9 @@ public class Swerve extends Subsystem {
       translationMotionProfileConfig.createAccelerationLimiter();
     final SlewRateLimiter yAccelerationLimiter =
       translationMotionProfileConfig.createAccelerationLimiter();
+    final SlewRateLimiter rotationAccelerationLimiter =
+      rotationMotionProfileConfig.createAccelerationLimiter();
+
 
     // create a velocity clamping function from the rotation motion profile
     final Function<Double, Double> rotationVelocityLimiter =
@@ -320,6 +323,7 @@ public class Swerve extends Subsystem {
           xAccelerationLimiter.calculate(chassisSpeeds.vxMetersPerSecond),
           yAccelerationLimiter.calculate(chassisSpeeds.vyMetersPerSecond),
           Units.rotationsToRadians(
+            angula
             rotationVelocityLimiter.apply(
               Units.radiansToRotations(chassisSpeeds.omegaRadiansPerSecond))));
       };
