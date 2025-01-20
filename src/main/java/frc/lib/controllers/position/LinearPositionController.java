@@ -11,20 +11,29 @@ public interface LinearPositionController {
   /** Linear position controller values */
   public static class LinearPositionControllerValues {
 
-    /** Current position in inches */
-    public double posInches = 0.0;
+    /** Current motor position in rotations */
+    public double motorPosRotations = 0.0;
 
-    /** Current velocity in inches per second */
-    public double velInchesPerSec = 0.0;
+    /** Current motor velocity in rotatoins per second */
+    public double motorVelRotationsPerSec = 0.0;
 
-    /** Current acceleration in inches per second per second */
-    public double accInchesPerSecPerSec = 0.0;
+    /** Current motor acceleration in rotations per second per second */
+    public double motorAccRotationsPerSecPerSec = 0.0;
 
     /** Current motor voltage */
     public double motorVolts = 0.0;
 
     /** Current motor current */
     public double motorAmps = 0.0;
+
+    /** Current position in meters */
+    public double posMeters = 0.0;
+    
+    /** Current velocity in meters per second */
+    public double velMetersPerSec = 0.0;
+
+    /** Current acceleration in meters per second per second */
+    public double accMetersPerSecPerSec = 0.0;
   }
 
   /** Configures the linear position controller */
@@ -40,17 +49,17 @@ public interface LinearPositionController {
   /**
    * Set current position of linear position controller
    * 
-   * @param posInches position in inches
+   * @param posMeters position in meters
    */
-  public void setPos(double posInches);
+  public void setPos(double posMeters);
 
   /**
    * Set setpoint of linear position controller
    * 
-   * @param posInches setpoint position in inches
-   * @param velInchesPerSec setpoint velocity in inches per second
+   * @param posMeters setpoint position in meters
+   * @param velMetersPerSec setpoint velocity in meters per second
    */
-  public void setSetpoint(double posInches, double velInchesPerSec);
+  public void setSetpoint(double posMeters, double velMetersPerSec);
 
   /** Called every periodic loop */
   public void periodic();
