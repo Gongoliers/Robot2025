@@ -323,9 +323,9 @@ public class Swerve extends Subsystem {
           xAccelerationLimiter.calculate(chassisSpeeds.vxMetersPerSecond),
           yAccelerationLimiter.calculate(chassisSpeeds.vyMetersPerSecond),
           Units.rotationsToRadians(
-            angula
-            rotationVelocityLimiter.apply(
-              Units.radiansToRotations(chassisSpeeds.omegaRadiansPerSecond))));
+            rotationAccelerationLimiter.calculate(
+              rotationVelocityLimiter.apply(
+                Units.radiansToRotations(chassisSpeeds.omegaRadiansPerSecond)))));
       };
 
     final Function<DriveRequest, ChassisSpeeds> chassisSpeedsGetter =
