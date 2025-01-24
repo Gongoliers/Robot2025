@@ -1,6 +1,7 @@
 package frc.lib.configs;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 /** 
@@ -44,6 +45,15 @@ public record FeedforwardControllerConfig(
    */
   public ArmFeedforward createArmFeedforward() {
     return new ArmFeedforward(kS, kG, kV, kA);
+  }
+
+  /**
+   * Creates an elevator feedforward using this config
+   * 
+   * @return an elevator feedforward using this config
+   */
+  public ElevatorFeedforward creatElevatorFeedforward() {
+    return new ElevatorFeedforward(kS, kG, kV, kA);
   }
 
   /** Easier and more modular way to construct feedforward controller configs */
