@@ -52,7 +52,7 @@ public record FeedforwardControllerConfig(
    * 
    * @return an elevator feedforward using this config
    */
-  public ElevatorFeedforward creatElevatorFeedforward() {
+  public ElevatorFeedforward createElevatorFeedforward() {
     return new ElevatorFeedforward(kS, kG, kV, kA);
   }
 
