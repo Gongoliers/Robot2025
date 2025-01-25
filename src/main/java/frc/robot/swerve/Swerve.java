@@ -114,7 +114,7 @@ public class Swerve extends Subsystem {
         SwerveFactory.getSouthWestModuleTranslation());
 
     yawPidController.enableContinuousInput(-0.5, 0.5);
-    yawPidController.setTolerance(0.01);
+    yawPidController.setTolerance(0.02);
   }
 
   /** 
