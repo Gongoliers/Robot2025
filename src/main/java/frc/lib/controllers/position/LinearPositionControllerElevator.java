@@ -37,6 +37,7 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
   private final VoltageOut voltage;
 
   private double elevatorPos = 0.0;
+  private final double motorToElevatorRatio;
 
   public LinearPositionControllerElevator(
       CAN leaderCAN,
@@ -61,6 +62,9 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
     // create feedforward and feedback based on config
     feedforward = config.feedforwardControllerConfig().createElevatorFeedforward();
     feedback = config.feedbackControllerConfig().createPIDController();
+
+    // set motor to elevator ratio
+    motorToElevatorRatio = config.motorConfig().motorToMechRatio();
 
     // default voltage
     voltage = new VoltageOut(0.0).withEnableFOC(enableFOC);
@@ -107,7 +111,10 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    // update elevator position based on motor velocity
+    setPos(elevatorPos + (velocity.getValueAsDouble() / motorToElevatorRatio));
+  }
 
   private double calculateFeedforward(double measurementMeters, double setpointMeters) {
     if (feedback.atSetpoint() == false) {
