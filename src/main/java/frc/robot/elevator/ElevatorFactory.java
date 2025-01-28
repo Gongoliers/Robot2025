@@ -1,7 +1,12 @@
 package frc.robot.elevator;
 
+import frc.lib.CAN;
+import frc.lib.configs.MechanismConfig;
+import frc.lib.controllers.position.LinearPositionController;
 import frc.lib.controllers.position.LinearPositionControllerElevator;
+import frc.robot.Robot;
 import frc.robot.RobotConstants;
+import frc.robot.RobotConstants.Subsystem;
 
 /** Creates elevator hardware */
 public class ElevatorFactory {

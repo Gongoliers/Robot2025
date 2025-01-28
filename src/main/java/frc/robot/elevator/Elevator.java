@@ -1,9 +1,11 @@
 package frc.robot.elevator;
 
+import frc.lib.CAN;
 import frc.lib.Subsystem;
 import frc.lib.configs.FeedforwardControllerConfig;
 import frc.lib.configs.FeedbackControllerConfig.FeedbackControllerBuilder;
 import frc.lib.configs.FeedforwardControllerConfig.FeedforwardControllerBuilder;
+import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.MechanismConfig.MechanismBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.position.LinearPositionController;
