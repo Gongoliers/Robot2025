@@ -37,6 +37,7 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
 
   private final VoltageOut voltage;
 
+  private final double rotationsToMeters;
   private double elevatorPosMeters = 0.0;
 
   private double setpointPosMeters = 0.0;
@@ -47,7 +48,8 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
       CAN followerCAN,
       MechanismConfig config,
       boolean enableFOC,
-      boolean invertFollower) {
+      boolean invertFollower,
+      double rotationsToMeters) {
     
     this.config = config;
 
@@ -65,6 +67,9 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
     // create feedforward and feedback based on config
     feedforward = config.feedforwardControllerConfig().createElevatorFeedforward();
     feedback = config.feedbackControllerConfig().createPIDController();
+
+    // set ratio of rotations of drum to meters of movement of elevator
+    this.rotationsToMeters = rotationsToMeters;
 
     // default voltage
     voltage = new VoltageOut(0.0).withEnableFOC(enableFOC);
@@ -114,8 +119,8 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
 
   @Override
   public void periodic() {
-    // update elevator position based on motor velocity
-    setPos(elevatorPosMeters + (velocity.getValueAsDouble() * RobotConstants.PERIODIC_DURATION / config.motorConfig().motorToMechRatio()));
+    // update elevator position based on motor encoder position (1 rotation of mechanism = 1m movement of )
+    setPos(position.getValueAsDouble()*rotationsToMeters);
 
     // approach setpoint
     double feedforwardVolts = calculateFeedforward(elevatorPosMeters, setpointPosMeters);

@@ -2,7 +2,7 @@ package frc.robot.elevator;
 
 public enum ElevatorState {
   STOW(0),
-  L1(1);
+  L1(0.5);
 
   private final double elevatorPosMeters;
 

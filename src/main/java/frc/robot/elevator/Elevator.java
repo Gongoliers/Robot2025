@@ -1,5 +1,7 @@
 package frc.robot.elevator;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.CAN;
 import frc.lib.Subsystem;
 import frc.lib.configs.FeedforwardControllerConfig;
@@ -47,10 +49,7 @@ public class Elevator extends Subsystem {
 
   /** Initializes the elevator subsystem and configures hardware */
   private Elevator() {
-    motor = ElevatorFactory.createDriveMotor(
-        new CAN(10),
-        new CAN(11),
-        config);
+    motor = ElevatorFactory.createDriveMotor(config);
   }
 
   /** Gets elevator subsystem instance if there is one, and creates one if there isn't */
@@ -68,5 +67,12 @@ public class Elevator extends Subsystem {
   @Override
   public void periodic() {
     motor.periodic();
+  }
+
+  public Command stow() {
+    return Commands.runOnce(
+      () -> {
+
+      });
   }
 }

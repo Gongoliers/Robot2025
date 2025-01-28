@@ -18,12 +18,11 @@ public class OdometryFactory {
    * Creates the gyroscope
    * 
    * @param odometry odometry instance
-   * @param gyroscopeCAN CAN id and bus of gyroscope
    * @return the gyroscope
    */
-  public static Gyroscope createGyroscope(Odometry odometry, CAN gyroscopeCAN) {
+  public static Gyroscope createGyroscope(Odometry odometry) {
     if (Robot.isReal() && RobotConstants.ENABLED_SUBSYSTEMS.contains(Subsystem.ODOMETRY)) {
-      return new GyroscopePigeon2(gyroscopeCAN);
+      return new GyroscopePigeon2(new CAN(0));
     }
 
     return new GyroscopeSim(() -> Units.radiansToRotations(odometry.getVelocity().dtheta));
