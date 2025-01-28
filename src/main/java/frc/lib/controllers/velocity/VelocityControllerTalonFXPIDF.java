@@ -36,6 +36,8 @@ public class VelocityControllerTalonFXPIDF implements VelocityController {
   
   private final VoltageOut voltage;
 
+  private double setpointVelRotationsPerSec = 0.0;
+
   public VelocityControllerTalonFXPIDF(
       CAN motorCAN,
       MechanismConfig config,
@@ -88,15 +90,15 @@ public class VelocityControllerTalonFXPIDF implements VelocityController {
 
   @Override
   public void setSetpoint(double velRotationsPerSec) {
-    double feedforwardVolts = feedforward.calculate(velRotationsPerSec);
-
-    double measuredVelRotationsPerSec = velocity.getValueAsDouble();
-
-    double feedbackVolts = feedback.calculate(measuredVelRotationsPerSec, velRotationsPerSec);
-
-    motor.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
+    setpointVelRotationsPerSec = velRotationsPerSec;
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    double feedforwardVolts = feedforward.calculate(setpointVelRotationsPerSec);
+    double measuredVelRotationsPerSec = velocity.getValueAsDouble();
+    double feedbackVolts = feedback.calculate(measuredVelRotationsPerSec, setpointVelRotationsPerSec);
+
+    motor.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
+  }
 }

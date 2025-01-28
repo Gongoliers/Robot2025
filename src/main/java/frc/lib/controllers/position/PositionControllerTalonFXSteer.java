@@ -40,6 +40,9 @@ public class PositionControllerTalonFXSteer implements PositionController {
 
   private final VoltageOut voltage;
 
+  private double setpointPosRotations;
+  private double setpointVelRotationsPerSec;
+
   public PositionControllerTalonFXSteer(
       CAN steerCAN,
       CAN encoderCAN,
@@ -97,17 +100,18 @@ public class PositionControllerTalonFXSteer implements PositionController {
 
   @Override
   public void setSetpoint(double posRotations, double velRotationsPerSec) {
-    double measuredPosRotations = position.getValueAsDouble();
-
-    double feedforwardVolts = calculateFeedforward(measuredPosRotations, posRotations);
-    
-    double feedbackVolts = feedback.calculate(measuredPosRotations, posRotations);
-
-    motor.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
+    setpointPosRotations = posRotations;
+    setpointVelRotationsPerSec = velRotationsPerSec;
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    double measuredPosRotations = position.getValueAsDouble();
+    double feedforwardVolts = calculateFeedforward(measuredPosRotations, setpointPosRotations);
+    double feedbackVolts = feedback.calculate(measuredPosRotations, setpointPosRotations);
+
+    motor.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
+  }
 
   private double calculateFeedforward(double measurementRotations, double setpointRotations) {
     if (feedback.atSetpoint() == false) {
