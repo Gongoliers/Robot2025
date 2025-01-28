@@ -19,6 +19,9 @@ public class Elevator extends Subsystem {
   /** Motor(s) that drives the elevator */
   private final LinearPositionController motor;
 
+  /** Current elevator state */
+  private ElevatorState state = ElevatorState.STOW;
+
   /** Config for elevator mechanism */
   private final MechanismConfig config =
     MechanismBuilder.defaults()
