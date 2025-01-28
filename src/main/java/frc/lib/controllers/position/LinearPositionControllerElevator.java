@@ -16,7 +16,6 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.lib.CAN;
 import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.appliers.TalonFXConfigApplier;
-import frc.robot.RobotConstants;
 
 /** Linear position controller used for elevator subsystem with 2 TalonFX motor controllers */
 public class LinearPositionControllerElevator implements LinearPositionController {
@@ -132,9 +131,9 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
   private double calculateFeedforward(double measurementMeters, double setpointMeters) {
     if (feedback.atSetpoint() == false) {
       if (measurementMeters > setpointMeters) {
-        return feedforward.getKs() + feedforward.getKg();
-      } else {
         return -feedforward.getKs() + feedforward.getKg();
+      } else {
+        return feedforward.getKs() + feedforward.getKg();
       }
     }
 
