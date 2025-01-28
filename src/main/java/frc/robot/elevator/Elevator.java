@@ -6,6 +6,8 @@ public class Elevator extends Subsystem {
 
   private static Elevator instance = null;
 
+  private final LinearPositionController motor;
+
   private Elevator() {
     
   }
@@ -20,4 +22,6 @@ public class Elevator extends Subsystem {
 
   @Override
   public void initializeTab() {}
+
+
 }

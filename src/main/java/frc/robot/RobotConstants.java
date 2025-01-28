@@ -17,6 +17,7 @@ public class RobotConstants {
     SWERVE,
     ODOMETRY,
     LIMELIGHT,
+    ELEVATOR,
   }
 
   /** Enabled subsystems */
