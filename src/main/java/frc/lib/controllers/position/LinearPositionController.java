@@ -47,6 +47,13 @@ public interface LinearPositionController {
   public void getUpdatedVals(LinearPositionControllerValues values);
 
   /**
+   * Get current position of linear position controller in meters
+   * 
+   * @return position of liear position controller in meters
+   */
+  public double getPos();
+
+  /**
    * Set current position of linear position controller
    * 
    * @param posMeters position in meters

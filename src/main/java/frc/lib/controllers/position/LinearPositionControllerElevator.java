@@ -97,6 +97,11 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
   }
 
   @Override
+  public double getPos() {
+    return elevatorPosMeters;
+  }
+
+  @Override
   public void setPos(double posMeters) {
     elevatorPosMeters = posMeters;
   }
