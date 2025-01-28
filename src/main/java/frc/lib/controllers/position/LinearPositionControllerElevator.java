@@ -120,7 +120,7 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
   @Override
   public void periodic() {
     // update elevator position based on motor encoder position (1 rotation of mechanism = 1m movement of )
-    setPos(position.getValueAsDouble()*rotationsToMeters);
+    elevatorPosMeters = position.getValueAsDouble()*rotationsToMeters;
 
     // approach setpoint
     double feedforwardVolts = calculateFeedforward(elevatorPosMeters, setpointPosMeters);
