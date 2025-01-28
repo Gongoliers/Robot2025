@@ -39,6 +39,9 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
 
   private double elevatorPos = 0.0;
 
+  private double setpointPosMeters = 0.0;
+  private double setpointVelMetersPerSecond = 0.0;
+
   public LinearPositionControllerElevator(
       CAN leaderCAN,
       CAN followerCAN,
@@ -100,17 +103,20 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
 
   @Override
   public void setSetpoint(double posMeters, double velMetersPerSec) {
-    double feedforwardVolts = calculateFeedforward(elevatorPos, posMeters);
-    
-    double feedbackVolts = feedback.calculate(elevatorPos, posMeters);
-
-    leader.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
+    setpointPosMeters = posMeters;
+    setpointVelMetersPerSecond = velMetersPerSec;
   }
 
   @Override
   public void periodic() {
     // update elevator position based on motor velocity
     setPos(elevatorPos + (velocity.getValueAsDouble() * RobotConstants.PERIODIC_DURATION / config.motorConfig().motorToMechRatio()));
+
+    // approach setpoint
+    double feedforwardVolts = calculateFeedforward(elevatorPos, posMeters);
+    double feedbackVolts = feedback.calculate(elevatorPos, posMeters);
+
+    leader.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
   }
 
   private double calculateFeedforward(double measurementMeters, double setpointMeters) {

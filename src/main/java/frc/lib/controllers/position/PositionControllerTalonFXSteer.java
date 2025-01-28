@@ -40,8 +40,8 @@ public class PositionControllerTalonFXSteer implements PositionController {
 
   private final VoltageOut voltage;
 
-  private double setpointPosRotations;
-  private double setpointVelRotationsPerSec;
+  private double setpointPosRotations = 0.0;
+  private double setpointVelRotationsPerSec = 0.0;
 
   public PositionControllerTalonFXSteer(
       CAN steerCAN,
