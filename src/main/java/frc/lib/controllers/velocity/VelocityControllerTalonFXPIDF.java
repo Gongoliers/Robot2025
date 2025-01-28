@@ -95,6 +95,7 @@ public class VelocityControllerTalonFXPIDF implements VelocityController {
 
   @Override
   public void periodic() {
+    // approach setpoint
     double feedforwardVolts = feedforward.calculate(setpointVelRotationsPerSec);
     double measuredVelRotationsPerSec = velocity.getValueAsDouble();
     double feedbackVolts = feedback.calculate(measuredVelRotationsPerSec, setpointVelRotationsPerSec);

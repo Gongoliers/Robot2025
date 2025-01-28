@@ -106,6 +106,7 @@ public class PositionControllerTalonFXSteer implements PositionController {
 
   @Override
   public void periodic() {
+    // approach setpoint
     double measuredPosRotations = position.getValueAsDouble();
     double feedforwardVolts = calculateFeedforward(measuredPosRotations, setpointPosRotations);
     double feedbackVolts = feedback.calculate(measuredPosRotations, setpointPosRotations);
