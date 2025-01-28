@@ -16,6 +16,7 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.lib.CAN;
 import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.appliers.TalonFXConfigApplier;
+import frc.robot.RobotConstants;
 
 /** Linear position controller used for elevator subsystem with 2 TalonFX motor controllers */
 public class LinearPositionControllerElevator implements LinearPositionController {
@@ -109,7 +110,7 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
   @Override
   public void periodic() {
     // update elevator position based on motor velocity
-    setPos(elevatorPos + (velocity.getValueAsDouble() / config.motorConfig().motorToMechRatio()));
+    setPos(elevatorPos + (velocity.getValueAsDouble() * RobotConstants.PERIODIC_DURATION / config.motorConfig().motorToMechRatio()));
   }
 
   private double calculateFeedforward(double measurementMeters, double setpointMeters) {
