@@ -37,7 +37,7 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
 
   private final VoltageOut voltage;
 
-  private double elevatorPos = 0.0;
+  private double elevatorPosMeters = 0.0;
 
   private double setpointPosMeters = 0.0;
   private double setpointVelMetersPerSecond = 0.0;
@@ -98,7 +98,7 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
 
   @Override
   public void setPos(double posMeters) {
-    elevatorPos = posMeters;
+    elevatorPosMeters = posMeters;
   }
 
   @Override
