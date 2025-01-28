@@ -2,8 +2,8 @@ package frc.robot.elevator;
 
 import frc.lib.CAN;
 import frc.lib.configs.MechanismConfig;
-import frc.lib.controllers.position.LinearPositionController;
-import frc.lib.controllers.position.LinearPositionControllerElevator;
+import frc.lib.controllers.position.ElevatorPositionController;
+import frc.lib.controllers.position.ElevatorPositionControllerElevator;
 import frc.robot.Robot;
 import frc.robot.RobotConstants;
 import frc.robot.RobotConstants.Subsystem;
@@ -11,9 +11,9 @@ import frc.robot.RobotConstants.Subsystem;
 /** Creates elevator hardware */
 public class ElevatorFactory {
   
-  public static LinearPositionController createDriveMotor(MechanismConfig config) {
+  public static ElevatorPositionController createDriveMotor(MechanismConfig config) {
     if (Robot.isReal() && RobotConstants.ENABLED_SUBSYSTEMS.contains(Subsystem.ELEVATOR)) {
-      return new LinearPositionControllerElevator(
+      return new ElevatorPositionControllerElevator(
         new CAN(10),
         new CAN(11),
         config,
@@ -22,7 +22,7 @@ public class ElevatorFactory {
         2.0);
     }
 
-    return new LinearPositionControllerElevator(
+    return new ElevatorPositionControllerElevator(
       new CAN(10), 
       new CAN(11), 
       config, 

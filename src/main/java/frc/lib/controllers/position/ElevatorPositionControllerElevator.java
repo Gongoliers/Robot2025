@@ -18,7 +18,7 @@ import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.appliers.TalonFXConfigApplier;
 
 /** Linear position controller used for elevator subsystem with 2 TalonFX motor controllers */
-public class LinearPositionControllerElevator implements LinearPositionController {
+public class ElevatorPositionControllerElevator implements ElevatorPositionController {
 
   private final MechanismConfig config;
 
@@ -42,7 +42,7 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
   private double setpointPosMeters = 0.0;
   private double setpointVelMetersPerSecond = 0.0;
 
-  public LinearPositionControllerElevator(
+  public ElevatorPositionControllerElevator(
       CAN leaderCAN,
       CAN followerCAN,
       MechanismConfig config,
@@ -89,7 +89,7 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
   }
 
   @Override
-  public void getUpdatedVals(LinearPositionControllerValues values) {
+  public void getUpdatedVals(ElevatorPositionControllerValues values) {
     BaseStatusSignal.refreshAll(position, velocity, acceleration, volts, amps);
 
     values.motorPosRotations = position.getValueAsDouble();
@@ -101,12 +101,12 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
   }
 
   @Override
-  public double getPos() {
+  public double getElevatorPos() {
     return elevatorPosMeters;
   }
 
   @Override
-  public void setPos(double posMeters) {
+  public void setElevatorPos(double posMeters) {
     elevatorPosMeters = posMeters;
   }
 

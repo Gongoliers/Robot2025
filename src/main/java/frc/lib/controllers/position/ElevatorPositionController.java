@@ -1,15 +1,15 @@
 package frc.lib.controllers.position;
 
 /** 
- * Basic interface for linear position controllers
+ * Basic interface for elevator position controllers
  * 
- * Outlines required functions and variables all linear position controllers have to make implementing new types
+ * Outlines required functions and variables all elevator position controllers have to make implementing new types
  * of position controllers in the future much simpler
  */
-public interface LinearPositionController {
+public interface ElevatorPositionController {
   
-  /** Linear position controller values */
-  public static class LinearPositionControllerValues {
+  /** elevator position controller values */
+  public static class ElevatorPositionControllerValues {
 
     /** Current motor position in rotations */
     public double motorPosRotations = 0.0;
@@ -36,32 +36,32 @@ public interface LinearPositionController {
     public double accMetersPerSecPerSec = 0.0;
   }
 
-  /** Configures the linear position controller */
+  /** Configures the elevator position controller */
   public void configure();
 
   /**
-   * Get the linear position controller's updated values and update the provided values class accordingly
+   * Get the elevator position controller's updated values and update the provided values class accordingly
    * 
    * @param values values class to be updated
    */
-  public void getUpdatedVals(LinearPositionControllerValues values);
+  public void getUpdatedVals(ElevatorPositionControllerValues values);
 
   /**
-   * Get current position of linear position controller in meters
+   * Get current position of elevator position controller in meters
    * 
    * @return position of liear position controller in meters
    */
-  public double getPos();
+  public double getElevatorPos();
 
   /**
-   * Set current position of linear position controller
+   * Set current position of elevator position controller
    * 
    * @param posMeters position in meters
    */
-  public void setPos(double posMeters);
+  public void setElevatorPos(double posMeters);
 
   /**
-   * Set setpoint of linear position controller
+   * Set setpoint of elevator position controller
    * 
    * @param posMeters setpoint position in meters
    * @param velMetersPerSec setpoint velocity in meters per second
