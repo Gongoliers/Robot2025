@@ -110,11 +110,11 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
   @Override
   public void periodic() {
     // update elevator position based on motor velocity
-    setPos(elevatorPos + (velocity.getValueAsDouble() * RobotConstants.PERIODIC_DURATION / config.motorConfig().motorToMechRatio()));
+    setPos(elevatorPosMeters + (velocity.getValueAsDouble() * RobotConstants.PERIODIC_DURATION / config.motorConfig().motorToMechRatio()));
 
     // approach setpoint
-    double feedforwardVolts = calculateFeedforward(elevatorPos, posMeters);
-    double feedbackVolts = feedback.calculate(elevatorPos, posMeters);
+    double feedforwardVolts = calculateFeedforward(elevatorPosMeters, setpointPosMeters);
+    double feedbackVolts = feedback.calculate(elevatorPosMeters, setpointPosMeters);
 
     leader.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
   }
