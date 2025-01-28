@@ -93,7 +93,7 @@ public class LinearPositionControllerElevator implements LinearPositionControlle
     values.motorAccRotationsPerSecPerSec = acceleration.getValueAsDouble();
     values.motorVolts = volts.getValueAsDouble();
     values.motorAmps = amps.getValueAsDouble();
-    values.posMeters = elevatorPos;
+    values.posMeters = elevatorPosMeters;
   }
 
   @Override
