@@ -122,21 +122,9 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
     elevatorPosMeters = position.getValueAsDouble()*rotationsToMeters;
 
     // approach setpoint
-    double feedforwardVolts = calculateFeedforward(elevatorPosMeters, setpointPosMeters);
+    double feedforwardVolts = feedforward.calculate(setpointVelMetersPerSecond);
     double feedbackVolts = feedback.calculate(elevatorPosMeters, setpointPosMeters);
 
     leader.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
-  }
-
-  private double calculateFeedforward(double measurementMeters, double setpointMeters) {
-    if (feedback.atSetpoint() == false) {
-      if (measurementMeters > setpointMeters) {
-        return -feedforward.getKs() + feedforward.getKg();
-      } else {
-        return feedforward.getKs() + feedforward.getKg();
-      }
-    }
-
-    return 0.0;
   }
 }

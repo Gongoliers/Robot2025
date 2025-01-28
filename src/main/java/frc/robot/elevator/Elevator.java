@@ -27,7 +27,8 @@ public class Elevator extends Subsystem {
   private final ElevatorPositionController motor;
 
   /** Current elevator state */
-  private ElevatorState state = ElevatorState.STOW;
+  private ElevatorState targetState = ElevatorState.STOW;
+  private ElevatorState currentState = ElevatorState.STOW;
 
   private final TrapezoidProfile motionProfile;
 
@@ -80,9 +81,10 @@ public class Elevator extends Subsystem {
 
   @Override
   public void periodic() {
-    motor.periodic();
+    State profiledSetpoint = calculateSetpoint(motor.getElevatorPos(), 0, targetState);
+    motor.setSetpoint(profiledSetpoint.position, profiledSetpoint.velocity);
 
-    State profiledSetpoint = calculateSetpoint(motor.getElevatorPos(), 0, state);
+    motor.periodic();
   }
 
   /**
