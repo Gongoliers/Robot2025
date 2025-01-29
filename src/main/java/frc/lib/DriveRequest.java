@@ -53,7 +53,10 @@ public record DriveRequest(
     double translationY = -controller.getLeftX();
 
     double translationMagnitude = Math.hypot(translationX, translationY);
-    Rotation2d translationDirection = new Rotation2d(translationX, translationY);
+    Rotation2d translationDirection = Rotation2d.fromDegrees(0);
+    if (translationX != 0 || translationY != 0) {
+      translationDirection = new Rotation2d(translationX, translationY);
+    }
 
     translationMagnitude = MathUtil.applyDeadband(translationMagnitude, 0.1);
     translationMagnitude =
