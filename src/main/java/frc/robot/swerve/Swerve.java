@@ -26,6 +26,7 @@ import frc.lib.configs.FeedforwardControllerConfig.FeedforwardControllerBuilder;
 import frc.lib.configs.MechanismConfig.MechanismBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.swerve.SwerveModule;
+import frc.lib.sendables.SwerveStates;
 import frc.robot.RobotConstants;
 import frc.robot.odometry.Odometry;
 
@@ -143,43 +144,11 @@ public class Swerve extends Subsystem {
 
   @Override
   public void initializeTab() {
-    // get shuffleboard tab
-    ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
-
-    // info about swerve modules
-    for (int i = 0; i < 4; i++) {
-      SwerveModule swerve = swerves[i];
-
-      // get swerve module's list widget (acts as a sub-table in NT)
-      ShuffleboardLayout swerveColumn = tab.getLayout("Module " + i, BuiltInLayouts.kList);
-
-      swerveColumn.addDouble("Angle (rot)", () -> swerve.getState().angle.getRotations());
-      swerveColumn.addDouble("Velocity (mps)", () -> swerve.getState().speedMetersPerSecond);
-      swerveColumn.addDouble("Setpoint Angle (deg)", () -> swerve.getSetpoint().angle.getDegrees());
-      swerveColumn.addDouble("Setpoint Velocity (mps)", () -> swerve.getSetpoint().speedMetersPerSecond);
-    }
-
-    // fancy swerve states sendable
-    SmartDashboard.putData("Swerve Drive", new Sendable() {
-      @Override
-      public void initSendable(SendableBuilder builder) {
-        builder.setSmartDashboardType("SwerveDrive");
-
-        builder.addDoubleProperty("Front Left Angle", () -> swerves[0].getState().angle.getRadians(), null);
-        builder.addDoubleProperty("Front Left Velocity", () -> swerves[0].getState().speedMetersPerSecond, null);
-
-        builder.addDoubleProperty("Front Right Angle", () -> swerves[1].getState().angle.getRadians(), null);
-        builder.addDoubleProperty("Front Right Velocity", () -> swerves[1].getState().speedMetersPerSecond, null);
-
-        builder.addDoubleProperty("Back Left Angle", () -> swerves[2].getState().angle.getRadians(), null);
-        builder.addDoubleProperty("Back Left Velocity", () -> swerves[2].getState().speedMetersPerSecond, null);
-
-        builder.addDoubleProperty("Back Right Angle", () -> swerves[3].getState().angle.getRadians(), null);
-        builder.addDoubleProperty("Back Right Velocity", () -> swerves[3].getState().speedMetersPerSecond, null);
-
-        builder.addDoubleProperty("Robot Angle", () -> Odometry.getInstance().getDriverRelativeHeading().getRadians(), null);
-      }
-    });
+    SmartDashboard.putData("Swerve Drive", new SwerveStates(
+        swerves[0], 
+        swerves[1], 
+        swerves[3], 
+        swerves[2]));
   }
 
   /**
