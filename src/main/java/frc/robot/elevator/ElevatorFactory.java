@@ -4,6 +4,7 @@ import frc.lib.CAN;
 import frc.lib.configs.MechanismConfig;
 import frc.lib.controllers.position.ElevatorPositionController;
 import frc.lib.controllers.position.ElevatorPositionControllerElevator;
+import frc.lib.controllers.position.ElevatorPositionControllerSim;
 import frc.robot.Robot;
 import frc.robot.RobotConstants;
 import frc.robot.RobotConstants.Subsystem;
@@ -22,12 +23,6 @@ public class ElevatorFactory {
         2.0);
     }
 
-    return new ElevatorPositionControllerElevator(
-      new CAN(10), 
-      new CAN(11), 
-      config, 
-      false, 
-      false,
-      2.0);
+    return new ElevatorPositionControllerSim();
   }
 }

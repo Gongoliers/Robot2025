@@ -17,7 +17,7 @@ import frc.lib.CAN;
 import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.appliers.TalonFXConfigApplier;
 
-/** Linear position controller used for elevator subsystem with 2 TalonFX motor controllers */
+/** Elevatr position controller used for elevator subsystem with 2 TalonFX motor controllers */
 public class ElevatorPositionControllerElevator implements ElevatorPositionController {
 
   private final MechanismConfig config;
@@ -37,7 +37,7 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
   private final VoltageOut voltage;
 
   private final double rotationsToMeters;
-  private double elevatorPosMeters = 0.0;
+  private double posMeters = 0.0;
 
   private double setpointPosMeters = 0.0;
   private double setpointVelMetersPerSecond = 0.0;
@@ -97,17 +97,17 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
     values.motorAccRotationsPerSecPerSec = acceleration.getValueAsDouble();
     values.motorVolts = volts.getValueAsDouble();
     values.motorAmps = amps.getValueAsDouble();
-    values.posMeters = elevatorPosMeters;
+    values.posMeters = posMeters;
   }
 
   @Override
   public double getElevatorPos() {
-    return elevatorPosMeters;
+    return posMeters;
   }
 
   @Override
   public void setElevatorPos(double posMeters) {
-    elevatorPosMeters = posMeters;
+    this.posMeters = posMeters;
   }
 
   @Override
@@ -119,11 +119,11 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
   @Override
   public void periodic() {
     // update elevator position based on motor encoder position (1 rotation of mechanism = 1m movement of )
-    elevatorPosMeters = position.getValueAsDouble()*rotationsToMeters;
+    posMeters = position.getValueAsDouble()*rotationsToMeters;
 
     // approach setpoint
     double feedforwardVolts = feedforward.calculate(setpointVelMetersPerSecond);
-    double feedbackVolts = feedback.calculate(elevatorPosMeters, setpointPosMeters);
+    double feedbackVolts = feedback.calculate(posMeters, setpointPosMeters);
 
     leader.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
   }
