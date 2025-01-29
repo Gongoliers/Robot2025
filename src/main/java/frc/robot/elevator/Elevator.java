@@ -15,6 +15,7 @@ import frc.lib.configs.MechanismConfig.MechanismBuilder;
 import frc.lib.configs.MotionProfileConfig.MotionProfileBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.position.ElevatorPositionController;
+import frc.lib.controllers.position.ElevatorPositionController.ElevatorPositionControllerValues;
 import frc.robot.RobotConstants;
 
 /** Elevator subsystem */
@@ -30,7 +31,11 @@ public class Elevator extends Subsystem {
   private ElevatorState targetState = ElevatorState.STOW;
   private ElevatorState currentState = ElevatorState.STOW;
 
+  /** Trapezoidal motion profile for smooth movement from setpoint to setpoint */
   private final TrapezoidProfile motionProfile;
+
+  /** Motor values */
+  private ElevatorPositionControllerValues motorValues = new ElevatorPositionControllerValues();
 
   /** Config for elevator mechanism */
   private final MechanismConfig config =
@@ -81,8 +86,15 @@ public class Elevator extends Subsystem {
 
   @Override
   public void periodic() {
-    State profiledSetpoint = calculateSetpoint(motor.getElevatorPos(), 0, targetState);
+    motor.getUpdatedVals(motorValues);
+
+    State profiledSetpoint = calculateSetpoint(motorValues.posMeters, motorValues.velMetersPerSec, targetState);
     motor.setSetpoint(profiledSetpoint.position, profiledSetpoint.velocity);
+
+    // update current state if safely reached target state
+    if (Math.abs(motorValues.posMeters - targetState.getPosMeters()) < 0.01) {
+      currentState = targetState;
+    }
 
     motor.periodic();
   }
@@ -105,7 +117,35 @@ public class Elevator extends Subsystem {
   public Command stow() {
     return Commands.runOnce(
       () -> {
+        targetState = ElevatorState.STOW;
+      });
+  }
 
+  public Command l1() {
+    return Commands.runOnce(
+      () -> {
+        targetState = ElevatorState.L1;
+      });
+  }
+
+  public Command l2() {
+    return Commands.runOnce(
+      () -> {
+        targetState = ElevatorState.L2;
+      });
+  }
+
+  public Command l3() {
+    return Commands.runOnce(
+      () -> {
+        targetState = ElevatorState.L3;
+      });
+  }
+
+  public Command l4() {
+    return Commands.runOnce(
+      () -> {
+        targetState = ElevatorState.L4;
       });
   }
 }
