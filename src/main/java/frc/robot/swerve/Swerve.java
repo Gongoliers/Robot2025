@@ -94,7 +94,7 @@ public class Swerve extends Subsystem {
 
   /** Translation motion profile config */
   private final MotionProfileConfig translationMotionProfileConfig =
-    new MotionProfileConfig(4.5, 6);
+    new MotionProfileConfig(4.5, 15);
 
   /** Rotation motion profile config */
   private final MotionProfileConfig rotationMotionProfileConfig =
