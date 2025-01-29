@@ -1,7 +1,5 @@
 package frc.lib.controllers.position;
 
-import frc.lib.configs.MechanismConfig;
-
 /** Elevator position controller simulation */
 public class ElevatorPositionControllerSim implements ElevatorPositionController {
   private double posMeters = 0.0;

@@ -144,7 +144,11 @@ public class Swerve extends Subsystem {
 
   @Override
   public void initializeTab() {
-    SmartDashboard.putData("Swerve Drive", new SwerveStates(
+    // Get shuffleboard tab
+    ShuffleboardTab tab = Shuffleboard.getTab("Swerve Drive");
+
+    // Add SwerveStates sendable to shuffleboard
+    tab.add("Module States", new SwerveStates(
         swerves[0], 
         swerves[1], 
         swerves[3], 

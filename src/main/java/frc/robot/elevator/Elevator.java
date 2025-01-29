@@ -79,7 +79,9 @@ public class Elevator extends Subsystem {
   }
 
   @Override
-  public void initializeTab() {}
+  public void initializeTab() {
+    
+  }
 
   @Override
   public void periodic() {
