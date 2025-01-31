@@ -66,7 +66,7 @@ public class Elevator extends Subsystem {
       .motionProfileConfig(
         MotionProfileBuilder.defaults()
           .maxVelocity(3)
-          .maxAcceleration(2)
+          .maxAcceleration(5)
           .build())
       .build();
 
@@ -119,6 +119,8 @@ public class Elevator extends Subsystem {
     // update current state if safely reached target state
     if (Math.abs(motorValues.posMeters - targetState.getPosMeters()) < 0.01) {
       currentState = targetState;
+    } else {
+      currentState = null;
     }
 
     motor.periodic();
