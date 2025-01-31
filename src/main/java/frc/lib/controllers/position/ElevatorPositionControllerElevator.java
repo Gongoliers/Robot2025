@@ -38,6 +38,7 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
 
   private final double rotationsToMeters;
   private double posMeters = 0.0;
+  private double posOffsetMeters = 0.0;
 
   private double setpointPosMeters = 0.0;
   private double setpointVelMetersPerSecond = 0.0;
@@ -98,6 +99,8 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
     values.motorVolts = volts.getValueAsDouble();
     values.motorAmps = amps.getValueAsDouble();
     values.posMeters = posMeters;
+    values.velMetersPerSec = velocity.getValueAsDouble()*rotationsToMeters;
+    values.accMetersPerSecPerSec = acceleration.getValueAsDouble()*rotationsToMeters;
   }
 
   @Override
@@ -107,7 +110,7 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
 
   @Override
   public void setElevatorPos(double posMeters) {
-    this.posMeters = posMeters;
+    posOffsetMeters = posMeters - this.posMeters;
   }
 
   @Override
@@ -118,12 +121,12 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
 
   @Override
   public void periodic() {
-    // update elevator position based on motor encoder position (1 rotation of mechanism = 1m movement of )
-    posMeters = position.getValueAsDouble()*rotationsToMeters;
+    // update elevator position based on motor encoder position + offset
+    posMeters = position.getValueAsDouble()*rotationsToMeters + posOffsetMeters;
 
     // approach setpoint
     double feedforwardVolts = feedforward.calculate(setpointVelMetersPerSecond);
-    double feedbackVolts = feedback.calculate(posMeters, setpointPosMeters);
+    double feedbackVolts = feedback.calculate(position.getValueAsDouble()*rotationsToMeters, setpointPosMeters);
 
     leader.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
   }

@@ -8,13 +8,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.DriveRequest;
@@ -26,7 +21,7 @@ import frc.lib.configs.FeedforwardControllerConfig.FeedforwardControllerBuilder;
 import frc.lib.configs.MechanismConfig.MechanismBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.swerve.SwerveModule;
-import frc.lib.sendables.SwerveStates;
+import frc.lib.sendables.SwerveStatesSendable;
 import frc.robot.RobotConstants;
 import frc.robot.odometry.Odometry;
 
@@ -147,8 +142,8 @@ public class Swerve extends Subsystem {
     // Get shuffleboard tab
     ShuffleboardTab tab = Shuffleboard.getTab("Swerve Drive");
 
-    // Add SwerveStates sendable to shuffleboard
-    tab.add("Module States", new SwerveStates(
+    // Add swerve states sendable to shuffleboard
+    tab.add("Module States", new SwerveStatesSendable(
         swerves[0], 
         swerves[1], 
         swerves[3], 

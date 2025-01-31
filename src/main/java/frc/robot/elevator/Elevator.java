@@ -2,6 +2,10 @@ package frc.robot.elevator;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Subsystem;
@@ -13,6 +17,7 @@ import frc.lib.configs.MotionProfileConfig.MotionProfileBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.position.ElevatorPositionController;
 import frc.lib.controllers.position.ElevatorPositionController.ElevatorPositionControllerValues;
+import frc.lib.sendables.ElevatorStateSendable;
 import frc.robot.RobotConstants;
 
 /** Elevator subsystem */
@@ -27,6 +32,9 @@ public class Elevator extends Subsystem {
   /** Current elevator state */
   private ElevatorState targetState = ElevatorState.STOW;
   private ElevatorState currentState = ElevatorState.STOW;
+
+  /** Profiled elevator setpoint */
+  private State profiledSetpoint = new State();
 
   /** Trapezoidal motion profile for smooth movement from setpoint to setpoint */
   private final TrapezoidProfile motionProfile;
@@ -80,14 +88,32 @@ public class Elevator extends Subsystem {
 
   @Override
   public void initializeTab() {
-    
+    // Get shuffleboard tab
+    ShuffleboardTab tab = Shuffleboard.getTab("Elevator");
+
+    // State info
+    tab.add("Target state", new ElevatorStateSendable(() -> targetState));
+    tab.addBoolean("At target state: ", () -> targetState == currentState);
+
+    // Setpoint column
+    ShuffleboardLayout setpointColumn = tab.getLayout("Setpoint", BuiltInLayouts.kList);
+
+    setpointColumn.addDouble("Pos (m): ", () -> profiledSetpoint.position);
+    setpointColumn.addDouble("Vel (mps): ", () -> profiledSetpoint.velocity);
+
+    // Current position/velocity collumn
+    ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
+
+    stateColumn.addDouble("Pos (m): ", () -> motorValues.posMeters);
+    stateColumn.addDouble("Vel (mps): ", () -> motorValues.velMetersPerSec);
+    stateColumn.addDouble("Acc (mpsps): ", () -> motorValues.accMetersPerSecPerSec);
   }
 
   @Override
   public void periodic() {
     motor.getUpdatedVals(motorValues);
 
-    State profiledSetpoint = calculateSetpoint(motorValues.posMeters, motorValues.velMetersPerSec, targetState);
+    profiledSetpoint = calculateSetpoint(motorValues.posMeters, motorValues.velMetersPerSec, targetState);
     motor.setSetpoint(profiledSetpoint.position, profiledSetpoint.velocity);
 
     // update current state if safely reached target state

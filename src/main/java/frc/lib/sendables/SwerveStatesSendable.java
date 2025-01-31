@@ -6,7 +6,7 @@ import frc.lib.controllers.swerve.SwerveModule;
 import frc.robot.odometry.Odometry;
 
 /** Nice swerve drive states sendable that allows for pretty visualization */
-public class SwerveStates implements Sendable {
+public class SwerveStatesSendable implements Sendable {
 
   private final SwerveModule nw;
   private final SwerveModule ne;
@@ -14,14 +14,14 @@ public class SwerveStates implements Sendable {
   private final SwerveModule se;
 
   /**
-   * Creates a SwerveStates sendable that can easily be used to visualize swerves in a dashboard
+   * Creates a swerve states sendable that can easily be used to visualize swerves in a dashboard
    * 
    * @param nwModule north-west swerve module
    * @param neModule north-east swerve module
    * @param swModule south-west swerve module
    * @param seModule south-east swerve module
    */
-  public SwerveStates(
+  public SwerveStatesSendable(
       SwerveModule nwModule,
       SwerveModule neModule,
       SwerveModule swModule,

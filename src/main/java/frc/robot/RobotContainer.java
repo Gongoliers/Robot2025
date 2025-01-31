@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
+import frc.robot.elevator.Elevator;
 import frc.robot.odometry.Odometry;
 import frc.robot.swerve.Swerve;
 
@@ -23,6 +24,9 @@ public class RobotContainer {
   /** Swerve subsystem reference */
   private final Swerve swerve;
 
+  /** Elevator subsystem reference */
+  private final Elevator elevator;
+
   /** Driver controller */
   private final CommandXboxController driverController;
 
@@ -33,11 +37,12 @@ public class RobotContainer {
   private RobotContainer() {
     odometry = Odometry.getInstance();
     swerve = Swerve.getInstance();
+    elevator = Elevator.getInstance();
 
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
 
-    Telemetry.initializeTabs(odometry, swerve);
+    Telemetry.initializeTabs(odometry, swerve, elevator);
 
     configureDefaultCommands();
     configureBindings();
