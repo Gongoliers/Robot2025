@@ -39,9 +39,6 @@ public class PositionControllerTalonFXPivot implements PositionController {
   private double setpointPosRotations = 0.0;
   private double setpointVelRotationsPerSec = 0.0;
 
-  // used to zero the TalonFX encoder because we have no absolute encoder
-  private double posOffsetRotations = 0.0;
-
   public PositionControllerTalonFXPivot(
       CAN motorCAN,
       MechanismConfig config,
@@ -81,7 +78,7 @@ public class PositionControllerTalonFXPivot implements PositionController {
   public void getUpdatedVals(PositionControllerValues values) {
     BaseStatusSignal.refreshAll(position, velocity, acceleration, volts, amps);
 
-    values.posRotations = position.getValueAsDouble() + posOffsetRotations;
+    values.posRotations = position.getValueAsDouble();
     values.velRotationsPerSec = velocity.getValueAsDouble();
     values.accRotationsPerSecPerSec = acceleration.getValueAsDouble();
     values.motorVolts = volts.getValueAsDouble();
@@ -90,7 +87,7 @@ public class PositionControllerTalonFXPivot implements PositionController {
 
   @Override
   public void setPos(double posRotations) {
-    posOffsetRotations = posRotations - position.getValueAsDouble();
+    motor.setPosition(posRotations);
   }
 
   @Override
@@ -102,7 +99,7 @@ public class PositionControllerTalonFXPivot implements PositionController {
   @Override
   public void periodic() {
     // approach setpoint
-    double measuredPosRotations = position.getValueAsDouble() + posOffsetRotations;
+    double measuredPosRotations = position.getValueAsDouble();
     double feedforwardVolts = feedforward.calculate(setpointPosRotations * Math.PI * 2, setpointVelRotationsPerSec * Math.PI * 2);
     double feedbackVolts = feedback.calculate(measuredPosRotations, setpointPosRotations);
 

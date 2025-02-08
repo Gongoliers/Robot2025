@@ -18,10 +18,12 @@ public class RobotConstants {
     ODOMETRY,
     LIMELIGHT,
     ELEVATOR,
+    MANIPULATOR,
+    SUPERSTRUCTURE,
   }
 
   /** Enabled subsystems */
   public static final Set<Subsystem> ENABLED_SUBSYSTEMS =
     EnumSet.of(
-      Subsystem.SWERVE, Subsystem.ODOMETRY, Subsystem.ELEVATOR);
+      Subsystem.SWERVE, Subsystem.ODOMETRY, Subsystem.ELEVATOR, Subsystem.MANIPULATOR);
 }

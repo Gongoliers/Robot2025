@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
 import frc.robot.elevator.Elevator;
+import frc.robot.manipulator.Manipulator;
 import frc.robot.odometry.Odometry;
 import frc.robot.swerve.Swerve;
 
@@ -27,6 +28,9 @@ public class RobotContainer {
   /** Elevator subsystem reference */
   private final Elevator elevator;
 
+  /** Manipulator subsystem reference */
+  private final Manipulator manipulator;
+
   /** Driver controller */
   private final CommandXboxController driverController;
 
@@ -38,11 +42,12 @@ public class RobotContainer {
     odometry = Odometry.getInstance();
     swerve = Swerve.getInstance();
     elevator = Elevator.getInstance();
+    manipulator = Manipulator.getInstance();
 
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
 
-    Telemetry.initializeTabs(odometry, swerve, elevator);
+    Telemetry.initializeTabs(odometry, swerve, elevator, manipulator);
 
     configureDefaultCommands();
     configureBindings();
@@ -71,12 +76,14 @@ public class RobotContainer {
     driverController.y().onTrue(odometry.zeroYaw());
 
     operatorController.a().onTrue(elevator.stow());
-    operatorController.b().onTrue(elevator.l1());
     operatorController.x().onTrue(elevator.l2());
-    operatorController.y().onTrue(elevator.l3());
-    operatorController.rightBumper().onTrue(elevator.l4());
+    operatorController.y().onTrue(elevator.l4());
 
-    operatorController.leftBumper().onTrue(elevator.manualZero());
+    operatorController.leftStick().onTrue(manipulator.stow());
+    operatorController.rightStick().onTrue(manipulator.test2());
+
+    operatorController.leftBumper().onTrue(manipulator.zeroPivot());
+    operatorController.b().onTrue(elevator.zero());
   }
 
   public Command getAutonomousCommand() {

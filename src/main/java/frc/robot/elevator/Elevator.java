@@ -116,7 +116,7 @@ public class Elevator extends Subsystem {
     stateColumn.addDouble("Amps", () -> motorValues.motorAmps);
 
     // Ideal position/velocity column
-    ShuffleboardLayout idealStateColumn = tab.getLayout("Idea state", BuiltInLayouts.kList);
+    ShuffleboardLayout idealStateColumn = tab.getLayout("Ideal state", BuiltInLayouts.kList);
 
     idealStateColumn.addDouble("Ideal pos (m)", () -> idealPosMeters);
     idealStateColumn.addDouble("Ideal vel (mps)", () -> idealVelMetersPerSec);
@@ -192,7 +192,7 @@ public class Elevator extends Subsystem {
       });
   }
 
-  public Command manualZero() {
+  public Command zero() {
     return Commands.runOnce(
       () -> {
         motor.setElevatorPos(0);

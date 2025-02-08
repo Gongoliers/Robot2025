@@ -4,19 +4,19 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import frc.robot.elevator.ElevatorState;
+import frc.robot.manipulator.PivotState;
 
 /** Nice ElevatorState sendable */
-public class ElevatorStateSendable implements Sendable {
+public class PivotStateSendable implements Sendable {
   
-  private final Supplier<ElevatorState> stateSupplier;
+  private final Supplier<PivotState> stateSupplier;
 
   /**
    * Creates an ElevatorState sendable 
    * 
    * @param stateSupplier function that supplies ElevatorState enum
    */
-  public ElevatorStateSendable(Supplier<ElevatorState> stateSupplier) {
+  public PivotStateSendable(Supplier<PivotState> stateSupplier) {
     this.stateSupplier = stateSupplier;
   }
 
@@ -25,7 +25,7 @@ public class ElevatorStateSendable implements Sendable {
     builder.setSmartDashboardType("ElevatorState");
 
     builder.addStringProperty("Name", () -> stateSupplier.get().name(), null);
-    builder.addDoubleProperty("Pos (m)", () -> stateSupplier.get().getPosMeters(), null);
-    builder.addDoubleProperty("Vel (mps)", () -> stateSupplier.get().getVelMetersPerSec(), null);
+    builder.addDoubleProperty("Pos (m)", () -> stateSupplier.get().getPosRotations(), null);
+    builder.addDoubleProperty("Vel (mps)", () -> stateSupplier.get().getVelRotationsPerSec(), null);
   }
 }
