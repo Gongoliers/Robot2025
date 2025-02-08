@@ -20,7 +20,7 @@ public class ElevatorFactory {
         config,
         false,
         false,
-        2.0);
+        1/26.518545);
     }
 
     return new ElevatorPositionControllerSim();

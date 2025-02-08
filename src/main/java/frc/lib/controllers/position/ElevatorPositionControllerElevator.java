@@ -2,6 +2,7 @@ package frc.lib.controllers.position;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -70,6 +71,9 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
 
     // set ratio of rotations of drum to meters of movement of elevator
     this.rotationsToMeters = rotationsToMeters;
+
+    // set follower
+    follower.setControl(new Follower(leader.getDeviceID(), invertFollower));
 
     // default voltage
     voltage = new VoltageOut(0.0).withEnableFOC(enableFOC);

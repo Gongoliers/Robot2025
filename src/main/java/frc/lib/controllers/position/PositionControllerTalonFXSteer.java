@@ -56,7 +56,7 @@ public class PositionControllerTalonFXSteer implements PositionController {
     azimuthEncoder = new CANcoder(encoderCAN.id(), encoderCAN.bus());
 
     // status signals
-    position = azimuthEncoder.getAbsolutePosition();
+    position = motor.getPosition();
     velocity = motor.getVelocity();
     acceleration = motor.getAcceleration();
     volts = motor.getMotorVoltage();

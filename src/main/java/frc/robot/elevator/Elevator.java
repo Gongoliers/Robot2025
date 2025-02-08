@@ -107,6 +107,8 @@ public class Elevator extends Subsystem {
     stateColumn.addDouble("Pos (m): ", () -> motorValues.posMeters);
     stateColumn.addDouble("Vel (mps): ", () -> motorValues.velMetersPerSec);
     stateColumn.addDouble("Acc (mpsps): ", () -> motorValues.accMetersPerSecPerSec);
+    stateColumn.addDouble("Volts: ",  () -> motorValues.motorVolts);
+    stateColumn.addDouble("Amps: ", () -> motorValues.motorAmps);
   }
 
   @Override
