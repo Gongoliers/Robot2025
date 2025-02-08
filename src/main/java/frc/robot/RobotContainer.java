@@ -75,6 +75,8 @@ public class RobotContainer {
     operatorController.x().onTrue(elevator.l2());
     operatorController.y().onTrue(elevator.l3());
     operatorController.rightBumper().onTrue(elevator.l4());
+
+    operatorController.leftBumper().onTrue(elevator.manualZero());
   }
 
   public Command getAutonomousCommand() {

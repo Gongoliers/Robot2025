@@ -39,7 +39,6 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
 
   private final double rotationsToMeters;
   private double posMeters = 0.0;
-  private double posOffsetMeters = 0.0;
 
   private double setpointPosMeters = 0.0;
   private double setpointVelMetersPerSecond = 0.0;
@@ -114,7 +113,8 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
 
   @Override
   public void setElevatorPos(double posMeters) {
-    posOffsetMeters = posMeters - this.posMeters;
+    leader.setPosition(posMeters);
+    follower.setPosition(posMeters);
   }
 
   @Override
@@ -125,8 +125,8 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
 
   @Override
   public void periodic() {
-    // update elevator position based on motor encoder position + offset
-    posMeters = position.getValueAsDouble()*rotationsToMeters + posOffsetMeters;
+    // update elevator position based on motor encoder position
+    posMeters = position.getValueAsDouble()*rotationsToMeters;
 
     // approach setpoint
     double feedforwardVolts = feedforward.calculate(setpointVelMetersPerSecond);

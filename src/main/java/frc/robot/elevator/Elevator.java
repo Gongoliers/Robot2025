@@ -39,6 +39,10 @@ public class Elevator extends Subsystem {
   /** Trapezoidal motion profile for smooth movement from setpoint to setpoint */
   private final TrapezoidProfile motionProfile;
 
+  /** Ideal current state, follows profile perfectly */
+  private double idealPosMeters = 0.0;
+  private double idealVelMetersPerSec = 0.0;
+
   /** Motor values */
   private ElevatorPositionControllerValues motorValues = new ElevatorPositionControllerValues();
 
@@ -59,20 +63,21 @@ public class Elevator extends Subsystem {
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
           .kA(0)
-          .kG(0)
-          .kS(0)
-          .kV(0)
+          .kG(0.329)
+          .kS(0.111)
+          .kV(3.1)
           .build())
       .motionProfileConfig(
         MotionProfileBuilder.defaults()
           .maxVelocity(3)
-          .maxAcceleration(5)
+          .maxAcceleration(3)
           .build())
       .build();
 
   /** Initializes the elevator subsystem and configures hardware */
   private Elevator() {
     motor = ElevatorFactory.createDriveMotor(config);
+    motor.setElevatorPos(0.0);
 
     motionProfile = config.motionProfileConfig().createTrapezoidProfile();
   }
@@ -93,29 +98,38 @@ public class Elevator extends Subsystem {
 
     // State info
     tab.add("Target state", new ElevatorStateSendable(() -> targetState));
-    tab.addBoolean("At target state: ", () -> targetState == currentState);
+    tab.addBoolean("At target state", () -> targetState == currentState);
 
     // Setpoint column
     ShuffleboardLayout setpointColumn = tab.getLayout("Setpoint", BuiltInLayouts.kList);
 
-    setpointColumn.addDouble("Pos (m): ", () -> profiledSetpoint.position);
-    setpointColumn.addDouble("Vel (mps): ", () -> profiledSetpoint.velocity);
+    setpointColumn.addDouble("Pos (m)", () -> profiledSetpoint.position);
+    setpointColumn.addDouble("Vel (mps)", () -> profiledSetpoint.velocity);
 
-    // Current position/velocity collumn
+    // Current position/velocity column
     ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
 
-    stateColumn.addDouble("Pos (m): ", () -> motorValues.posMeters);
-    stateColumn.addDouble("Vel (mps): ", () -> motorValues.velMetersPerSec);
-    stateColumn.addDouble("Acc (mpsps): ", () -> motorValues.accMetersPerSecPerSec);
-    stateColumn.addDouble("Volts: ",  () -> motorValues.motorVolts);
-    stateColumn.addDouble("Amps: ", () -> motorValues.motorAmps);
+    stateColumn.addDouble("Pos (m)", () -> motorValues.posMeters);
+    stateColumn.addDouble("Vel (mps)", () -> motorValues.velMetersPerSec);
+    stateColumn.addDouble("Acc (mpsps)", () -> motorValues.accMetersPerSecPerSec);
+    stateColumn.addDouble("Volts",  () -> motorValues.motorVolts);
+    stateColumn.addDouble("Amps", () -> motorValues.motorAmps);
+
+    // Ideal position/velocity column
+    ShuffleboardLayout idealStateColumn = tab.getLayout("Idea state", BuiltInLayouts.kList);
+
+    idealStateColumn.addDouble("Ideal pos (m)", () -> idealPosMeters);
+    idealStateColumn.addDouble("Ideal vel (mps)", () -> idealVelMetersPerSec);
   }
 
   @Override
   public void periodic() {
     motor.getUpdatedVals(motorValues);
 
-    profiledSetpoint = calculateSetpoint(motorValues.posMeters, motorValues.velMetersPerSec, targetState);
+    profiledSetpoint = calculateSetpoint(idealPosMeters, idealVelMetersPerSec, targetState);
+    idealPosMeters = profiledSetpoint.position;
+    idealVelMetersPerSec = profiledSetpoint.velocity;
+
     motor.setSetpoint(profiledSetpoint.position, profiledSetpoint.velocity);
 
     // update current state if safely reached target state
@@ -175,6 +189,13 @@ public class Elevator extends Subsystem {
     return Commands.runOnce(
       () -> {
         targetState = ElevatorState.L4;
+      });
+  }
+
+  public Command manualZero() {
+    return Commands.runOnce(
+      () -> {
+        motor.setElevatorPos(0);
       });
   }
 }
