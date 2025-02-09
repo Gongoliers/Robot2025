@@ -66,8 +66,8 @@ public class Manipulator extends Subsystem {
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
           .kA(0.0)
-          .kG(0.0)
-          .kS(0.0)
+          .kG(-0.2145)
+          .kS(0.0285)
           .kV(0.0)
           .build())
       .feedbackControllerConfig(
@@ -112,7 +112,7 @@ public class Manipulator extends Subsystem {
 
     pivotProfile = pivotConfig.motionProfileConfig().createTrapezoidProfile();
 
-    pivotMotor.setPos(0.0);
+    pivotMotor.setPos(-0.33203125);
   }
 
   /** Gets manipulator subsystem instance if there is one, and creates one if there isn't */
@@ -265,7 +265,7 @@ public class Manipulator extends Subsystem {
   public Command zeroPivot() {
     return Commands.runOnce(
       () -> {
-        pivotMotor.setPos(0.0);
+        pivotMotor.setPos(-0.33203125);
       });
   }
 }
