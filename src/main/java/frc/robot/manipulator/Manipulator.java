@@ -150,17 +150,14 @@ public class Manipulator extends Subsystem {
     tab.addBoolean("At target pivot state", () -> targetPivotState == currentPivotState);
     tab.addBoolean("At target intake state", () -> targetIntakeState == currentIntakeState);
 
-    // Pivot column
-    ShuffleboardLayout pivotColumn = tab.getLayout("Pivot", BuiltInLayouts.kList);
-
     // Pivot setpoint column
-    ShuffleboardLayout pivotSetpointColumn = pivotColumn.getLayout("Setpoint", BuiltInLayouts.kList);
+    ShuffleboardLayout pivotSetpointColumn = tab.getLayout("Pivot setpoint", BuiltInLayouts.kList);
 
     pivotSetpointColumn.addDouble("Pos (rot)", () -> profiledPivotSetpoint.position);
     pivotSetpointColumn.addDouble("Vel (rps)", () -> profiledPivotSetpoint.velocity);
 
     // Current intake position/velocity column
-    ShuffleboardLayout pivotStateColumn = pivotColumn.getLayout("Current state", BuiltInLayouts.kList);
+    ShuffleboardLayout pivotStateColumn = tab.getLayout("Current pivot state", BuiltInLayouts.kList);
 
     pivotStateColumn.addDouble("Pos (rot)", () -> pivotValues.posRotations);
     pivotStateColumn.addDouble("Vel (rps)", () -> pivotValues.velRotationsPerSec);
@@ -169,21 +166,18 @@ public class Manipulator extends Subsystem {
     pivotStateColumn.addDouble("Amps", () -> pivotValues.motorAmps);
 
     // Ideal intake position/velocity column
-    ShuffleboardLayout idealPivotStateColumn = pivotColumn.getLayout("Ideal state", BuiltInLayouts.kList);
+    ShuffleboardLayout idealPivotStateColumn = tab.getLayout("Ideal pivot state", BuiltInLayouts.kList);
 
     idealPivotStateColumn.addDouble("Ideal pos (rot)", () -> idealPivotPosRotations);
     idealPivotStateColumn.addDouble("Ideal vel (rps)", () -> idealPivotVelRotationsPerSec);
 
-    // Intake column
-    ShuffleboardLayout intakeColumn = tab.getLayout("Intake");
-
     // Intake setpoint column
-    ShuffleboardLayout intakeSetpointColumn = intakeColumn.getLayout("Setpoint", BuiltInLayouts.kList);
+    ShuffleboardLayout intakeSetpointColumn = tab.getLayout("Intake setpoint", BuiltInLayouts.kList);
 
     intakeSetpointColumn.addDouble("Vel (rps)", () -> setpointVelRotationsPerSec);
     
     // Current intake velocity column
-    ShuffleboardLayout intakeStateColumn = intakeColumn.getLayout("Current state", BuiltInLayouts.kList);
+    ShuffleboardLayout intakeStateColumn = tab.getLayout("Current intake state", BuiltInLayouts.kList);
 
     intakeStateColumn.addDouble("Vel (rps)", () -> intakeValues.velRotationsPerSec);
     intakeStateColumn.addDouble("Acc (rpsps)", () -> intakeValues.accRotationsPerSecPerSec);
