@@ -265,7 +265,7 @@ public class Manipulator extends Subsystem {
   public Command zeroPivot() {
     return Commands.runOnce(
       () -> {
-        pivotMotor.setPos(-0.33203125);
+        pivotMotor.setPos(0.33203125);
       });
   }
 }
