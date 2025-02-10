@@ -80,10 +80,10 @@ public class Superstructure extends Subsystem {
     return Commands
       .runOnce(
         () -> manipulator.setTargetPivotState(PivotState.SAFE))
-          .until(manipulator::atTargetPivotState)
+      .andThen(Commands.waitUntil(manipulator::atTargetPivotState))
       .andThen(
-        () -> elevator.setTargetState(targetState.getElevatorState()))
-          .until(elevator::atTargetState)
+      () -> elevator.setTargetState(targetState.getElevatorState()))
+      .andThen(Commands.waitUntil(elevator::atTargetState))
       .andThen(
         () -> {
           manipulator.setTargetPivotState(targetState.getPivotState());
