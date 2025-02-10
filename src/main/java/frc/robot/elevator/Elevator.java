@@ -76,6 +76,7 @@ public class Elevator extends Subsystem {
   /** Initializes the elevator subsystem and configures hardware */
   private Elevator() {
     motor = ElevatorFactory.createDriveMotor(config);
+    motor.configure();
     motor.setElevatorPos(0.0);
 
     targetState = ElevatorState.STOW;

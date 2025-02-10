@@ -110,6 +110,9 @@ public class Manipulator extends Subsystem {
     pivotMotor = ManipulatorFactory.createPivotMotor(pivotConfig);
     intakeMotor = ManipulatorFactory.createIntakeMotor(intakeConfig);
 
+    pivotMotor.configure();
+    intakeMotor.configure();
+
     pivotProfile = pivotConfig.motionProfileConfig().createTrapezoidProfile();
 
     targetPivotState = PivotState.STOW;
