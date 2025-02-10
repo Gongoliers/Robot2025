@@ -33,7 +33,7 @@ public class SuperstructureMechanism {
     root = mech.getRoot("root", 1, 0);
 
     elevator = root.append(new MechanismLigament2d("elevator", 0.2, 90));
-    manipulator = root.append(new MechanismLigament2d("manipulator", 0.2, 0));
+    manipulator = elevator.append(new MechanismLigament2d("manipulator", 0.2, 0));
 
     this.elevatorPosSupplier = elevatorPosSupplier;
     this.manipulatorPivotSupplier = manipulatorPivotSupplier;
