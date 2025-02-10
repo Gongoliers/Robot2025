@@ -40,19 +40,19 @@ public class Manipulator extends Subsystem {
   private final TrapezoidProfile pivotProfile;
 
   /** Target states */
-  private PivotState targetPivotState = PivotState.STOW;
-  private IntakeState targetIntakeState = IntakeState.STOP;
+  private PivotState targetPivotState;
+  private IntakeState targetIntakeState;
 
-  private PivotState currentPivotState = PivotState.STOW;
-  private IntakeState currentIntakeState = IntakeState.STOP;
+  private PivotState currentPivotState;
+  private IntakeState currentIntakeState;
 
   /** Motor setpoints */
-  private TrapezoidProfile.State profiledPivotSetpoint = new TrapezoidProfile.State(0, 0);
-  private double setpointVelRotationsPerSec = 0.0;
+  private TrapezoidProfile.State profiledPivotSetpoint;
+  private double setpointVelRotationsPerSec;
 
   /** Ideal pivot position */
-  private double idealPivotPosRotations = 0.0;
-  private double idealPivotVelRotationsPerSec = 0.0;
+  private double idealPivotPosRotations;
+  private double idealPivotVelRotationsPerSec;
 
   /** Pivot motor config */
   private final MechanismConfig pivotConfig =
@@ -111,6 +111,18 @@ public class Manipulator extends Subsystem {
     intakeMotor = ManipulatorFactory.createIntakeMotor(intakeConfig);
 
     pivotProfile = pivotConfig.motionProfileConfig().createTrapezoidProfile();
+
+    targetPivotState = PivotState.STOW;
+    targetIntakeState = IntakeState.STOP;
+
+    currentPivotState = PivotState.STOW;
+    currentIntakeState = IntakeState.STOP;
+
+    profiledPivotSetpoint = new TrapezoidProfile.State();
+    setpointVelRotationsPerSec = 0.0;
+
+    idealPivotPosRotations = 0.0;
+    idealPivotVelRotationsPerSec = 0.0;
 
     pivotMotor.setPos(-0.33203125);
   }

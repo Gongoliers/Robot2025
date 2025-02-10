@@ -1,7 +1,6 @@
 package frc.robot.elevator;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -30,18 +29,18 @@ public class Elevator extends Subsystem {
   private final ElevatorPositionController motor;
 
   /** Current elevator state */
-  private ElevatorState targetState = ElevatorState.STOW;
-  private ElevatorState currentState = ElevatorState.STOW;
+  private ElevatorState targetState;
+  private ElevatorState currentState;
 
   /** Profiled elevator setpoint */
-  private State profiledSetpoint = new State();
+  private TrapezoidProfile.State profiledSetpoint;
 
   /** Trapezoidal motion profile for smooth movement from setpoint to setpoint */
   private final TrapezoidProfile motionProfile;
 
   /** Ideal current state, follows profile perfectly */
-  private double idealPosMeters = 0.0;
-  private double idealVelMetersPerSec = 0.0;
+  private double idealPosMeters;
+  private double idealVelMetersPerSec;
 
   /** Motor values */
   private ElevatorPositionControllerValues motorValues = new ElevatorPositionControllerValues();
@@ -78,6 +77,14 @@ public class Elevator extends Subsystem {
   private Elevator() {
     motor = ElevatorFactory.createDriveMotor(config);
     motor.setElevatorPos(0.0);
+
+    targetState = ElevatorState.STOW;
+    currentState = ElevatorState.STOW;
+
+    profiledSetpoint = new TrapezoidProfile.State();
+
+    idealPosMeters = 0.0;
+    idealVelMetersPerSec = 0.0;
 
     motionProfile = config.motionProfileConfig().createTrapezoidProfile();
   }
@@ -150,11 +157,11 @@ public class Elevator extends Subsystem {
    * @param target target elevator state
    * @return new setpoint
    */
-  public State calculateSetpoint(double posMeters, double velMetersPerSec, ElevatorState target) {
+  public TrapezoidProfile.State calculateSetpoint(double posMeters, double velMetersPerSec, ElevatorState target) {
     return motionProfile.calculate(
       RobotConstants.PERIODIC_DURATION, 
-      new State(posMeters, velMetersPerSec), 
-      new State(target.getPosMeters(), target.getVelMetersPerSec()));
+      new TrapezoidProfile.State(posMeters, velMetersPerSec), 
+      new TrapezoidProfile.State(target.getPosMeters(), target.getVelMetersPerSec()));
   }
 
   public Command stow() {
