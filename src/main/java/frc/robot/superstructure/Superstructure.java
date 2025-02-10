@@ -66,7 +66,7 @@ public class Superstructure extends Subsystem {
     ShuffleboardTab tab = Shuffleboard.getTab("Superstructure");
 
     // Mechanism2d visualizer
-    tab.add(mechanism.getSendable());
+    tab.add("Superstructure", mechanism.getSendable());
   }
 
   public boolean atTargetState() {
