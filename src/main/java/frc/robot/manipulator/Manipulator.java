@@ -59,14 +59,14 @@ public class Manipulator extends Subsystem {
     MechanismBuilder.defaults()
       .motorConfig(
         MotorBuilder.defaults()
-          .ccwPositive(false)
+          .ccwPositive(true)
           .motorToMechRatio((58/10)*(58/18)*(30/12))
           .statorCurrentLimit(50)
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
           .kA(0.0)
-          .kG(-0.2145)
+          .kG(0.2145)
           .kS(0.0285)
           .kV(0.0)
           .build())
