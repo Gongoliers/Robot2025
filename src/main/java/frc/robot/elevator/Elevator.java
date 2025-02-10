@@ -51,7 +51,7 @@ public class Elevator extends Subsystem {
       .motorConfig(
         MotorBuilder.defaults()
           .motorToMechRatio(7.5)
-          .ccwPositive(false)
+          .ccwPositive(true)
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
