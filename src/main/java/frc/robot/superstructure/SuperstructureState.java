@@ -5,7 +5,8 @@ import frc.robot.manipulator.IntakeState;
 import frc.robot.manipulator.PivotState;
 
 public enum SuperstructureState {
-  STOW(ElevatorState.STOW, PivotState.STOW, IntakeState.STOP);
+  STOW(ElevatorState.STOW, PivotState.STOW, IntakeState.STOP),
+  L2TEST(ElevatorState.L2, PivotState.STOW, IntakeState.STOP);
 
   private final ElevatorState elevatorState;
   private final PivotState pivotState;

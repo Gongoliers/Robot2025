@@ -228,53 +228,20 @@ public class Manipulator extends Subsystem {
       new TrapezoidProfile.State(targetPivotState.getPosRotations(), targetPivotState.getVelRotationsPerSec()));
   }
 
-  public Command stow() {
-    return Commands.runOnce(
-      () -> {
-        targetPivotState = PivotState.STOW;
-      });
+  public void setTargetPivotState(PivotState state) {
+    targetPivotState = state;
   }
 
-  public Command test1() {
-    return Commands.runOnce(
-      () -> {
-        targetPivotState = PivotState.TEST1;
-      });
+  public void setTargetIntakeState(IntakeState state) {
+    targetIntakeState = state;
   }
 
-  public Command test2() {
-    return Commands.runOnce(
-      () -> {
-        targetPivotState = PivotState.TEST2;
-      });
+  public boolean atTargetPivotState() {
+    return targetPivotState == currentPivotState;
   }
 
-  public Command stop() {
-    return Commands.runOnce(
-      () -> {
-        targetIntakeState = IntakeState.STOP;
-      });
-  }
-
-  public Command slow() {
-    return Commands.runOnce(
-      () -> {
-        targetIntakeState = IntakeState.SLOW;
-      });
-  }
-
-  public Command medium() {
-    return Commands.runOnce(
-      () -> {
-        targetIntakeState = IntakeState.MED;
-      });
-  }
-
-  public Command fast() {
-    return Commands.runOnce(
-      () -> {
-        targetIntakeState = IntakeState.FAST;
-      });
+  public boolean atTargetIntakeState() {
+    return targetIntakeState == currentIntakeState;
   }
 
   public Command zeroPivot() {

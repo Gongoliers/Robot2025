@@ -165,39 +165,12 @@ public class Elevator extends Subsystem {
       new TrapezoidProfile.State(target.getPosMeters(), target.getVelMetersPerSec()));
   }
 
-  public Command stow() {
-    return Commands.runOnce(
-      () -> {
-        targetState = ElevatorState.STOW;
-      });
+  public void setTargetState(ElevatorState state) {
+    targetState = state;
   }
 
-  public Command l1() {
-    return Commands.runOnce(
-      () -> {
-        targetState = ElevatorState.L1;
-      });
-  }
-
-  public Command l2() {
-    return Commands.runOnce(
-      () -> {
-        targetState = ElevatorState.L2;
-      });
-  }
-
-  public Command l3() {
-    return Commands.runOnce(
-      () -> {
-        targetState = ElevatorState.L3;
-      });
-  }
-
-  public Command l4() {
-    return Commands.runOnce(
-      () -> {
-        targetState = ElevatorState.L4;
-      });
+  public boolean atTargetState() {
+    return targetState == currentState;
   }
 
   public Command zero() {

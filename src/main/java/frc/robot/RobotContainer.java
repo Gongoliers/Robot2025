@@ -75,15 +75,8 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.y().onTrue(odometry.zeroYaw());
 
-    operatorController.a().onTrue(elevator.stow());
-    operatorController.x().onTrue(elevator.l2());
-    operatorController.y().onTrue(elevator.l4());
-
-    operatorController.leftStick().onTrue(manipulator.stow());
-    operatorController.rightStick().onTrue(manipulator.test2());
-
     operatorController.leftBumper().onTrue(manipulator.zeroPivot());
-    operatorController.b().onTrue(elevator.zero());
+    operatorController.rightBumper().onTrue(elevator.zero());
   }
 
   public Command getAutonomousCommand() {
