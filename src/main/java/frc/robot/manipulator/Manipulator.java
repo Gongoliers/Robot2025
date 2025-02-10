@@ -79,7 +79,7 @@ public class Manipulator extends Subsystem {
       .motionProfileConfig(
         MotionProfileBuilder.defaults()
           .maxVelocity(1)
-          .maxAcceleration(1)
+          .maxAcceleration(4)
           .build())
       .build();
 
