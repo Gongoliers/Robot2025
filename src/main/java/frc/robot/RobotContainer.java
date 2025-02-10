@@ -11,6 +11,8 @@ import frc.lib.Telemetry;
 import frc.robot.elevator.Elevator;
 import frc.robot.manipulator.Manipulator;
 import frc.robot.odometry.Odometry;
+import frc.robot.superstructure.Superstructure;
+import frc.robot.superstructure.SuperstructureState;
 import frc.robot.swerve.Swerve;
 
 /** Robot container */
@@ -31,6 +33,9 @@ public class RobotContainer {
   /** Manipulator subsystem reference */
   private final Manipulator manipulator;
 
+  /** Superstructure subystem reference */
+  private final Superstructure superstructure;
+
   /** Driver controller */
   private final CommandXboxController driverController;
 
@@ -43,11 +48,12 @@ public class RobotContainer {
     swerve = Swerve.getInstance();
     elevator = Elevator.getInstance();
     manipulator = Manipulator.getInstance();
+    superstructure = Superstructure.getInstance();
 
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
 
-    Telemetry.initializeTabs(odometry, swerve, elevator, manipulator);
+    Telemetry.initializeTabs(odometry, swerve, elevator, manipulator, superstructure);
 
     configureDefaultCommands();
     configureBindings();
@@ -77,6 +83,9 @@ public class RobotContainer {
 
     operatorController.leftBumper().onTrue(manipulator.zeroPivot());
     operatorController.rightBumper().onTrue(elevator.zero());
+
+    operatorController.a().onTrue(superstructure.safelyTo(SuperstructureState.STOW));
+    operatorController.b().onTrue(superstructure.safelyTo(SuperstructureState.L2TEST));
   }
 
   public Command getAutonomousCommand() {

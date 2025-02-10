@@ -1,5 +1,7 @@
 package frc.robot.superstructure;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Subsystem;
@@ -20,7 +22,11 @@ public class Superstructure extends Subsystem {
   private final Manipulator manipulator;
 
   /** Superstructure state */
+  private SuperstructureState targetState;
   private SuperstructureState currentState;
+
+  /** Superstructure Mechanism2d visualization */
+  private SuperstructureMechanism mechanism;
 
   /** Initializes superstructure subsystem */
   private Superstructure() {
@@ -28,6 +34,8 @@ public class Superstructure extends Subsystem {
     manipulator = Manipulator.getInstance();
 
     currentState = SuperstructureState.STOW;
+
+    mechanism = new SuperstructureMechanism(elevator::getPosMeters, manipulator::getPosRotations);
   }
 
   /**
@@ -45,12 +53,27 @@ public class Superstructure extends Subsystem {
 
   @Override
   public void periodic() {
+    if (atTargetState()) {
+      currentState = targetState;
+    }
 
+    mechanism.periodic();
   }
 
   @Override
   public void initializeTab() {
+    // Get shuffleboard tab
+    ShuffleboardTab tab = Shuffleboard.getTab("Superstructure");
 
+    // Mechanism2d visualizer
+    tab.add(mechanism.getSendable());
+  }
+
+  public boolean atTargetState() {
+    return 
+      manipulator.atTargetPivotState() &&
+      manipulator.atTargetIntakeState() &&
+      elevator.atTargetState();
   }
 
   public Command safelyTo(SuperstructureState targetState) {

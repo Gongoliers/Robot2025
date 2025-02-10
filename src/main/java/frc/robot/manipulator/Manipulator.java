@@ -228,6 +228,10 @@ public class Manipulator extends Subsystem {
       new TrapezoidProfile.State(targetPivotState.getPosRotations(), targetPivotState.getVelRotationsPerSec()));
   }
 
+  public double getPosRotations() {
+    return pivotValues.posRotations;
+  }
+
   public void setTargetPivotState(PivotState state) {
     targetPivotState = state;
   }
