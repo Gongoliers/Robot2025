@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
+import frc.robot.RobotConstants.Subsystem;
 import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
@@ -100,6 +101,10 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return auto.getSelectedCommand();
+    if (RobotConstants.ENABLED_SUBSYSTEMS.contains(RobotConstants.Subsystem.AUTO)) {
+      return auto.getSelectedCommand();
+    }
+
+    return Commands.print("Auto disabled");
   }
 }
