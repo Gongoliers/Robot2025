@@ -99,7 +99,7 @@ public class Auto extends Subsystem {
   /** Adds event triggers that schedule commands across the robot */
   public void addEventTriggers() {
     new EventTrigger("STOW").onTrue(superstructure.safelyTo(SuperstructureState.STOW));
-    new EventTrigger("L2TEST").onTrue(superstructure.safelyTo(SuperstructureState.L2TEST));
+    new EventTrigger("L2").onTrue(superstructure.safelyTo(SuperstructureState.L2TEST));
   }
 
   public Command getSelectedCommand() {
