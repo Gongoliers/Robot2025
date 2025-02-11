@@ -90,6 +90,7 @@ public class Auto extends Subsystem {
 
   @Override
   public void initializeTab() {
+    // Get tab
     ShuffleboardTab tab = Shuffleboard.getTab("Auto");
 
     tab.add(autoChooser);

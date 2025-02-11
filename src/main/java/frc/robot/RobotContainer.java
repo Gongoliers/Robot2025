@@ -61,7 +61,7 @@ public class RobotContainer {
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
 
-    Telemetry.initializeTabs(odometry, swerve, elevator, manipulator, superstructure);
+    Telemetry.initializeTabs(odometry, swerve, elevator, manipulator, superstructure, auto);
 
     configureDefaultCommands();
     configureBindings();
