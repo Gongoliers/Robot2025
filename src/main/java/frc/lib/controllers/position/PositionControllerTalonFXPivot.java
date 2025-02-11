@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MeasurementHealthValue;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
@@ -59,6 +60,7 @@ public class PositionControllerTalonFXPivot implements PositionController {
     // create feedforward and feedback based on config
     feedforward = config.feedforwardControllerConfig().createArmFeedforward();
     feedback = config.feedbackControllerConfig().createPIDController();
+    feedback.setTolerance(0.005);
 
     // default voltage
     voltage = new VoltageOut(0.0).withEnableFOC(enableFOC);
@@ -99,9 +101,13 @@ public class PositionControllerTalonFXPivot implements PositionController {
   public void periodic() {
     // approach setpoint
     double measuredPosRotations = position.getValueAsDouble();
-    double feedforwardVolts = feedforward.calculate(setpointPosRotations * Math.PI * 2, setpointVelRotationsPerSec * Math.PI * 2);
+    double feedforwardVolts = feedforward.calculate(setpointPosRotations * Math.PI * 2, -setpointVelRotationsPerSec * Math.PI * 2);
     double feedbackVolts = feedback.calculate(measuredPosRotations, setpointPosRotations);
 
-    motor.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
+    System.out.println(feedforwardVolts);
+    System.out.println(feedbackVolts);
+    System.out.println("\n");
+
+    motor.setControl(voltage.withOutput(-feedforwardVolts + feedbackVolts));
   }
 }

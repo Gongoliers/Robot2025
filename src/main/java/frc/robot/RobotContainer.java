@@ -9,7 +9,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
 import frc.robot.elevator.Elevator;
+import frc.robot.elevator.ElevatorState;
 import frc.robot.manipulator.Manipulator;
+import frc.robot.manipulator.PivotState;
 import frc.robot.odometry.Odometry;
 import frc.robot.superstructure.Superstructure;
 import frc.robot.superstructure.SuperstructureState;
@@ -82,10 +84,14 @@ public class RobotContainer {
     driverController.y().onTrue(odometry.zeroYaw());
 
     operatorController.leftBumper().onTrue(manipulator.zeroPivot());
-    operatorController.rightBumper().onTrue(elevator.zero());
+    operatorController.rightBumper().onTrue(elevator.zero());    
 
-    operatorController.a().onTrue(superstructure.safelyTo(SuperstructureState.STOW));
-    operatorController.b().onTrue(superstructure.safelyTo(SuperstructureState.L2TEST));
+    operatorController.a().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.STOW)));
+    operatorController.b().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.L1)));
+    operatorController.y().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.L2)));
+
+    operatorController.povDown().onTrue(Commands.runOnce(() -> manipulator.setTargetPivotState(PivotState.STOW)));
+    operatorController.povUp().onTrue(Commands.runOnce(() -> manipulator.setTargetPivotState(PivotState.SAFE)));
   }
 
   public Command getAutonomousCommand() {

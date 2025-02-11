@@ -65,21 +65,21 @@ public class Manipulator extends Subsystem {
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
-          .kA(0.0)
+          .kA(1)
           .kG(0.2145)
           .kS(0.0285)
-          .kV(0.0)
+          .kV(0.638)
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(0.0)
+          .kP(7.5)
           .kI(0.0)
           .kD(0.0)
           .build())
       .motionProfileConfig(
         MotionProfileBuilder.defaults()
           .maxVelocity(1)
-          .maxAcceleration(4)
+          .maxAcceleration(2)
           .build())
       .build();
 
@@ -127,7 +127,7 @@ public class Manipulator extends Subsystem {
     idealPivotPosRotations = 0.0;
     idealPivotVelRotationsPerSec = 0.0;
 
-    pivotMotor.setPos(-0.33203125);
+    pivotMotor.setPos(0.33203125);
   }
 
   /** Gets manipulator subsystem instance if there is one, and creates one if there isn't */
