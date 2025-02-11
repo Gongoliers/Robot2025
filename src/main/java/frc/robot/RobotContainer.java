@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
+import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
 import frc.robot.manipulator.Manipulator;
@@ -38,6 +39,9 @@ public class RobotContainer {
   /** Superstructure subystem reference */
   private final Superstructure superstructure;
 
+  /** Auto subsystem reference */
+  private final Auto auto;
+
   /** Driver controller */
   private final CommandXboxController driverController;
 
@@ -51,6 +55,7 @@ public class RobotContainer {
     elevator = Elevator.getInstance();
     manipulator = Manipulator.getInstance();
     superstructure = Superstructure.getInstance();
+    auto = Auto.getInstance();
 
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
@@ -95,6 +100,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous commands configured");
+    return auto.getSelectedCommand();
   }
 }
