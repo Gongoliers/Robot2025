@@ -55,16 +55,16 @@ public class Elevator extends Subsystem {
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(0)
+          .kP(2)
           .kI(0)
           .kD(0)
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
-          .kA(0)
-          .kG(0.329)
-          .kS(0.111)
-          .kV(5)
+          .kA(2)
+          .kG(0.3345)
+          .kS(0.1445)
+          .kV(4)
           .build())
       .motionProfileConfig(
         MotionProfileBuilder.defaults()

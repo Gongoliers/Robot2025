@@ -67,7 +67,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromRotations(0.0939941).unaryMinus())
+            .offset(Rotation2d.fromDegrees(-7.646484374).unaryMinus())
             .build())
         .build(),
       driveConfig,
@@ -80,7 +80,7 @@ public class SwerveFactory {
    * @return the north west swerve module's tranlsation
    */
   public static Translation2d getNorthWestModuleTranslation() {
-    return new Translation2d(Units.inchesToMeters(10.375), Units.inchesToMeters(10.375));
+    return new Translation2d(Units.inchesToMeters(10), Units.inchesToMeters(10));
   }
 
   /** 
@@ -103,7 +103,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromRotations(0.304443).unaryMinus())
+            .offset(Rotation2d.fromDegrees(-352.7929687).unaryMinus())
             .build())
         .build(),
       driveConfig,
@@ -116,7 +116,7 @@ public class SwerveFactory {
    * @return the north east swerve module's tranlsation
    */
   public static Translation2d getNorthEastModuleTranslation() {
-    return new Translation2d(Units.inchesToMeters(10.375), Units.inchesToMeters(-10.375));
+    return new Translation2d(Units.inchesToMeters(10), Units.inchesToMeters(-10));
   }
 
   /** 
@@ -139,7 +139,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromRotations(-0.294433593).unaryMinus())
+            .offset(Rotation2d.fromDegrees(-15.02929687).unaryMinus())
             .build())
         .build(),
       driveConfig,
@@ -152,7 +152,7 @@ public class SwerveFactory {
    * @return the south east swerve module's tranlsation
    */
   public static Translation2d getSouthEastModuleTranslation() {
-    return new Translation2d(Units.inchesToMeters(-10.375), Units.inchesToMeters(-10.375));
+    return new Translation2d(Units.inchesToMeters(-10), Units.inchesToMeters(-10));
   }
 
   /** 
@@ -175,7 +175,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromRotations(0.0161132).unaryMinus())
+            .offset(Rotation2d.fromDegrees(7.9980469).unaryMinus())
             .build())
         .build(),
       driveConfig,
@@ -188,7 +188,7 @@ public class SwerveFactory {
    * @return the south west swerve module's tranlsation
    */
   public static Translation2d getSouthWestModuleTranslation() {
-    return new Translation2d(Units.inchesToMeters(-10.375), Units.inchesToMeters(10.375));
+    return new Translation2d(Units.inchesToMeters(-10), Units.inchesToMeters(10));
   }
 
   /**

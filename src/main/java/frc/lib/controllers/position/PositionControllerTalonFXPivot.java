@@ -104,10 +104,6 @@ public class PositionControllerTalonFXPivot implements PositionController {
     double feedforwardVolts = feedforward.calculate(setpointPosRotations * Math.PI * 2, -setpointVelRotationsPerSec * Math.PI * 2);
     double feedbackVolts = feedback.calculate(measuredPosRotations, setpointPosRotations);
 
-    System.out.println(feedforwardVolts);
-    System.out.println(feedbackVolts);
-    System.out.println("\n");
-
     motor.setControl(voltage.withOutput(-feedforwardVolts + feedbackVolts));
   }
 }

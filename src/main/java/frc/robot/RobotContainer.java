@@ -12,6 +12,7 @@ import frc.robot.RobotConstants.Subsystem;
 import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
+import frc.robot.manipulator.IntakeState;
 import frc.robot.manipulator.Manipulator;
 import frc.robot.manipulator.PivotState;
 import frc.robot.odometry.Odometry;
@@ -92,12 +93,14 @@ public class RobotContainer {
     operatorController.leftBumper().onTrue(manipulator.zeroPivot());
     operatorController.rightBumper().onTrue(elevator.zero());    
 
-    operatorController.a().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.STOW)));
-    operatorController.b().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.L1)));
-    operatorController.y().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.L2)));
+    operatorController.a().onTrue(superstructure.safelyTo(SuperstructureState.STOW));
+    operatorController.b().onTrue(superstructure.safelyTo(SuperstructureState.L1));
+    operatorController.y().onTrue(superstructure.safelyTo(SuperstructureState.L2));
+    operatorController.x().onTrue(superstructure.safelyTo(SuperstructureState.L3));
 
-    operatorController.povDown().onTrue(Commands.runOnce(() -> manipulator.setTargetPivotState(PivotState.STOW)));
-    operatorController.povUp().onTrue(Commands.runOnce(() -> manipulator.setTargetPivotState(PivotState.SAFE)));
+    operatorController.povDown().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALIN)));
+    operatorController.povUp().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALSCORIN)));
+    operatorController.povLeft().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.STOP)));
   }
 
   public Command getAutonomousCommand() {
