@@ -183,6 +183,7 @@ public class Manipulator extends Subsystem {
     intakeStateColumn.addDouble("Acc (rpsps)", () -> intakeValues.accRotationsPerSecPerSec);
     intakeStateColumn.addDouble("Volts", () -> intakeValues.motorVolts);
     intakeStateColumn.addDouble("Amps", () -> intakeValues.motorAmps);
+    intakeStateColumn.addDouble("Current*Velocity", () -> {return intakeValues.velRotationsPerSec*intakeValues.motorAmps;});
   }
 
   @Override
