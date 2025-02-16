@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -318,9 +319,11 @@ public class Swerve extends Subsystem {
 
     return run(
       () -> {
-        setChassisSpeeds(
-          chassisSpeedsLimiter.apply(
-            chassisSpeedsGetter.apply(DriveRequest.fromController(controller))));
+        if (!DriverStation.isAutonomous()) {
+          setChassisSpeeds(
+            chassisSpeedsLimiter.apply(
+              chassisSpeedsGetter.apply(DriveRequest.fromController(controller))));
+        }
       });
   }
 }

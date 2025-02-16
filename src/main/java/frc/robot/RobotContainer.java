@@ -81,8 +81,8 @@ public class RobotContainer {
     return instance;
   }
 
-  /** Configures subsystem default commands */
-  private void configureDefaultCommands() {
+  /** Configures subsystem default commands for teleop */
+  public void configureDefaultCommands() {
     swerve.setDefaultCommand(swerve.teleopDrive(driverController));
   }
 
@@ -101,6 +101,10 @@ public class RobotContainer {
     operatorController.povDown().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALIN)));
     operatorController.povUp().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALSCORIN)));
     operatorController.povLeft().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.STOP)));
+
+    operatorController.rightTrigger().onTrue(Commands.runOnce(() -> manipulator.setTargetPivotState(PivotState.SAFE)));
+    operatorController.leftTrigger().onTrue(Commands.runOnce(() -> manipulator.setTargetPivotState(PivotState.STOW)));
+    operatorController.povRight().onTrue(Commands.runOnce(() -> manipulator.setTargetPivotState(PivotState.FLOOR)));
   }
 
   public Command getAutonomousCommand() {

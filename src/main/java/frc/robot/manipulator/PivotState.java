@@ -4,7 +4,8 @@ public enum PivotState {
   STOW(0.33203125, 0),
   SAFE(0.2, 0),
   SCORE(0.1, 0),
-  ALGAE(-0.1, 0);
+  ALGAE(-0.1, 0),
+  FLOOR(-0.35, 0);
 
   private final double posRotations;
   private final double velRotationsPerSec;
