@@ -14,10 +14,8 @@ public class LimelightsSim implements Limelights {
   }
   
   @Override
-  public void addLimelights(String... names) {
-    for (String name : names) {
-      limelights.add(name);
-    }
+  public void addLimelight(String name, double forward, double side, double up, double roll, double pitch, double yaw) {
+    limelights.add(name);
   }
 
   @Override

@@ -67,6 +67,7 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
     // create feedforward and feedback based on config
     feedforward = config.feedforwardControllerConfig().createElevatorFeedforward();
     feedback = config.feedbackControllerConfig().createPIDController();
+    feedback.setTolerance(0.01);
 
     // set ratio of rotations of drum to meters of movement of elevator
     this.rotationsToMeters = rotationsToMeters;
@@ -113,8 +114,8 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
 
   @Override
   public void setElevatorPos(double posMeters) {
-    leader.setPosition(posMeters);
-    follower.setPosition(posMeters);
+    leader.setPosition(posMeters/rotationsToMeters);
+    follower.setPosition(posMeters/rotationsToMeters);
   }
 
   @Override

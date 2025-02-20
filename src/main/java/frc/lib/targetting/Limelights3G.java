@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import frc.robot.LimelightHelpers;
+import frc.robot.odometry.Odometry;
 
 /** Set of limelight 3Gs */
 public class Limelights3G implements Limelights {
 
+  /** List of limelight names */
   private ArrayList<String> limelights;
 
   public Limelights3G() {
@@ -15,20 +17,20 @@ public class Limelights3G implements Limelights {
   }
   
   @Override
-  public void addLimelights(String... names) {
-    for (String name : names) {
-      limelights.add(name);
-    }
+  public void addLimelight(String name, double forward, double side, double up, double roll, double pitch, double yaw) {
+    limelights.add(name);
+    LimelightHelpers.setCameraPose_RobotSpace(name, forward, side, up, roll, pitch, yaw);
   }
 
   @Override
   public void addVisionMeasurements(SwerveDrivePoseEstimator poseEstimator) {
     for (String limelight : limelights) {
+      //LimelightHelpers.SetRobotOrientation(limelight, Odometry.getInstance().getFieldRelativeHeading().getDegrees(), 0, 0, 0, 0, 0);
       LimelightHelpers.PoseEstimate measurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight);
 
-      if (measurement.tagCount >= 2) {
+      if (measurement.tagCount >= 1) {
         poseEstimator.addVisionMeasurement(
-          measurement.pose, 
+          measurement.pose,
           measurement.timestampSeconds);
       }
     }

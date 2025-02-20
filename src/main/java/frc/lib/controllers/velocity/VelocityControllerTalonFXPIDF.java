@@ -66,7 +66,7 @@ public class VelocityControllerTalonFXPIDF implements VelocityController {
   @Override
   public void configure() {
     BaseStatusSignal.setUpdateFrequencyForAll(100, position, velocity, acceleration);
-    BaseStatusSignal.setUpdateFrequencyForAll(10, volts, amps);
+    BaseStatusSignal.setUpdateFrequencyForAll(100, volts, amps);
 
     ParentDevice.optimizeBusUtilizationForAll(motor);
 

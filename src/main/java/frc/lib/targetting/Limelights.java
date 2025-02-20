@@ -14,8 +14,14 @@ public interface Limelights {
    * Adds a limelight
    * 
    * @param name name of limelight
+   * @param forward forward offset in meters
+   * @param side side offset in meters
+   * @param up up offset in meters
+   * @param roll roll offset in degrees
+   * @param pitch pitch offset in degrees
+   * @param yaw yaw offset in degrees
    */
-  public void addLimelights(String... names);
+  public void addLimelight(String name, double forward, double side, double up, double roll, double pitch, double yaw);
 
   /**
    * Adds vision measurements to a swerve pose estimator

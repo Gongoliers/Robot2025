@@ -69,7 +69,20 @@ public class Odometry extends Subsystem {
     poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
 
     limelights = OdometryFactory.createLimelights();
-    limelights.addLimelights("limelight1", "limelight2");
+    limelights.addLimelight("limelight-north", 
+      0.3302,
+      -0.22225,
+      0.219075,
+      0,
+      0,
+      0);
+    limelights.addLimelight("limelight-south",
+      -0.3302,
+      0.0127,
+      0.22225,
+      0,
+      0,
+      180);
 
     field = new Field2d();
   }

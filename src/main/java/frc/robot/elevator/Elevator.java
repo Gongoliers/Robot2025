@@ -55,7 +55,7 @@ public class Elevator extends Subsystem {
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(2)
+          .kP(6)
           .kI(0)
           .kD(0)
           .build())
@@ -64,7 +64,7 @@ public class Elevator extends Subsystem {
           .kA(2)
           .kG(0.3345)
           .kS(0.1445)
-          .kV(4)
+          .kV(3.5)
           .build())
       .motionProfileConfig(
         MotionProfileBuilder.defaults()
@@ -77,7 +77,7 @@ public class Elevator extends Subsystem {
   private Elevator() {
     motor = ElevatorFactory.createDriveMotor(config);
     motor.configure();
-    motor.setElevatorPos(0.0);
+    motor.setElevatorPos(-0.025); // compensate for play on start
 
     targetState = ElevatorState.STOW;
     currentState = ElevatorState.STOW;
@@ -141,7 +141,7 @@ public class Elevator extends Subsystem {
     motor.setSetpoint(profiledSetpoint.position, profiledSetpoint.velocity);
 
     // update current state if safely reached target state
-    if (Math.abs(motorValues.posMeters - targetState.getPosMeters()) < 0.01) {
+    if (Math.abs(motorValues.posMeters - targetState.getPosMeters()) < 0.02) {
       currentState = targetState;
     } else {
       currentState = null;

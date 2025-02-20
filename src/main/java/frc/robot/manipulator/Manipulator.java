@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.Subsystem;
 import frc.lib.configs.FeedbackControllerConfig.FeedbackControllerBuilder;
 import frc.lib.configs.MechanismConfig;
@@ -54,6 +55,9 @@ public class Manipulator extends Subsystem {
   private double idealPivotPosRotations;
   private double idealPivotVelRotationsPerSec;
 
+  /** Trigger to stop intaking after current spike */
+  private final Trigger currentTrigger;
+
   /** Pivot motor config */
   private final MechanismConfig pivotConfig =
     MechanismBuilder.defaults()
@@ -72,7 +76,7 @@ public class Manipulator extends Subsystem {
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(7.5)
+          .kP(10)
           .kI(0.0)
           .kD(0.0)
           .build())
@@ -126,6 +130,11 @@ public class Manipulator extends Subsystem {
 
     idealPivotPosRotations = 0.0;
     idealPivotVelRotationsPerSec = 0.0;
+
+    currentTrigger = new Trigger(() -> intakeValues.motorAmps > 15.0 && Math.abs(intakeValues.accRotationsPerSecPerSec) < 30.0);
+
+    currentTrigger.onTrue(
+      Commands.runOnce(() -> setTargetIntakeState(IntakeState.STOP)));
 
     pivotMotor.setPos(0.33203125);
   }
@@ -250,6 +259,10 @@ public class Manipulator extends Subsystem {
 
   public boolean atTargetIntakeState() {
     return targetIntakeState == currentIntakeState;
+  }
+
+  public boolean intakeSpunUp() {
+    return atTargetIntakeState() && targetIntakeState.getVelRotationsPerSec() != 0;
   }
 
   public Command zeroPivot() {
