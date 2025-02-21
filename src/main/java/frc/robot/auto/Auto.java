@@ -14,9 +14,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.Subsystem;
 import frc.robot.RobotConstants;
+import frc.robot.elevator.ElevatorState;
 import frc.robot.odometry.Odometry;
 import frc.robot.superstructure.Superstructure;
-import frc.robot.superstructure.SuperstructureState;
 import frc.robot.swerve.Swerve;
 
 /** Handles choosing and running autos */
@@ -98,8 +98,8 @@ public class Auto extends Subsystem {
 
   /** Adds event triggers that schedule commands across the robot */
   public void addEventTriggers() {
-    new EventTrigger("STOW").onTrue(superstructure.safelyTo(SuperstructureState.STOW));
-    new EventTrigger("L2").onTrue(superstructure.safelyTo(SuperstructureState.L2));
+    new EventTrigger("STOW").onTrue(superstructure.elevatorTo(ElevatorState.STOW));
+    new EventTrigger("L2").onTrue(superstructure.elevatorTo(ElevatorState.L2));
   }
 
   public Command getSelectedCommand() {

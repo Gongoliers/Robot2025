@@ -22,9 +22,8 @@ public class Superstructure extends Subsystem {
   /** Manipulator reference */
   private final Manipulator manipulator;
 
-  /** Superstructure state */
-  private SuperstructureState targetState;
-  private SuperstructureState currentState;
+  /** Requested pivot state (ignores moving to a safe position for movement) */
+  private PivotState requestedPivotState;
 
   /** Superstructure Mechanism2d visualization */
   private SuperstructureMechanism mechanism;
@@ -33,8 +32,7 @@ public class Superstructure extends Subsystem {
   private Superstructure() {
     elevator = Elevator.getInstance();
     manipulator = Manipulator.getInstance();
-
-    currentState = SuperstructureState.STOW;
+    requestedPivotState = manipulator.getPivotState();
 
     mechanism = new SuperstructureMechanism(elevator::getPosMeters, manipulator::getPosRotations);
   }
@@ -54,10 +52,6 @@ public class Superstructure extends Subsystem {
 
   @Override
   public void periodic() {
-    if (atTargetState()) {
-      currentState = targetState;
-    }
-
     mechanism.periodic();
   }
 
@@ -77,6 +71,7 @@ public class Superstructure extends Subsystem {
       elevator.atTargetState();
   }
 
+<<<<<<< Updated upstream
   // TODO: make this less awful
   public Command safelyTo(SuperstructureState targetState) {
     final PivotState safePivotState = (targetState.getPivotState() == PivotState.STOW )
@@ -92,11 +87,37 @@ public class Superstructure extends Subsystem {
       .andThen(Commands.waitUntil(manipulator::atTargetPivotState))
       .andThen(
         () -> elevator.setTargetState(targetState.getElevatorState()))
+=======
+  public Command pivotTo(PivotState targetState) {
+    return Commands.runOnce(() -> {
+      if (elevator.getState() == ElevatorState.STOW) {
+        requestedPivotState = targetState;
+        manipulator.setTargetPivotState(targetState);
+      }
+    });
+  }
+
+  public Command elevatorTo(ElevatorState targetState) {
+    return Commands
+      .runOnce(() -> {
+        if (manipulator.getPivotState().isUnsafe()) {
+          manipulator.setTargetPivotState(PivotState.SAFE);
+        }
+      })
+      .andThen(Commands.waitUntil(manipulator::atTargetPivotState))
+      .andThen(() -> {
+        elevator.setTargetState(ElevatorState.STOW);
+      })
+>>>>>>> Stashed changes
       .andThen(Commands.waitUntil(elevator::atTargetState))
-      .andThen(
-        () -> {
-          manipulator.setTargetPivotState(targetState.getPivotState());
-          manipulator.setTargetIntakeState(targetState.getIntakeState());
-        });
+      .andThen(() -> {
+        elevator.setTargetState(targetState);
+      })
+      .andThen(Commands.waitUntil(elevator::atTargetState))
+      .andThen(() -> {
+        if (manipulator.getPivotState() != requestedPivotState) {
+          manipulator.setTargetPivotState(requestedPivotState);
+        }
+      });
   }
 }

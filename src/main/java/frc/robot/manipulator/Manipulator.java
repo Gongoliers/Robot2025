@@ -227,6 +227,14 @@ public class Manipulator extends Subsystem {
     return pivotValues.posRotations;
   }
 
+  public PivotState getPivotState() {
+    return currentPivotState;
+  }
+
+  public IntakeState getIntakeState() {
+    return currentIntakeState;
+  }
+
   public void setTargetPivotState(PivotState state) {
     targetPivotState = state;
   }

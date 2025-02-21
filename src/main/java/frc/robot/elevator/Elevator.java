@@ -173,6 +173,10 @@ public class Elevator extends Subsystem {
     return motorValues.posMeters;
   }
 
+  public ElevatorState getState() {
+    return currentState;
+  }
+
   public boolean atTargetState() {
     return targetState == currentState;
   }

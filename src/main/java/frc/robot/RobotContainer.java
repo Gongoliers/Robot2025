@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import javax.naming.OperationNotSupportedException;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -93,10 +95,13 @@ public class RobotContainer {
     operatorController.leftBumper().onTrue(manipulator.zeroPivot());
     operatorController.rightBumper().onTrue(elevator.zero());    
 
-    operatorController.a().onTrue(superstructure.safelyTo(SuperstructureState.STOW));
-    operatorController.b().onTrue(superstructure.safelyTo(SuperstructureState.L1));
-    operatorController.y().onTrue(superstructure.safelyTo(SuperstructureState.L2));
-    operatorController.x().onTrue(superstructure.safelyTo(SuperstructureState.L3));
+    operatorController.a().onTrue(superstructure.elevatorTo(ElevatorState.STOW));
+    operatorController.b().onTrue(superstructure.elevatorTo(ElevatorState.L2));
+    operatorController.x().onTrue(superstructure.elevatorTo(ElevatorState.L3));
+
+    operatorController.y().onTrue(superstructure.pivotTo(PivotState.ALGAE));
+    operatorController.leftTrigger().onTrue(superstructure.pivotTo(PivotState.STOW));
+    operatorController.rightTrigger().onTrue(superstructure.pivotTo(PivotState.SAFE));
 
     operatorController.povDown().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALIN)));
     operatorController.povUp().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALSCORIN)));
