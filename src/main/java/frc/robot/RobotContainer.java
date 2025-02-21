@@ -19,7 +19,6 @@ import frc.robot.manipulator.Manipulator;
 import frc.robot.manipulator.PivotState;
 import frc.robot.odometry.Odometry;
 import frc.robot.superstructure.Superstructure;
-import frc.robot.superstructure.SuperstructureState;
 import frc.robot.swerve.Swerve;
 
 /** Robot container */
@@ -106,10 +105,6 @@ public class RobotContainer {
     operatorController.povDown().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALIN)));
     operatorController.povUp().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALSCORIN)));
     operatorController.povLeft().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.STOP)));
-
-    operatorController.rightTrigger().onTrue(Commands.runOnce(() -> manipulator.setTargetPivotState(PivotState.SAFE)));
-    operatorController.leftTrigger().onTrue(Commands.runOnce(() -> manipulator.setTargetPivotState(PivotState.STOW)));
-    operatorController.povRight().onTrue(Commands.runOnce(() -> manipulator.setTargetPivotState(PivotState.FLOOR)));
   }
 
   public Command getAutonomousCommand() {

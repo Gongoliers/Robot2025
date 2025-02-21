@@ -71,23 +71,6 @@ public class Superstructure extends Subsystem {
       elevator.atTargetState();
   }
 
-<<<<<<< Updated upstream
-  // TODO: make this less awful
-  public Command safelyTo(SuperstructureState targetState) {
-    final PivotState safePivotState = (targetState.getPivotState() == PivotState.STOW )
-      ? PivotState.SAFE
-      : targetState.getPivotState();
-
-    return Commands
-      .runOnce(
-        () -> elevator.setTargetState(ElevatorState.STOW))
-      .andThen(Commands.waitUntil(elevator::atTargetState))
-      .andThen(
-        () -> manipulator.setTargetPivotState(safePivotState))
-      .andThen(Commands.waitUntil(manipulator::atTargetPivotState))
-      .andThen(
-        () -> elevator.setTargetState(targetState.getElevatorState()))
-=======
   public Command pivotTo(PivotState targetState) {
     return Commands.runOnce(() -> {
       if (elevator.getState() == ElevatorState.STOW) {
@@ -95,7 +78,7 @@ public class Superstructure extends Subsystem {
         manipulator.setTargetPivotState(targetState);
       }
     });
-  }
+  };
 
   public Command elevatorTo(ElevatorState targetState) {
     return Commands
@@ -108,7 +91,6 @@ public class Superstructure extends Subsystem {
       .andThen(() -> {
         elevator.setTargetState(ElevatorState.STOW);
       })
->>>>>>> Stashed changes
       .andThen(Commands.waitUntil(elevator::atTargetState))
       .andThen(() -> {
         elevator.setTargetState(targetState);
