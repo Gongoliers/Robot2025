@@ -100,7 +100,7 @@ public class RobotContainer {
     operatorController.rightTrigger().onTrue(superstructure.pivotTo(PivotState.SAFE));
 
     operatorController.povDown().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALIN)));
-    operatorController.povUp().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALSCORIN)));
+    operatorController.povUp().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALOUT)));
     operatorController.povLeft().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.STOP)));
   }
 

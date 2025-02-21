@@ -12,6 +12,9 @@ public class RobotConstants {
   /** Duration of each robot periodic call in seconds */
   public static final double PERIODIC_DURATION = 1.0/PERIODIC_RATE;
 
+  /** Side lengths of robot chassis */
+  public static final double CHASSIS_SIDE_LENGTH = 24;
+
   /** Subsystems */
   public enum Subsystem {
     SWERVE,

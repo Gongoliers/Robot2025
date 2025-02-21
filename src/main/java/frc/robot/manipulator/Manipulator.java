@@ -76,7 +76,7 @@ public class Manipulator extends Subsystem {
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(10)
+          .kP(15)
           .kI(0.0)
           .kD(0.0)
           .build())
@@ -209,16 +209,16 @@ public class Manipulator extends Subsystem {
     intakeMotor.setSetpoint(setpointVelRotationsPerSec);
 
     // update current states if safely reached target states
-    if (Math.abs(pivotValues.posRotations - targetPivotState.getPosRotations()) < 0.02) {
+    if (Math.abs(pivotValues.posRotations - targetPivotState.getPosRotations()) < 0.03) {
       currentPivotState = targetPivotState;
     } else {
-      currentPivotState = null;
+      currentPivotState = PivotState.MOVING;
     }
 
     if (Math.abs(intakeValues.velRotationsPerSec - targetIntakeState.getVelRotationsPerSec()) < 5) {
       currentIntakeState = targetIntakeState;
     } else {
-      currentIntakeState = null;
+      currentIntakeState = IntakeState.MOVING;
     }
 
     pivotMotor.periodic();

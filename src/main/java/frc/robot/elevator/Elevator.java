@@ -17,6 +17,7 @@ import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.position.ElevatorPositionController;
 import frc.lib.controllers.position.ElevatorPositionController.ElevatorPositionControllerValues;
 import frc.lib.sendables.ElevatorStateSendable;
+import frc.robot.Robot;
 import frc.robot.RobotConstants;
 
 /** Elevator subsystem */
@@ -77,11 +78,11 @@ public class Elevator extends Subsystem {
   private Elevator() {
     motor = ElevatorFactory.createDriveMotor(config);
     motor.configure();
-    motor.setElevatorPos(-0.025); // compensate for play on start
+    motor.setElevatorPos((Robot.isReal()) ? -0.025 : 0.0); // compensate for play on start if real 
 
     targetState = ElevatorState.STOW;
     currentState = ElevatorState.STOW;
-
+    
     profiledSetpoint = new TrapezoidProfile.State();
 
     idealPosMeters = 0.0;
@@ -117,6 +118,7 @@ public class Elevator extends Subsystem {
     // Current position/velocity column
     ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
 
+    stateColumn.addString("Name", () -> currentState.name());
     stateColumn.addDouble("Pos (m)", () -> motorValues.posMeters);
     stateColumn.addDouble("Vel (mps)", () -> motorValues.velMetersPerSec);
     stateColumn.addDouble("Acc (mpsps)", () -> motorValues.accMetersPerSecPerSec);
@@ -144,7 +146,7 @@ public class Elevator extends Subsystem {
     if (Math.abs(motorValues.posMeters - targetState.getPosMeters()) < 0.02) {
       currentState = targetState;
     } else {
-      currentState = null;
+      currentState = ElevatorState.MOVING;
     }
 
     motor.periodic();

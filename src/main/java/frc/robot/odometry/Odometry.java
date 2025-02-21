@@ -22,6 +22,7 @@ import frc.lib.sensors.Gyroscope;
 import frc.lib.sensors.Gyroscope.GyroscopeValues;
 import frc.lib.targetting.Limelights;
 import frc.robot.swerve.Swerve;
+import frc.robot.targetting.Targetting;
 
 /** Odometry subsystem */
 public class Odometry extends Subsystem {
@@ -110,6 +111,8 @@ public class Odometry extends Subsystem {
     poseEstimator.update(
       Rotation2d.fromRotations(gyroscopeValues.yawRotations), 
       modulePositionsSupplier.get());
+
+    System.out.println(Targetting.getReefFaceNormal(getPosition()).getDegrees());
 
     field.setRobotPose(getPosition());
   }
