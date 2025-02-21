@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Subsystem;
 import frc.robot.elevator.Elevator;
+import frc.robot.elevator.ElevatorState;
 import frc.robot.manipulator.Manipulator;
 import frc.robot.manipulator.PivotState;
 
@@ -76,13 +77,21 @@ public class Superstructure extends Subsystem {
       elevator.atTargetState();
   }
 
+  // TODO: make this less awful
   public Command safelyTo(SuperstructureState targetState) {
+    final PivotState safePivotState = (targetState.getPivotState() == PivotState.STOW )
+      ? PivotState.SAFE
+      : targetState.getPivotState();
+
     return Commands
       .runOnce(
-        () -> manipulator.setTargetPivotState(PivotState.SAFE))
+        () -> elevator.setTargetState(ElevatorState.STOW))
+      .andThen(Commands.waitUntil(elevator::atTargetState))
+      .andThen(
+        () -> manipulator.setTargetPivotState(safePivotState))
       .andThen(Commands.waitUntil(manipulator::atTargetPivotState))
       .andThen(
-      () -> elevator.setTargetState(targetState.getElevatorState()))
+        () -> elevator.setTargetState(targetState.getElevatorState()))
       .andThen(Commands.waitUntil(elevator::atTargetState))
       .andThen(
         () -> {
