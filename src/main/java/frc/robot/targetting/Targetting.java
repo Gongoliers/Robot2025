@@ -49,7 +49,7 @@ public class Targetting {
    * @param safeDistance distance (in meters) to keep between the target position and robot
    * @return position on the field of closest reef target with some offset to leave room for bumpers or room for the manipulator to move
    */
-  public static Translation2d getStagedTranslation(Pose2d robotPose, ReefTarget target, double stagingDistance) {
+  public static Translation2d getSafeTranslation(Pose2d robotPose, ReefTarget target, double stagingDistance) {
     Rotation2d reefFaceNormal = getReefFaceNormal(robotPose);
     Translation2d offsetTranslation = new Translation2d(
       target.getForwardOffset() + RobotConstants.CHASSIS_SIDE_LENGTH*0.0254/2 + stagingDistance, // magic number converts to meters

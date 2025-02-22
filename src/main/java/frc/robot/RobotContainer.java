@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -17,6 +19,8 @@ import frc.robot.manipulator.PivotState;
 import frc.robot.odometry.Odometry;
 import frc.robot.superstructure.Superstructure;
 import frc.robot.swerve.Swerve;
+import frc.robot.targetting.ReefTarget;
+import frc.robot.targetting.Targetting;
 
 /** Robot container */
 public class RobotContainer {
@@ -87,6 +91,22 @@ public class RobotContainer {
   /** Configures controller bindings */
   private void configureBindings() {
     driverController.y().onTrue(odometry.setYaw(0.0));
+
+    driverController.povLeft().onTrue(Commands.runOnce(() -> {
+      odometry.setPosition(new Pose2d(
+        Targetting.getSafeTranslation(odometry.getPosition(), ReefTarget.LEFT, 0),
+        Targetting.getReefFaceNormal(odometry.getPosition()).rotateBy(Rotation2d.k180deg)));
+    }));
+    driverController.povUp().onTrue(Commands.runOnce(() -> {
+      odometry.setPosition(new Pose2d(
+        Targetting.getSafeTranslation(odometry.getPosition(), ReefTarget.CENTER, 0.3),
+        Targetting.getReefFaceNormal(odometry.getPosition()).rotateBy(Rotation2d.k180deg)));
+    }));
+    driverController.povRight().onTrue(Commands.runOnce(() -> {
+      odometry.setPosition(new Pose2d(
+        Targetting.getSafeTranslation(odometry.getPosition(), ReefTarget.RIGHT, 0),
+        Targetting.getReefFaceNormal(odometry.getPosition()).rotateBy(Rotation2d.k180deg)));
+    }));
 
     operatorController.leftBumper().onTrue(manipulator.zeroPivot());
     operatorController.rightBumper().onTrue(elevator.zero());    

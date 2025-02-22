@@ -2,8 +2,8 @@ package frc.robot.targetting;
 
 public enum ReefTarget {
   LEFT(0.8255, -0.1651),
-  RIGHT(0.8255, 0.0),
-  CENTER(0.8255, 0.1651);
+  RIGHT(0.8255, 0.1651),
+  CENTER(0.8255, 0.0);
 
   private final double offsetForward;
   private final double offsetHorizontal;
