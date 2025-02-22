@@ -2,6 +2,8 @@ package frc.robot.odometry;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.configs.GyroTrimConfigs;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,6 +23,7 @@ import frc.lib.Subsystem;
 import frc.lib.sensors.Gyroscope;
 import frc.lib.sensors.Gyroscope.GyroscopeValues;
 import frc.lib.targetting.Limelights;
+import frc.robot.Robot;
 import frc.robot.swerve.Swerve;
 import frc.robot.targetting.Targetting;
 
@@ -168,9 +171,21 @@ public class Odometry extends Subsystem {
    * @return the rotation of the robot on the field where zero is away from the driver's alliance wall
    */
   public Rotation2d getDriverRelativeHeading() {
-    return Rotation2d.fromRotations(gyroscopeValues.yawRotations);
+    return getFieldRelativeHeading().rotateBy(
+      (Robot.isRedAlliance())
+        ? Rotation2d.k180deg
+        : Rotation2d.kZero);
   }
 
+  /**
+   * Get raw yaw measurement from gyroscope (ignores the pose estimator to prevent possible feedback loops with limelights)
+   * 
+   * @reutrn raw yaw measurement from gyroscope
+   */
+  public Rotation2d getRawGyroYaw() {
+    return Rotation2d.fromRotations(gyroscopeValues.yawRotations);
+  }
+  
   /**
    * Sets the position of the robot on the field
    * used for testing and the start of matches
@@ -202,11 +217,11 @@ public class Odometry extends Subsystem {
    * 
    * @return a command that zeros the yaw of the pigeon2 gyroscope
    */
-  public Command zeroYaw() {
+  public Command setYaw(double yawRotations) {
     return Commands.runOnce(
       () -> {
-        gyroscope.setYaw(0.0);
-        setRotation(Rotation2d.fromDegrees(0.0));
+        gyroscope.setYaw(yawRotations);
+        setRotation(Rotation2d.fromRotations(yawRotations));
       });
   }
 

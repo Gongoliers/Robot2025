@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Subsystem;
 import frc.robot.RobotConstants;
 import frc.robot.elevator.ElevatorState;
@@ -98,6 +99,8 @@ public class Auto extends Subsystem {
 
   /** Adds event triggers that schedule commands across the robot */
   public void addEventTriggers() {
+    new EventTrigger("RESET GYRO YAW").onTrue(Commands.runOnce(() -> 
+      Odometry.getInstance().setYaw(Odometry.getInstance().getFieldRelativeHeading().getRotations())));
     new EventTrigger("STOW").onTrue(superstructure.elevatorTo(ElevatorState.STOW));
     new EventTrigger("L2").onTrue(superstructure.elevatorTo(ElevatorState.L2));
   }

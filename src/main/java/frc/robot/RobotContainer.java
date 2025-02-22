@@ -86,7 +86,7 @@ public class RobotContainer {
 
   /** Configures controller bindings */
   private void configureBindings() {
-    driverController.y().onTrue(odometry.zeroYaw());
+    driverController.y().onTrue(odometry.setYaw(0.0));
 
     operatorController.leftBumper().onTrue(manipulator.zeroPivot());
     operatorController.rightBumper().onTrue(elevator.zero());    
