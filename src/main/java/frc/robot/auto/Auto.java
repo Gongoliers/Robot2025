@@ -1,6 +1,7 @@
 package frc.robot.auto;
 
 import choreo.auto.AutoFactory;
+import frc.lib.Subsystem;
 import frc.robot.odometry.Odometry;
 import frc.robot.swerve.Swerve;
 
@@ -28,5 +29,15 @@ public class Auto extends Subsystem {
       Swerve.getInstance()::autoDrive, 
       true, 
       Swerve.getInstance());
+  }
+
+  @Override
+  public void initializeTab() {
+
+  }
+
+  @Override
+  public void periodic() {
+    
   }
 }
