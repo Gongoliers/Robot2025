@@ -2,6 +2,7 @@ package frc.robot.swerve;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -28,6 +29,8 @@ import frc.robot.odometry.Odometry;
 
 import java.util.function.Function;
 
+import choreo.trajectory.SwerveSample;
+
 /** Swerve subsystem */
 public class Swerve extends Subsystem {
   
@@ -40,7 +43,9 @@ public class Swerve extends Subsystem {
   /** Swerve kinematics */
   private final SwerveDriveKinematics swerveKinematics;
 
-  /** Swerve chassis yaw PID */
+  /** PID controllers for choreo */
+  private final PIDController xPidController = new PIDController(10, 0, 0);
+  private final PIDController yPidController = new PIDController(10, 0, 0);
   private final PIDController yawPidController = new PIDController(25, 0, 0);
 
   /** Steer motor config */
@@ -325,5 +330,21 @@ public class Swerve extends Subsystem {
               chassisSpeedsGetter.apply(DriveRequest.fromController(controller))));
         }
       });
+  }
+
+  /**
+   * Drives the robot through swerve samples from choreo
+   * 
+   * @param sample swerve sample from choreo
+   */
+  public void autoDrive(SwerveSample sample) {
+    Pose2d pose = Odometry.getInstance().getPosition();
+
+    ChassisSpeeds speeds = new ChassisSpeeds(
+      sample.vx + xPidController.calculate(pose.getX(), sample.x),
+      sample.vy + yPidController.calculate(pose.getY(), sample.y),
+      sample.omega + yawPidController.calculate(pose.getRotation().getRotations(), sample.heading / (2* Math.PI)));
+
+    setChassisSpeeds(speeds);
   }
 }
