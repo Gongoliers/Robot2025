@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,7 +24,6 @@ import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.swerve.SwerveModule;
 import frc.lib.sendables.SwerveStatesSendable;
 import frc.robot.RobotConstants;
-import frc.robot.auto.AutonomousHandler;
 import frc.robot.odometry.Odometry;
 
 import java.util.function.Function;
@@ -319,7 +319,7 @@ public class Swerve extends Subsystem {
 
     return run(
       () -> {
-        if (!AutonomousHandler.getIsAutonomous()) {
+        if (!DriverStation.isAutonomous()) {
           setChassisSpeeds(
             chassisSpeedsLimiter.apply(
               chassisSpeedsGetter.apply(DriveRequest.fromController(controller))));

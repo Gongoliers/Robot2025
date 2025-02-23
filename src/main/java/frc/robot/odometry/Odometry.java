@@ -2,8 +2,6 @@ package frc.robot.odometry;
 
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.configs.GyroTrimConfigs;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,7 +21,6 @@ import frc.lib.Subsystem;
 import frc.lib.sensors.Gyroscope;
 import frc.lib.sensors.Gyroscope.GyroscopeValues;
 import frc.lib.targetting.Limelights;
-import frc.lib.targetting.Targetting;
 import frc.robot.Robot;
 import frc.robot.swerve.Swerve;
 
