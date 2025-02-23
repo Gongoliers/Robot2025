@@ -103,6 +103,8 @@ public class Auto extends Subsystem {
       Odometry.getInstance().setYaw(Odometry.getInstance().getFieldRelativeHeading().getRotations())));
     new EventTrigger("STOW").onTrue(superstructure.elevatorTo(ElevatorState.STOW));
     new EventTrigger("L2").onTrue(superstructure.elevatorTo(ElevatorState.L2));
+    new EventTrigger("END PATH").onTrue(Commands.runOnce(() -> 
+      AutonomousHandler.setTeleAutonomous(false)));
   }
 
   public Command getSelectedCommand() {

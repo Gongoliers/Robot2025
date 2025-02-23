@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
+import frc.lib.targetting.ReefTarget;
+import frc.lib.targetting.Targetting;
 import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
@@ -19,8 +21,6 @@ import frc.robot.manipulator.PivotState;
 import frc.robot.odometry.Odometry;
 import frc.robot.superstructure.Superstructure;
 import frc.robot.swerve.Swerve;
-import frc.robot.targetting.ReefTarget;
-import frc.robot.targetting.Targetting;
 
 /** Robot container */
 public class RobotContainer {
@@ -93,9 +93,8 @@ public class RobotContainer {
     driverController.y().onTrue(odometry.setYaw(0.0));
 
     driverController.povLeft().onTrue(Commands.runOnce(() -> {
-      odometry.setPosition(new Pose2d(
-        Targetting.getSafeTranslation(odometry.getPosition(), ReefTarget.LEFT, 0),
-        Targetting.getReefFaceNormal(odometry.getPosition()).rotateBy(Rotation2d.k180deg)));
+      
+      Targetting.pathToTarget(odometry.getPosition(), ReefTarget.LEFT, 0).schedule();
     }));
     driverController.povUp().onTrue(Commands.runOnce(() -> {
       odometry.setPosition(new Pose2d(

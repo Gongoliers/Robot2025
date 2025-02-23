@@ -1,4 +1,4 @@
-package frc.robot.targetting;
+package frc.lib.targetting;
 
 public enum ReefTarget {
   LEFT(0.8255, -0.1651),
