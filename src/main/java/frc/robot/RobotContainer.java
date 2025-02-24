@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
 import frc.lib.targetting.ReefTarget;
-import frc.lib.targetting.Targetting;
 import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
@@ -92,20 +91,7 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.y().onTrue(odometry.setYaw(0.0));
 
-    driverController.povLeft().onTrue(Commands.runOnce(() -> {
-      
-      Targetting.pathToTarget(odometry.getPosition(), ReefTarget.LEFT, 0).schedule();
-    }));
-    driverController.povUp().onTrue(Commands.runOnce(() -> {
-      odometry.setPosition(new Pose2d(
-        Targetting.getSafeTranslation(odometry.getPosition(), ReefTarget.CENTER, 0.3),
-        Targetting.getReefFaceNormal(odometry.getPosition()).rotateBy(Rotation2d.k180deg)));
-    }));
-    driverController.povRight().onTrue(Commands.runOnce(() -> {
-      odometry.setPosition(new Pose2d(
-        Targetting.getSafeTranslation(odometry.getPosition(), ReefTarget.RIGHT, 0),
-        Targetting.getReefFaceNormal(odometry.getPosition()).rotateBy(Rotation2d.k180deg)));
-    }));
+    driverController.a().onTrue(auto.pathfindToTarget(ReefTarget.LEFT, 0).andThen(Commands.print("worked")));
 
     operatorController.leftBumper().onTrue(manipulator.zeroPivot());
     operatorController.rightBumper().onTrue(elevator.zero());    

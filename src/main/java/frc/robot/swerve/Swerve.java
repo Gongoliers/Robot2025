@@ -2,12 +2,14 @@ package frc.robot.swerve;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,7 +25,7 @@ import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.swerve.SwerveModule;
 import frc.lib.sendables.SwerveStatesSendable;
 import frc.robot.RobotConstants;
-import frc.robot.auto.AutonomousHandler;
+import frc.robot.auto.AutoHandler;
 import frc.robot.odometry.Odometry;
 
 import java.util.function.Function;
@@ -40,7 +42,9 @@ public class Swerve extends Subsystem {
   /** Swerve kinematics */
   private final SwerveDriveKinematics swerveKinematics;
 
-  /** Swerve chassis yaw PID */
+  /** PID controllers for choreo */
+  private final PIDController xPidController = new PIDController(10, 0, 0);
+  private final PIDController yPidController = new PIDController(10, 0, 0);
   private final PIDController yawPidController = new PIDController(25, 0, 0);
 
   /** Steer motor config */
@@ -319,7 +323,7 @@ public class Swerve extends Subsystem {
 
     return run(
       () -> {
-        if (!AutonomousHandler.getIsAutonomous()) {
+        if (!AutoHandler.getIsAuto()) {
           setChassisSpeeds(
             chassisSpeedsLimiter.apply(
               chassisSpeedsGetter.apply(DriveRequest.fromController(controller))));
