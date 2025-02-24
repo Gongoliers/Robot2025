@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
+import frc.lib.targetting.ReefTarget;
+import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
 import frc.robot.manipulator.IntakeState;
@@ -88,6 +90,8 @@ public class RobotContainer {
   /** Configures controller bindings */
   private void configureBindings() {
     driverController.y().onTrue(odometry.setYaw(0.0));
+
+    driverController.a().onTrue(auto.pathfindToTarget(ReefTarget.LEFT, 0).andThen(Commands.print("worked")));
 
     operatorController.leftBumper().onTrue(manipulator.zeroPivot());
     operatorController.rightBumper().onTrue(elevator.zero());    

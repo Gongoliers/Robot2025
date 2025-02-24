@@ -25,11 +25,10 @@ import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.swerve.SwerveModule;
 import frc.lib.sendables.SwerveStatesSendable;
 import frc.robot.RobotConstants;
+import frc.robot.auto.AutoHandler;
 import frc.robot.odometry.Odometry;
 
 import java.util.function.Function;
-
-import choreo.trajectory.SwerveSample;
 
 /** Swerve subsystem */
 public class Swerve extends Subsystem {
@@ -324,27 +323,11 @@ public class Swerve extends Subsystem {
 
     return run(
       () -> {
-        if (!DriverStation.isAutonomous()) {
+        if (!AutoHandler.getIsAuto()) {
           setChassisSpeeds(
             chassisSpeedsLimiter.apply(
               chassisSpeedsGetter.apply(DriveRequest.fromController(controller))));
         }
       });
-  }
-
-  /**
-   * Drives the robot through swerve samples from choreo
-   * 
-   * @param sample swerve sample from choreo
-   */
-  public void autoDrive(SwerveSample sample) {
-    Pose2d pose = Odometry.getInstance().getPosition();
-
-    ChassisSpeeds speeds = new ChassisSpeeds(
-      sample.vx + xPidController.calculate(pose.getX(), sample.x),
-      sample.vy + yPidController.calculate(pose.getY(), sample.y),
-      sample.omega + yawPidController.calculate(pose.getRotation().getRotations(), sample.heading / (2* Math.PI)));
-
-    setChassisSpeeds(speeds);
   }
 }
