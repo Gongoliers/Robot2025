@@ -1,6 +1,7 @@
 package frc.lib.targetting;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import frc.robot.LimelightHelpers;
 
 /**
  * Basic interface for limelights
@@ -29,4 +30,12 @@ public interface Limelights {
    * @param poseEstimator swerve drive pose estimator to add vision measurements to
    */
   public void addVisionMeasurements(SwerveDrivePoseEstimator poseEstimator);
+
+  /**
+   * Gets a raw vision measurement from some limelight
+   * 
+   * @param cameraName name of limelight
+   * @return a raw vision measurement from some limelight
+   */
+  public LimelightHelpers.PoseEstimate getVisionMeasurement(String cameraName);
 }

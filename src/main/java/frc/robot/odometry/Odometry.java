@@ -21,6 +21,7 @@ import frc.lib.Subsystem;
 import frc.lib.sensors.Gyroscope;
 import frc.lib.sensors.Gyroscope.GyroscopeValues;
 import frc.lib.targetting.Limelights;
+import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
 import frc.robot.swerve.Swerve;
 
@@ -204,6 +205,20 @@ public class Odometry extends Subsystem {
     Pose2d position = getPosition();
 
     setPosition(new Pose2d(position.getTranslation(), rotation));
+  }
+
+  /**
+   * Gets a mt1 vision measurement from a given camera and fully resets pose estimator position to whatever the measurement says
+   * 
+   * @param camera limelight name
+   * @return a command that gets a mt1 vision measurement from a given camera and fully resets pose estimator position to whatever the measurement says
+   */
+  public Command trustVisionMeasurement(String camera) {
+    return Commands.runOnce(() -> {
+      LimelightHelpers.PoseEstimate poseEstimate = limelights.getVisionMeasurement(camera);
+
+      setPosition(poseEstimate.pose);
+    });
   }
 
   /**

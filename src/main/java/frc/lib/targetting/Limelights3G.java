@@ -35,4 +35,9 @@ public class Limelights3G implements Limelights {
       }
     }
   }
+
+  @Override
+  public LimelightHelpers.PoseEstimate getVisionMeasurement(String cameraName) {
+    return LimelightHelpers.getBotPoseEstimate_wpiBlue(cameraName);
+  }
 }

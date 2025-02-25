@@ -3,6 +3,7 @@ package frc.lib.targetting;
 import java.util.ArrayList;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import frc.robot.LimelightHelpers;
 
 /** Set of limelight 3Gs */
 public class LimelightsSim implements Limelights {
@@ -20,4 +21,9 @@ public class LimelightsSim implements Limelights {
 
   @Override
   public void addVisionMeasurements(SwerveDrivePoseEstimator poseEstimator) { }
+
+  @Override
+  public LimelightHelpers.PoseEstimate getVisionMeasurement(String cameraName) {
+    return new LimelightHelpers.PoseEstimate();
+  }
 }

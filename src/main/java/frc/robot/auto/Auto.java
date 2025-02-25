@@ -44,6 +44,12 @@ public class Auto extends Subsystem {
   /** Auto chooser */
   private final SendableChooser<Command> autoChooser;
 
+  /** Odometry reference */
+  private final Odometry odometry;
+
+  /** Swerve reference */
+  private final Swerve swerve;
+
   public static Auto getInstance() {
     if (instance == null) {
       instance = new Auto();
@@ -53,6 +59,9 @@ public class Auto extends Subsystem {
   }
 
   private Auto() {
+    odometry = Odometry.getInstance();
+    swerve = Swerve.getInstance();
+
     try {
       config = RobotConfig.fromGUISettings();
     } catch (Exception e) {
@@ -60,10 +69,10 @@ public class Auto extends Subsystem {
     }
 
     AutoBuilder.configure(
-      Odometry.getInstance()::getPosition, 
-      Odometry.getInstance()::setPosition, 
-      Swerve.getInstance()::getChassisSpeeds, 
-      (speeds, feedforwards) -> Swerve.getInstance().setChassisSpeeds(speeds), 
+      odometry::getPosition, 
+      odometry::setPosition, 
+      swerve::getChassisSpeeds, 
+      (speeds, feedforwards) -> swerve.setChassisSpeeds(speeds), 
       new PPHolonomicDriveController(
         new PIDConstants(5, 0, 0), 
         new PIDConstants(5, 0, 0)), 
@@ -114,14 +123,14 @@ public class Auto extends Subsystem {
    * @return a command that follows a generated path to the nearest selected reef target
    */
   public Command pathfindToTarget(ReefTarget target, double safeDistance) {
-    Supplier<Translation2d> targetTranslation = () -> FieldTargetSupplier.getSafeTranslation(Odometry.getInstance().getPosition(), target, safeDistance);
-    Supplier<Rotation2d> targetRotation = () -> FieldTargetSupplier.getReefFaceNormal(Odometry.getInstance().getPosition()).rotateBy(Rotation2d.k180deg);
-    PathConstraints constraints = new PathConstraints(3, 3, 2 * Math.PI, 4 * Math.PI);
+    final Supplier<Command> pathfindSupplier = () -> AutoBuilder.pathfindToPose(new Pose2d(
+        FieldTargetSupplier.getSafeTranslation(odometry.getPosition(), target, safeDistance), 
+        FieldTargetSupplier.getReefFaceNormal(odometry.getPosition()).rotateBy(Rotation2d.k180deg)), 
+      new PathConstraints(1, 1, 1*Math.PI, 1*Math.PI), 
+      0.0)
+      .alongWith(Commands.runOnce(() -> AutoHandler.setIsTeleAuto(true))
+      .andThen(() -> AutoHandler.setIsTeleAuto(false)));
 
-    Supplier<Command> pathfindSupplier = () -> AutoBuilder.pathfindToPose(new Pose2d(targetTranslation.get(), targetRotation.get()), constraints, 0.0)
-      .alongWith(Commands.runOnce(() -> AutoHandler.setIsTeleAuto(true)))
-      .andThen(() -> AutoHandler.setIsTeleAuto(false));
-
-    return Commands.defer(pathfindSupplier, Set.of(this, Swerve.getInstance()));
+    return Commands.defer(pathfindSupplier, Set.of(this));
   }
 }
