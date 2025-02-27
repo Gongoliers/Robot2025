@@ -25,7 +25,7 @@ import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.swerve.SwerveModule;
 import frc.lib.sendables.SwerveStatesSendable;
 import frc.robot.RobotConstants;
-import frc.robot.auto.AutoHandler;
+import frc.robot.auto.AutoCoordinator;
 import frc.robot.odometry.Odometry;
 
 import java.util.function.Function;
@@ -323,7 +323,7 @@ public class Swerve extends Subsystem {
 
     return run(
       () -> {
-        if (!AutoHandler.getIsAuto()) {
+        if (!AutoCoordinator.getIsAuto()) {
           setChassisSpeeds(
             chassisSpeedsLimiter.apply(
               chassisSpeedsGetter.apply(DriveRequest.fromController(controller))));

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import frc.robot.LimelightHelpers;
-import frc.robot.odometry.Odometry;
 
 /** Set of limelight 3Gs */
 public class Limelights3G implements Limelights {

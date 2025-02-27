@@ -1,7 +1,5 @@
 package frc.robot.auto;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -11,7 +9,6 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.events.EventTrigger;
-import com.pathplanner.lib.path.EventMarker;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -29,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Subsystem;
 import frc.lib.targetting.FieldTargetSupplier;
 import frc.lib.targetting.ReefTarget;
+import frc.robot.RobotConstants;
 import frc.robot.odometry.Odometry;
 import frc.robot.swerve.Swerve;
 
@@ -92,8 +90,8 @@ public class Auto extends Subsystem {
   }
 
   private void configureAutoCommands() {
-    new EventTrigger("BEGIN PATH").onTrue(Commands.runOnce(() -> AutoHandler.setIsTeleAuto(true)));
-    new EventTrigger("END PATH").onTrue(Commands.runOnce(() -> AutoHandler.setIsTeleAuto(false)));
+    new EventTrigger("BEGIN PATH").onTrue(Commands.runOnce(() -> AutoCoordinator.setIsTeleAuto(true)));
+    new EventTrigger("END PATH").onTrue(Commands.runOnce(() -> AutoCoordinator.setIsTeleAuto(false)));
   }
 
   @Override
@@ -102,7 +100,7 @@ public class Auto extends Subsystem {
 
     tab.add("Auto chooser", autoChooser);
 
-    tab.addBoolean("Is autonomous", AutoHandler::getIsAuto);
+    tab.addBoolean("Is autonomous", AutoCoordinator::getIsAuto);
   }
 
   @Override
@@ -116,6 +114,40 @@ public class Auto extends Subsystem {
   }
 
   /**
+   * Gets a pathfinding command to a reef target with some safe distance
+   * 
+   * @param target field target (left right center)
+   * @param safeDistance distance in meters to keep between the target position and chassis rails
+   * @return a pathfinding command to a reef target with some safe distance
+   */
+  private static Supplier<Command> getPathingCommandSupplier(ReefTarget target, double safeDistance) {
+    return () -> {
+      Pose2d currentPose = Odometry.getInstance().getPosition();
+      Rotation2d reefFaceNormal = FieldTargetSupplier.getReefFaceNormal(currentPose);
+      Pose2d targetPose = new Pose2d(
+        new Translation2d(
+          target.getForwardOffset() + RobotConstants.CHASSIS_SIDE_LENGTH*0.0254/2 + safeDistance,
+          target.getHorizontalOffset())
+          .rotateBy(reefFaceNormal)
+          .plus(FieldTargetSupplier.getReefCenter()),
+        reefFaceNormal.rotateBy(Rotation2d.k180deg));
+
+      List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+        new Pose2d(
+          currentPose.getTranslation(),
+          targetPose.getTranslation().minus(currentPose.getTranslation()).getAngle()),
+        targetPose);
+
+      PathConstraints constraints = new PathConstraints(2, 2, 1*Math.PI, 2*Math.PI);
+
+      PathPlannerPath path = new PathPlannerPath(waypoints, constraints, null, new GoalEndState(0.0, targetPose.getRotation()));
+      path.preventFlipping = true;
+
+      return AutoBuilder.followPath(path);
+    };
+  }
+
+  /**
    * Gets a command that follows a generated path to the nearest selected reef target
    * 
    * @param target reef target (left right center)
@@ -123,14 +155,8 @@ public class Auto extends Subsystem {
    * @return a command that follows a generated path to the nearest selected reef target
    */
   public Command pathfindToTarget(ReefTarget target, double safeDistance) {
-    final Supplier<Command> pathfindSupplier = () -> AutoBuilder.pathfindToPose(new Pose2d(
-        FieldTargetSupplier.getSafeTranslation(odometry.getPosition(), target, safeDistance), 
-        FieldTargetSupplier.getReefFaceNormal(odometry.getPosition()).rotateBy(Rotation2d.k180deg)), 
-      new PathConstraints(1, 1, 1*Math.PI, 1*Math.PI), 
-      0.0)
-      .alongWith(Commands.runOnce(() -> AutoHandler.setIsTeleAuto(true))
-      .andThen(() -> AutoHandler.setIsTeleAuto(false)));
-
-    return Commands.defer(pathfindSupplier, Set.of(this));
+    return Commands.defer(getPathingCommandSupplier(target, safeDistance), Set.of(this))
+      .alongWith(Commands.runOnce(() -> AutoCoordinator.setIsTeleAuto(true)))
+      .andThen(() -> AutoCoordinator.setIsTeleAuto(false));
   }
 }
