@@ -7,8 +7,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Subsystem;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
-import frc.robot.manipulator.Manipulator;
-import frc.robot.manipulator.PivotState;
+import frc.robot.intake.Intake;
+import frc.robot.intake.IntakeState;
+import frc.robot.pivot.Pivot;
+import frc.robot.pivot.PivotState;
 
 /** Superstructure subsystem */
 public class Superstructure extends Subsystem {
@@ -19,11 +21,11 @@ public class Superstructure extends Subsystem {
   /** Elevator reference */
   private final Elevator elevator;
 
-  /** Manipulator reference */
-  private final Manipulator manipulator;
+  /** Pivot reference */
+  private final Pivot pivot;
 
-  /** Requested pivot state (ignores moving to a safe position for movement) */
-  private PivotState requestedPivotState;
+  /** Intake reference */
+  private final Intake intake;
 
   /** Superstructure Mechanism2d visualization */
   private SuperstructureMechanism mechanism;
@@ -31,10 +33,10 @@ public class Superstructure extends Subsystem {
   /** Initializes superstructure subsystem */
   private Superstructure() {
     elevator = Elevator.getInstance();
-    manipulator = Manipulator.getInstance();
-    requestedPivotState = manipulator.getPivotState();
+    pivot = Pivot.getInstance();
+    intake = Intake.getInstance();
 
-    mechanism = new SuperstructureMechanism(elevator::getPosMeters, manipulator::getPosRotations);
+    mechanism = new SuperstructureMechanism(elevator::getPosMeters, pivot::getPosRotations);
   }
 
   /**
@@ -62,44 +64,62 @@ public class Superstructure extends Subsystem {
 
     // Mechanism2d visualizer
     tab.add("Superstructure", mechanism.getSendable());
+
+    // Everything at their target state
+    tab.addBoolean("At target states", () -> atTargetStates());
   }
 
-  public boolean atTargetState() {
+  /**
+   * Returns true if all subsystems have reached their target states
+   * 
+   * @return true if all subsystems have reached their target states
+   */
+  public boolean atTargetStates() {
     return 
-      manipulator.atTargetPivotState() &&
-      manipulator.atTargetIntakeState() &&
+      pivot.atTargetState() &&
+      intake.atTargetState() &&
       elevator.atTargetState();
   }
 
+  /**
+   * Returns a command that moves the pivot to a target state if the elevator is stowed
+   * 
+   * @param targetState target pivot state
+   * @return a command that moves the pivot to a target state if the elevator is stowed
+   */
   public Command pivotTo(PivotState targetState) {
     return Commands.runOnce(() -> {
       if (elevator.getState() == ElevatorState.STOW) {
-        requestedPivotState = targetState;
-        manipulator.setTargetPivotState(targetState);
+        pivot.setTargetState(targetState);
       }
-    });
+    }).andThen(Commands.waitUntil(pivot::atTargetState));
   };
 
+  /**
+   * Returns a command that moves the elevator to a target state if the pivot is at a safe state
+   * 
+   * @param targetState target elevator state
+   * @return a command that moves the elevator to a target state if the pivot is at a safe state
+   */
   public Command elevatorTo(ElevatorState targetState) {
     return Commands
       .runOnce(() -> {
-        if (manipulator.getPivotState().isUnsafe()) {
-          manipulator.setTargetPivotState(PivotState.SAFE);
+        if (pivot.getState().isSafe()) {
+          elevator.setTargetState(targetState);
         }
-      })
-      .andThen(Commands.waitUntil(manipulator::atTargetPivotState))
-      .andThen(() -> {
-        elevator.setTargetState(ElevatorState.STOW);
-      })
-      .andThen(Commands.waitUntil(elevator::atTargetState))
-      .andThen(() -> {
-        elevator.setTargetState(targetState);
-      })
-      .andThen(Commands.waitUntil(elevator::atTargetState))
-      .andThen(() -> {
-        if (manipulator.getPivotState() != requestedPivotState) {
-          manipulator.setTargetPivotState(requestedPivotState);
-        }
+      }).andThen(Commands.waitUntil(elevator::atTargetState));
+  }
+
+  /**
+   * Returns a command that spins up the intake to a target state
+   * 
+   * @param targetState target intake state
+   * @return a command that spins up the intake to a target state
+   */
+  public Command intakeTo(IntakeState targetState) {
+    return Commands
+      .runOnce(() -> {
+        intake.setTargetState(targetState);
       });
   }
 }
