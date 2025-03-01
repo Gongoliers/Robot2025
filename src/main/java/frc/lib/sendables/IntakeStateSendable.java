@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import frc.robot.manipulator.IntakeState;
+import frc.robot.intake.IntakeState;
 
 /** Nice ElevatorState sendable */
 public class IntakeStateSendable implements Sendable {
