@@ -113,6 +113,9 @@ public class Pivot extends Subsystem{
     tab.add("Target state", new PivotStateSendable(() -> targetState));
     tab.add("Current state", new PivotStateSendable(() -> currentState));
     tab.addBoolean("At target state", () -> targetState == currentState);
+
+    // Get current info column
+     
   }
 
   @Override

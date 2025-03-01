@@ -2,7 +2,9 @@ package frc.robot.intake;
 
 import frc.lib.configs.FeedbackControllerConfig.FeedbackControllerBuilder;
 import frc.lib.configs.FeedforwardControllerConfig.FeedforwardControllerBuilder;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.lib.Subsystem;
 import frc.lib.configs.MechanismConfig;
@@ -32,9 +34,6 @@ public class Intake extends Subsystem {
 
   /** Max difference between current rps and target rps for current state to be set to target state */
   private final double stateTolerance;
-
-  /** Setpoint velocity in rotations per second */
-  private double setpointVelRotationsPerSec;
 
   /** Intake subsystem config */
   private final MechanismConfig intakeConfig =
@@ -76,8 +75,6 @@ public class Intake extends Subsystem {
     targetState = IntakeState.STOP;
     currentState = IntakeState.STOP;
     stateTolerance = 2;
-
-    setpointVelRotationsPerSec = 0.0;
   }
 
   @Override
@@ -89,6 +86,14 @@ public class Intake extends Subsystem {
     tab.add("Target state", new IntakeStateSendable(() -> targetState));
     tab.add("Current state", new IntakeStateSendable(() -> currentState));
     tab.addBoolean("At target state", () -> targetState == currentState);
+
+    // Current info column
+    ShuffleboardLayout info = tab.getLayout("Current values", BuiltInLayouts.kList);
+
+    info.addDouble("Vel (rotps)", () -> motorValues.velRotationsPerSec);
+    info.addDouble("Acc (rotpsps)", () -> motorValues.accRotationsPerSecPerSec);
+    info.addDouble("Voltage", () -> motorValues.motorVolts);
+    info.addDouble("Current", () -> motorValues.motorAmps);
   }
 
   @Override
@@ -96,7 +101,7 @@ public class Intake extends Subsystem {
     // Approach setpoint
     motor.getUpdatedVals(motorValues);
 
-    motor.setSetpoint(setpointVelRotationsPerSec);
+    motor.setSetpoint(targetState.getVelRotationsPerSec());
 
     // Update current state if close enough to target state
     if (Math.abs(motorValues.velRotationsPerSec - targetState.getVelRotationsPerSec()) <= stateTolerance) {
