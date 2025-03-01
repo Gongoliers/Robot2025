@@ -1,7 +1,9 @@
 package frc.robot.pivot;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.Subsystem;
@@ -114,8 +116,20 @@ public class Pivot extends Subsystem{
     tab.add("Current state", new PivotStateSendable(() -> currentState));
     tab.addBoolean("At target state", () -> targetState == currentState);
 
-    // Get current info column
-     
+    // Get current values column
+    ShuffleboardLayout values = tab.getLayout("Current values", BuiltInLayouts.kList);
+
+    values.addDouble("Pos (rot)", () -> motorValues.posRotations);
+    values.addDouble("Vel (rotps)", () -> motorValues.velRotationsPerSec);
+    values.addDouble("Acc (rotpsps)", () -> motorValues.accRotationsPerSecPerSec);
+    values.addDouble("Volts", () -> motorValues.motorVolts);
+    values.addDouble("Amps", () -> motorValues.motorAmps);
+
+    // Get ideal values column
+    ShuffleboardLayout idealValues = tab.getLayout("Ideal values", BuiltInLayouts.kList);
+
+    idealValues.addDouble("Pos (rot)", () -> idealPosRotations);
+    idealValues.addDouble("vel (rotps)", () -> idealVelRotationsPerSec);
   }
 
   @Override

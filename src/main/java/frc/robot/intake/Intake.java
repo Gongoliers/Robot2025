@@ -87,13 +87,13 @@ public class Intake extends Subsystem {
     tab.add("Current state", new IntakeStateSendable(() -> currentState));
     tab.addBoolean("At target state", () -> targetState == currentState);
 
-    // Current info column
-    ShuffleboardLayout info = tab.getLayout("Current values", BuiltInLayouts.kList);
+    // Current values column
+    ShuffleboardLayout values = tab.getLayout("Current values", BuiltInLayouts.kList);
 
-    info.addDouble("Vel (rotps)", () -> motorValues.velRotationsPerSec);
-    info.addDouble("Acc (rotpsps)", () -> motorValues.accRotationsPerSecPerSec);
-    info.addDouble("Voltage", () -> motorValues.motorVolts);
-    info.addDouble("Current", () -> motorValues.motorAmps);
+    values.addDouble("Vel (rotps)", () -> motorValues.velRotationsPerSec);
+    values.addDouble("Acc (rotpsps)", () -> motorValues.accRotationsPerSecPerSec);
+    values.addDouble("Voltage", () -> motorValues.motorVolts);
+    values.addDouble("Current", () -> motorValues.motorAmps);
   }
 
   @Override
