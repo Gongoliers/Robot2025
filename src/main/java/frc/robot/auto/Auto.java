@@ -138,7 +138,7 @@ public class Auto extends Subsystem {
           targetPose.getTranslation().minus(currentPose.getTranslation()).getAngle()),
         targetPose);
 
-      PathConstraints constraints = new PathConstraints(2, 2, 1*Math.PI, 2*Math.PI);
+      PathConstraints constraints = new PathConstraints(2, 4, 2*Math.PI, 4*Math.PI);
 
       PathPlannerPath path = new PathPlannerPath(waypoints, constraints, null, new GoalEndState(0.0, targetPose.getRotation()));
       path.preventFlipping = true;
