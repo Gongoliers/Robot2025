@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import frc.robot.manipulator.PivotState;
+import frc.robot.pivot.PivotState;
 
 /** Nice ElevatorState sendable */
 public class PivotStateSendable implements Sendable {
@@ -26,6 +26,5 @@ public class PivotStateSendable implements Sendable {
 
     builder.addStringProperty("Name", () -> stateSupplier.get().name(), null);
     builder.addDoubleProperty("Pos (m)", () -> stateSupplier.get().getPosRotations(), null);
-    builder.addDoubleProperty("Vel (mps)", () -> stateSupplier.get().getVelRotationsPerSec(), null);
   }
 }
