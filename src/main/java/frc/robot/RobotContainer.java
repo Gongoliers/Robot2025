@@ -12,10 +12,11 @@ import frc.lib.targetting.ReefTarget;
 import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
-import frc.robot.manipulator.IntakeState;
-import frc.robot.manipulator.Manipulator;
-import frc.robot.manipulator.PivotState;
+import frc.robot.intake.Intake;
+import frc.robot.intake.IntakeState;
 import frc.robot.odometry.Odometry;
+import frc.robot.pivot.Pivot;
+import frc.robot.pivot.PivotState;
 import frc.robot.superstructure.Superstructure;
 import frc.robot.swerve.Swerve;
 
@@ -34,8 +35,11 @@ public class RobotContainer {
   /** Elevator subsystem reference */
   private final Elevator elevator;
 
-  /** Manipulator subsystem reference */
-  private final Manipulator manipulator;
+  /** Pivot subsystem reference */
+  private final Pivot pivot;
+
+  /** Intake subsystem reference */
+  private final Intake intake;
 
   /** Superstructure subystem reference */
   private final Superstructure superstructure;
@@ -54,14 +58,15 @@ public class RobotContainer {
     odometry = Odometry.getInstance();
     swerve = Swerve.getInstance();
     elevator = Elevator.getInstance();
-    manipulator = Manipulator.getInstance();
+    pivot = Pivot.getInstance();
+    intake = Intake.getInstance();
     superstructure = Superstructure.getInstance();
     auto = Auto.getInstance();
 
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
 
-    Telemetry.initializeTabs(odometry, swerve, elevator, manipulator, superstructure, auto);
+    Telemetry.initializeTabs(odometry, swerve, elevator, pivot, intake, superstructure, auto);
 
     configureDefaultCommands();
     configureBindings();
@@ -95,20 +100,20 @@ public class RobotContainer {
 
     driverController.a().onTrue(odometry.trustVisionMeasurement("limelight-north"));
 
-    operatorController.leftBumper().onTrue(manipulator.zeroPivot());
+    operatorController.leftBumper().onTrue(pivot.zero());
     operatorController.rightBumper().onTrue(elevator.zero());    
 
     operatorController.a().onTrue(superstructure.elevatorTo(ElevatorState.STOW));
     operatorController.b().onTrue(superstructure.elevatorTo(ElevatorState.L2));
     operatorController.x().onTrue(superstructure.elevatorTo(ElevatorState.L3));
 
-    operatorController.y().onTrue(superstructure.pivotTo(PivotState.ALGAE));
+    operatorController.y().onTrue(superstructure.pivotTo(PivotState.TEST));
     operatorController.leftTrigger().onTrue(superstructure.pivotTo(PivotState.STOW));
-    operatorController.rightTrigger().onTrue(superstructure.pivotTo(PivotState.SAFE));
+    operatorController.rightTrigger().onTrue(superstructure.pivotTo(PivotState.TEST));
 
-    operatorController.povDown().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALIN)));
-    operatorController.povUp().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.CORALOUT)));
-    operatorController.povLeft().onTrue(Commands.runOnce(() -> manipulator.setTargetIntakeState(IntakeState.STOP)));
+    operatorController.povDown().onTrue(Commands.runOnce(() -> intake.setTargetState(IntakeState.CORALIN)));
+    operatorController.povUp().onTrue(Commands.runOnce(() -> intake.setTargetState(IntakeState.CORALOUT)));
+    operatorController.povLeft().onTrue(Commands.runOnce(() -> intake.setTargetState(IntakeState.STOP)));
   }
 
   public Command getAutonomousCommand() {
