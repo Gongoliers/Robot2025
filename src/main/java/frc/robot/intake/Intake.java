@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Subsystem;
 import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.MechanismConfig.MechanismBuilder;
@@ -13,6 +14,8 @@ import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.velocity.VelocityController;
 import frc.lib.controllers.velocity.VelocityController.VelocityControllerValues;
 import frc.lib.sendables.IntakeStateSendable;
+import frc.lib.sensors.TimeOfFlight;
+import frc.lib.sensors.TimeOfFlight.TimeOfFlightValues;
 
 /** Intake subsystem */
 public class Intake extends Subsystem {
@@ -23,8 +26,14 @@ public class Intake extends Subsystem {
   /** Intake motor */
   private final VelocityController motor;
 
+  /** Time of flight sensor used as beam break */
+  private final TimeOfFlight timeOfFlight;
+
   /** Intake motor values */
   private VelocityControllerValues motorValues;
+
+  /** Time of flight sensor values */
+  private TimeOfFlightValues timeOfFlightValues;
 
   /** Target state */
   private IntakeState targetState;
@@ -72,6 +81,11 @@ public class Intake extends Subsystem {
     motor = IntakeFactory.createIntakeMotor(intakeConfig);
     motor.configure();
 
+    timeOfFlight = IntakeFactory.createTimeOfFlightSensor();
+    timeOfFlight.configure();
+    timeOfFlight.setBeambreakThreshold(0.2);
+    timeOfFlight.beamBroken().onTrue(Commands.runOnce(() -> setTargetState(IntakeState.STOP)));
+
     targetState = IntakeState.STOP;
     currentState = IntakeState.STOP;
     stateTolerance = 2;
@@ -94,12 +108,19 @@ public class Intake extends Subsystem {
     values.addDouble("Acc (rotpsps)", () -> motorValues.accRotationsPerSecPerSec);
     values.addDouble("Voltage", () -> motorValues.motorVolts);
     values.addDouble("Current", () -> motorValues.motorAmps);
+
+    // Time of flight values column
+    ShuffleboardLayout tofValues = tab.getLayout("Time of flight values", BuiltInLayouts.kList);
+
+    tofValues.addDouble("Distance (m)", () -> timeOfFlightValues.distanceMeters);
+    tofValues.addBoolean("Beam broken", () -> timeOfFlightValues.beamBroken);
   }
 
   @Override
   public void periodic() {
     // Approach setpoint
     motor.getUpdatedVals(motorValues);
+    timeOfFlight.getUpdatedVals(timeOfFlightValues);
 
     motor.setSetpoint(targetState.getVelRotationsPerSec());
 

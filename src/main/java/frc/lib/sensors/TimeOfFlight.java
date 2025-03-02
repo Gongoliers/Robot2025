@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public interface TimeOfFlight {
   
   /** Time of Flight values */
-  static class TimeOfFlightValues {
+  public static class TimeOfFlightValues {
 
     /** Distance in meters */
     public double distanceMeters = 0.0;
