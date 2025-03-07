@@ -37,6 +37,8 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
 
   private final VoltageOut voltage;
 
+  private boolean motorsDisabled = false;
+
   private final double rotationsToMeters;
   private double posMeters = 0.0;
 
@@ -125,6 +127,11 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
   }
 
   @Override
+  public void setDisabled(boolean disabled) {
+    motorsDisabled = disabled;
+  }
+
+  @Override
   public void periodic() {
     // update elevator position based on motor encoder position
     posMeters = position.getValueAsDouble()*rotationsToMeters;
@@ -133,6 +140,6 @@ public class ElevatorPositionControllerElevator implements ElevatorPositionContr
     double feedforwardVolts = feedforward.calculate(setpointVelMetersPerSecond);
     double feedbackVolts = feedback.calculate(position.getValueAsDouble()*rotationsToMeters, setpointPosMeters);
 
-    leader.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
+    leader.setControl(voltage.withOutput((motorsDisabled) ? 0.05 : feedforwardVolts + feedbackVolts));
   }
 }

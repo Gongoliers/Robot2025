@@ -132,6 +132,9 @@ public class Auto extends Subsystem {
           .plus(FieldTargetSupplier.getReefCenter()),
         reefFaceNormal.rotateBy(Rotation2d.k180deg));
 
+      System.out.println(currentPose);
+      System.out.println(targetPose);
+
       List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
         new Pose2d(
           currentPose.getTranslation(),
@@ -155,8 +158,21 @@ public class Auto extends Subsystem {
    * @return a command that follows a generated path to the nearest selected reef target
    */
   public Command pathfindToTarget(ReefTarget target, double safeDistance) {
-    return Commands.defer(getPathingCommandSupplier(target, safeDistance), Set.of(this))
-      .alongWith(Commands.runOnce(() -> AutoCoordinator.setIsTeleAuto(true)))
+    return Commands.defer(getPathingCommandSupplier(target, safeDistance), Set.of(swerve))
+      .alongWith(Commands.runOnce(() -> {
+        AutoCoordinator.setIsTeleAuto(true);
+        AutoCoordinator.setRecentReefTarget(target);;
+      }))
       .andThen(() -> AutoCoordinator.setIsTeleAuto(false));
+  }
+
+  /**
+   * Gets a command that pathfinds to the most recent target
+   * 
+   * @param safeDistance distance in meters to keep between the target and the chassis of the robot
+   * @return a command that pathfinds to the most recent target
+   */
+  public Command pathfindToRecentTarget(double safeDistance) {
+    return pathfindToTarget(AutoCoordinator.getRecentReefTarget(), safeDistance);
   }
 }

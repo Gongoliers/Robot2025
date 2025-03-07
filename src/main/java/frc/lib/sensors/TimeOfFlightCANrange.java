@@ -45,11 +45,6 @@ public class TimeOfFlightCANrange implements TimeOfFlight {
   }
 
   @Override
-  public Trigger beamBroken() {
-    return new Trigger(() -> distance.getValueAsDouble() < beambreakThresholdMeters);
-  }
-
-  @Override
   public void periodic() {
 
   }

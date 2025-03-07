@@ -43,6 +43,9 @@ public class Elevator extends Subsystem {
   private double idealPosMeters;
   private double idealVelMetersPerSec;
 
+  /** Max difference between current rps and target rps for current state to be set to target state */
+  private final double stateTolerance;
+
   /** Motor values */
   private ElevatorPositionControllerValues motorValues = new ElevatorPositionControllerValues();
 
@@ -88,6 +91,8 @@ public class Elevator extends Subsystem {
 
     idealPosMeters = 0.0;
     idealVelMetersPerSec = 0.0;
+
+    stateTolerance = 0.02;
 
     motionProfile = config.motionProfileConfig().createTrapezoidProfile();
   }
@@ -144,12 +149,13 @@ public class Elevator extends Subsystem {
     motor.setSetpoint(profiledSetpoint.position, profiledSetpoint.velocity);
 
     // update current state if safely reached target state
-    if (Math.abs(motorValues.posMeters - targetState.getPosMeters()) < 0.02) {
+    if (Math.abs(motorValues.posMeters - targetState.getPosMeters()) < stateTolerance) {
       currentState = targetState;
     } else {
       currentState = ElevatorState.MOVING;
     }
 
+    motor.setDisabled(currentState == ElevatorState.STOW);
     motor.periodic();
   }
 
@@ -165,7 +171,7 @@ public class Elevator extends Subsystem {
     return motionProfile.calculate(
       RobotConstants.PERIODIC_DURATION, 
       new TrapezoidProfile.State(posMeters, velMetersPerSec), 
-      new TrapezoidProfile.State(target.getPosMeters(), target.getVelMetersPerSec()));
+      new TrapezoidProfile.State(target.getPosMeters(), 0.0));
   }
 
   public void setTargetState(ElevatorState state) {

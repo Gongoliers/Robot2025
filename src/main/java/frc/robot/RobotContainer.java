@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
@@ -18,6 +19,7 @@ import frc.robot.odometry.Odometry;
 import frc.robot.pivot.Pivot;
 import frc.robot.pivot.PivotState;
 import frc.robot.superstructure.Superstructure;
+import frc.robot.superstructure.SuperstructureState;
 import frc.robot.swerve.Swerve;
 
 /** Robot container */
@@ -98,14 +100,21 @@ public class RobotContainer {
     driverController.povUp().onTrue(auto.pathfindToTarget(ReefTarget.CENTER, 0.05).andThen(Commands.print("worked")));
     driverController.povRight().onTrue(auto.pathfindToTarget(ReefTarget.RIGHT, 0.05).andThen(Commands.print("worked")));
 
-    driverController.a().onTrue(odometry.trustVisionMeasurement("limelight-north"));
+    //driverController.a().onTrue(odometry.trustVisionMeasurement("limelight-north"));
 
-    operatorController.leftBumper().onTrue(pivot.zero());
+    operatorController.leftBumper().onTrue((pivot.zero()));
     operatorController.rightBumper().onTrue(elevator.zero());    
 
+    operatorController.leftTrigger().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
+
+    /*
     operatorController.a().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.STOW)));
     operatorController.b().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.L2)));
     operatorController.x().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.L3)));
+    */
+
+    operatorController.a().onTrue(auto.pathfindToTarget(ReefTarget.LEFT, 0.6));
+    operatorController.b().onTrue(superstructure.autoScore(SuperstructureState.L2));
   }
 
   public Command getAutonomousCommand() {

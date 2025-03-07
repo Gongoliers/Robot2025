@@ -14,17 +14,12 @@ public class TimeOfFlightSim implements TimeOfFlight {
   @Override
   public void getUpdatedVals(TimeOfFlightValues values) {
     values.distanceMeters = 0.0;
-    values.beamBroken = true;
+    values.beamBroken = beamBroken;
   }
 
   @Override
   public void setBeambreakThreshold(double distanceMeters) {
     
-  }
-
-  @Override
-  public Trigger beamBroken() {
-    return new Trigger(() -> beamBroken);
   }
 
   @Override

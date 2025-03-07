@@ -2,8 +2,11 @@ package frc.robot.pivot;
 
 /** Enum that represents target pivot states and whether or not they are safe */
 public enum PivotState {
-  STOW(0.0, false),
-  TEST(0.5, false),
+  STOW(0.35, false),
+  SCORE(0.3, true),
+  INTAKE(0.25, true),
+  L1(0.3, true),
+  ALGAE(0.05, true),
   MOVING(999, false);
 
   private final double posRotations;

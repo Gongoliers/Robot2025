@@ -34,5 +34,8 @@ public class ElevatorPositionControllerSim implements ElevatorPositionController
   }
 
   @Override
+  public void setDisabled(boolean disabled) {}
+
+  @Override
   public void periodic() {}
 }

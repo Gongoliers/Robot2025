@@ -84,7 +84,6 @@ public class Intake extends Subsystem {
     timeOfFlight = IntakeFactory.createTimeOfFlightSensor();
     timeOfFlight.configure();
     timeOfFlight.setBeambreakThreshold(0.1);
-    timeOfFlight.beamBroken().onTrue(Commands.runOnce(() -> setTargetState(IntakeState.STOP)));
 
     targetState = IntakeState.STOP;
     currentState = IntakeState.STOP;
@@ -152,5 +151,9 @@ public class Intake extends Subsystem {
 
   public boolean atTargetState() {
     return currentState == targetState;
+  }
+
+  public boolean beamBroken() {
+    return timeOfFlightValues.beamBroken;
   }
 }

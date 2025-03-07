@@ -68,6 +68,13 @@ public interface ElevatorPositionController {
    */
   public void setSetpoint(double posMeters, double velMetersPerSec);
 
+  /**
+   * True disables the elevator motors to conserve energy and prevent stator heat from building too high from constant stall
+   * 
+   * @param disabled whether or not the elevator motors should be disabled
+   */
+  public void setDisabled(boolean disabled);
+
   /** Called every periodic loop */
   public void periodic();
 }

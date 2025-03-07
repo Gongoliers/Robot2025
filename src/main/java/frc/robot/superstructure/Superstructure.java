@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Subsystem;
+import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
 import frc.robot.intake.Intake;
@@ -27,6 +28,9 @@ public class Superstructure extends Subsystem {
   /** Intake reference */
   private final Intake intake;
 
+  /** Auto reference */
+  private final Auto auto;
+
   /** Superstructure Mechanism2d visualization */
   private SuperstructureMechanism mechanism;
 
@@ -35,6 +39,7 @@ public class Superstructure extends Subsystem {
     elevator = Elevator.getInstance();
     pivot = Pivot.getInstance();
     intake = Intake.getInstance();
+    auto = Auto.getInstance();
 
     mechanism = new SuperstructureMechanism(elevator::getPosMeters, pivot::getPosRotations);
   }
@@ -89,7 +94,7 @@ public class Superstructure extends Subsystem {
    */
   public Command pivotTo(PivotState targetState) {
     return Commands.runOnce(() -> {
-      if (elevator.getState() == ElevatorState.STOW) {
+      if (elevator.getState() == ElevatorState.STOW || targetState.isSafe()) {
         pivot.setTargetState(targetState);
       }
     }).andThen(Commands.waitUntil(pivot::atTargetState));
@@ -104,10 +109,15 @@ public class Superstructure extends Subsystem {
   public Command elevatorTo(ElevatorState targetState) {
     return Commands
       .runOnce(() -> {
-        if (pivot.getState().isSafe()) {
+        if (pivot.getState().isUnsafe()) {
+          pivot.setTargetState(PivotState.SCORE);
+        }
+      }).andThen(Commands.waitUntil(elevator::atTargetState))
+      .andThen(
+        () -> {
           elevator.setTargetState(targetState);
         }
-      }).andThen(Commands.waitUntil(elevator::atTargetState));
+      ).andThen(Commands.waitUntil(elevator::atTargetState));
   }
 
   /**
@@ -121,5 +131,45 @@ public class Superstructure extends Subsystem {
       .runOnce(() -> {
         intake.setTargetState(targetState);
       });
+  }
+
+  /**
+   * Returns a command that moves the superstructure to some superstructure state
+   * 
+   * @param targetState target superstructure state
+   * @return a command that moves the superstructure to some superstructure state
+   */
+  public Command superstructureTo(SuperstructureState targetState) {
+    return elevatorTo(targetState.getElevatorState())
+      .andThen(pivotTo(targetState.getPivotState()));
+  }
+
+  /**
+   * Returns a command that intakes coral from the coral station
+   * 
+   * @return a command that intakes coral from the coral station
+   */
+  public Command intakeCoral() {
+    return superstructureTo(SuperstructureState.INTAKE)
+      .alongWith(intakeTo(IntakeState.CORALIN))
+      .andThen(Commands.waitUntil(intake::beamBroken))
+      .andThen(superstructureTo(SuperstructureState.STOW))
+      .alongWith(intakeTo(IntakeState.STOP));
+  }
+
+  /**
+   * Returns a command that automatically scores coral at some superstructure state
+   * 
+   * @param scoreState superstructure state to score at (only uses L1, L2, L3, L4)
+   * @return a command that automatically scores coral at some superstructure state
+   */
+  public Command autoScore(SuperstructureState scoreState) {
+    return superstructureTo(scoreState) //TODO: CLEAN UP THIS GODAWFUL COMMAND
+      .alongWith(auto.pathfindToRecentTarget(0.1))
+      .andThen(intakeTo(IntakeState.CORALIN))
+      .andThen(Commands.waitSeconds(1.5))
+      .andThen(auto.pathfindToRecentTarget(0.6)
+        .alongWith(intakeTo(IntakeState.STOP))
+        .alongWith(superstructureTo(SuperstructureState.STOW)));
   }
 }

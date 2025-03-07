@@ -1,25 +1,23 @@
 package frc.robot.elevator;
 
 public enum ElevatorState {
-  STOW(0, 0),
-  L2(0.25, 0),
-  L3(0.635, 0),
-  L4(1.05, 0),
-  MOVING(999, 999);
+  STOW(0),
+  INTAKE(0.03),
+  L1(0.1),
+  L2(0.25),
+  L3(0.635),
+  L4(1.05),
+  ALGAE1(0.175),
+  ALGAE2(0.4),
+  MOVING(999);
 
   private final double posMeters;
-  private final double velMetersPerSec;
 
-  ElevatorState(double posMeters, double velMetersPerSec) {
+  ElevatorState(double posMeters) {
     this.posMeters = posMeters;
-    this.velMetersPerSec = velMetersPerSec;
   }
 
   public double getPosMeters() {
     return posMeters;
-  }
-
-  public double getVelMetersPerSec() {
-    return velMetersPerSec;
   }
 }

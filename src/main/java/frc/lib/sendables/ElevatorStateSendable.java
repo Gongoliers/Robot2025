@@ -26,6 +26,5 @@ public class ElevatorStateSendable implements Sendable {
 
     builder.addStringProperty("Name", () -> stateSupplier.get().name(), null);
     builder.addDoubleProperty("Pos (m)", () -> stateSupplier.get().getPosMeters(), null);
-    builder.addDoubleProperty("Vel (mps)", () -> stateSupplier.get().getVelMetersPerSec(), null);
   }
 }

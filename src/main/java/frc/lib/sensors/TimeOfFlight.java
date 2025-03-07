@@ -37,13 +37,6 @@ public interface TimeOfFlight {
    */
   public void setBeambreakThreshold(double distanceMeters);
 
-  /**
-   * Returns a trigger that is triggered when the distance is less than the beambreak threshold
-   * 
-   * @return a trigger that is triggered when the distance is less than the beambreak threshold
-   */
-  public Trigger beamBroken();
-
   /** Called every periodic loop */
   public void periodic();
 }
