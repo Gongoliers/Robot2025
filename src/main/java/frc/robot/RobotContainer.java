@@ -103,17 +103,9 @@ public class RobotContainer {
     operatorController.leftBumper().onTrue(pivot.zero());
     operatorController.rightBumper().onTrue(elevator.zero());    
 
-    operatorController.a().onTrue(superstructure.elevatorTo(ElevatorState.STOW));
-    operatorController.b().onTrue(superstructure.elevatorTo(ElevatorState.L2));
-    operatorController.x().onTrue(superstructure.elevatorTo(ElevatorState.L3));
-
-    operatorController.y().onTrue(superstructure.pivotTo(PivotState.TEST));
-    operatorController.leftTrigger().onTrue(superstructure.pivotTo(PivotState.STOW));
-    operatorController.rightTrigger().onTrue(superstructure.pivotTo(PivotState.TEST));
-
-    operatorController.povDown().onTrue(Commands.runOnce(() -> intake.setTargetState(IntakeState.CORALIN)));
-    operatorController.povUp().onTrue(Commands.runOnce(() -> intake.setTargetState(IntakeState.CORALOUT)));
-    operatorController.povLeft().onTrue(Commands.runOnce(() -> intake.setTargetState(IntakeState.STOP)));
+    operatorController.a().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.STOW)));
+    operatorController.b().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.L2)));
+    operatorController.x().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.L3)));
   }
 
   public Command getAutonomousCommand() {

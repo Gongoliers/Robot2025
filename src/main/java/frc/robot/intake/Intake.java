@@ -30,10 +30,10 @@ public class Intake extends Subsystem {
   private final TimeOfFlight timeOfFlight;
 
   /** Intake motor values */
-  private VelocityControllerValues motorValues;
+  private VelocityControllerValues motorValues = new VelocityControllerValues();
 
   /** Time of flight sensor values */
-  private TimeOfFlightValues timeOfFlightValues;
+  private TimeOfFlightValues timeOfFlightValues = new TimeOfFlightValues();
 
   /** Target state */
   private IntakeState targetState;
@@ -56,12 +56,12 @@ public class Intake extends Subsystem {
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
           .kA(0.0)
-          .kS(0.161)
-          .kV(0.25)
+          .kS(0.0)
+          .kV(0.0)
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(0.2)
+          .kP(0)
           .kI(0.0)
           .kD(0.0)
           .build())
@@ -83,7 +83,7 @@ public class Intake extends Subsystem {
 
     timeOfFlight = IntakeFactory.createTimeOfFlightSensor();
     timeOfFlight.configure();
-    timeOfFlight.setBeambreakThreshold(0.2);
+    timeOfFlight.setBeambreakThreshold(0.1);
     timeOfFlight.beamBroken().onTrue(Commands.runOnce(() -> setTargetState(IntakeState.STOP)));
 
     targetState = IntakeState.STOP;

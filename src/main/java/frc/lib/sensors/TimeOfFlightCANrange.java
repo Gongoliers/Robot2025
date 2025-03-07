@@ -34,6 +34,7 @@ public class TimeOfFlightCANrange implements TimeOfFlight {
 
   @Override
   public void getUpdatedVals(TimeOfFlightValues values) {
+    BaseStatusSignal.refreshAll(distance);
     values.distanceMeters = distance.getValueAsDouble();
     values.beamBroken = values.distanceMeters < beambreakThresholdMeters;
   }

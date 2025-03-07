@@ -20,7 +20,8 @@ public class ElevatorFactory {
         config,
         false,
         false,
-        0.035 * Math.PI * 2);
+        0.03637 * Math.PI * 3)
+        ;
     }
 
     return new ElevatorPositionControllerSim();

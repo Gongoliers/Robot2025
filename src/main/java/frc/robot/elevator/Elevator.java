@@ -51,26 +51,27 @@ public class Elevator extends Subsystem {
     MechanismBuilder.defaults()
       .motorConfig(
         MotorBuilder.defaults()
-          .motorToMechRatio(7.5)
-          .ccwPositive(true)
+          .motorToMechRatio(5)
+          .ccwPositive(false)
+          .statorCurrentLimit(120)
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(6)
+          .kP(0)
           .kI(0)
           .kD(0)
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
-          .kA(2)
-          .kG(0.3345)
-          .kS(0.1445)
-          .kV(3.5)
+          .kA(0)
+          .kG(0.9995)
+          .kS(0.41)
+          .kV(1.5)
           .build())
       .motionProfileConfig(
         MotionProfileBuilder.defaults()
-          .maxVelocity(1.5)
-          .maxAcceleration(4)
+          .maxVelocity(1)
+          .maxAcceleration(2)
           .build())
       .build();
 
@@ -78,7 +79,7 @@ public class Elevator extends Subsystem {
   private Elevator() {
     motor = ElevatorFactory.createDriveMotor(config);
     motor.configure();
-    motor.setElevatorPos((Robot.isReal()) ? -0.025 : 0.0); // compensate for play on start if real 
+    motor.setElevatorPos(-0.03); // account for some slack
 
     targetState = ElevatorState.STOW;
     currentState = ElevatorState.STOW;
