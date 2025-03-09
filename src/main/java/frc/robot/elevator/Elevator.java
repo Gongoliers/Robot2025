@@ -60,20 +60,20 @@ public class Elevator extends Subsystem {
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(0)
+          .kP(16)
           .kI(0)
           .kD(0)
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
-          .kA(0)
+          .kA(0.5)
           .kG(0.9995)
           .kS(0.41)
-          .kV(1.5)
+          .kV(0.3)
           .build())
       .motionProfileConfig(
         MotionProfileBuilder.defaults()
-          .maxVelocity(1)
+          .maxVelocity(1.5)
           .maxAcceleration(2)
           .build())
       .build();
@@ -82,7 +82,7 @@ public class Elevator extends Subsystem {
   private Elevator() {
     motor = ElevatorFactory.createDriveMotor(config);
     motor.configure();
-    motor.setElevatorPos(-0.03); // account for some slack
+    motor.setElevatorPos(0.0);
 
     targetState = ElevatorState.STOW;
     currentState = ElevatorState.STOW;
@@ -92,7 +92,7 @@ public class Elevator extends Subsystem {
     idealPosMeters = 0.0;
     idealVelMetersPerSec = 0.0;
 
-    stateTolerance = 0.02;
+    stateTolerance = 0.04;
 
     motionProfile = config.motionProfileConfig().createTrapezoidProfile();
   }
@@ -155,7 +155,7 @@ public class Elevator extends Subsystem {
       currentState = ElevatorState.MOVING;
     }
 
-    motor.setDisabled(currentState == ElevatorState.STOW);
+    motor.setDisabled(targetState == ElevatorState.STOW && motorValues.posMeters <= 0.03);
     motor.periodic();
   }
 

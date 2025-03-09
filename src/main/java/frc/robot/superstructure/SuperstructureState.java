@@ -13,7 +13,7 @@ public enum SuperstructureState {
   L1(ElevatorState.L1, PivotState.L1),
   L2(ElevatorState.L2, PivotState.SCORE),
   L3(ElevatorState.L3, PivotState.SCORE),
-  L4(ElevatorState.L4, PivotState.SCORE),
+  L4(ElevatorState.L4, PivotState.SCOREL4),
   ALGAE1(ElevatorState.ALGAE1, PivotState.ALGAE),
   ALGAE2(ElevatorState.ALGAE2, PivotState.ALGAE);
 

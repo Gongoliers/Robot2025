@@ -69,8 +69,8 @@ public class Auto extends Subsystem {
     AutoBuilder.configure(
       odometry::getPosition, 
       odometry::setPosition, 
-      swerve::getChassisSpeeds, 
-      (speeds, feedforwards) -> swerve.setChassisSpeeds(speeds), 
+      swerve::getRobotRelativeChassisSpeeds,
+      (speeds, feedforwards) -> swerve.setRobotRelativeChassisSpeeds(speeds), 
       new PPHolonomicDriveController(
         new PIDConstants(5, 0, 0), 
         new PIDConstants(5, 0, 0)), 
@@ -90,8 +90,7 @@ public class Auto extends Subsystem {
   }
 
   private void configureAutoCommands() {
-    new EventTrigger("BEGIN PATH").onTrue(Commands.runOnce(() -> AutoCoordinator.setIsTeleAuto(true)));
-    new EventTrigger("END PATH").onTrue(Commands.runOnce(() -> AutoCoordinator.setIsTeleAuto(false)));
+
   }
 
   @Override
@@ -141,10 +140,9 @@ public class Auto extends Subsystem {
           targetPose.getTranslation().minus(currentPose.getTranslation()).getAngle()),
         targetPose);
 
-      PathConstraints constraints = new PathConstraints(2, 4, 2*Math.PI, 4*Math.PI);
+      PathConstraints constraints = new PathConstraints(1, 2, 1*Math.PI, 2*Math.PI);
 
       PathPlannerPath path = new PathPlannerPath(waypoints, constraints, null, new GoalEndState(0.0, targetPose.getRotation()));
-      path.preventFlipping = true;
 
       return AutoBuilder.followPath(path);
     };

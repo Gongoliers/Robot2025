@@ -57,20 +57,20 @@ public class Pivot extends Subsystem{
     MechanismBuilder.defaults()
       .motorConfig(
         MotorBuilder.defaults()
-          .ccwPositive(true)
-          .motorToMechRatio((58/10)*(58/18)*(30/12))
+          .ccwPositive(false)
+          .motorToMechRatio(25*(58/30)*(42/12)*2)
           .statorCurrentLimit(50)
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
-          .kA(0)
-          .kG(0)
-          .kS(0)
-          .kV(0)
+          .kA(1)
+          .kG(0.1789)
+          .kS(0.0605)
+          .kV(2.8)
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(0)
+          .kP(18)
           .kI(0.0)
           .kD(0.0)
           .build())
@@ -99,13 +99,13 @@ public class Pivot extends Subsystem{
 
     targetState = PivotState.STOW;
     currentState = PivotState.STOW;
-    stateTolerance = 0.01;
+    stateTolerance = 0.03;
 
     profiledSetpoint = new TrapezoidProfile.State();
     idealPosRotations = 0.0;
     idealVelRotationsPerSec = 0.0;
 
-    motor.setPos(0.0);
+    motor.setPos(0.34);
   }
 
   @Override

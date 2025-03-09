@@ -96,25 +96,25 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.y().onTrue(odometry.setYaw(0.0));
 
-    driverController.povLeft().onTrue(auto.pathfindToTarget(ReefTarget.LEFT, 0.05).andThen(Commands.print("worked")));
-    driverController.povUp().onTrue(auto.pathfindToTarget(ReefTarget.CENTER, 0.05).andThen(Commands.print("worked")));
-    driverController.povRight().onTrue(auto.pathfindToTarget(ReefTarget.RIGHT, 0.05).andThen(Commands.print("worked")));
+    //driverController.povLeft().onTrue(auto.pathfindToTarget(ReefTarget.LEFT, 0.05).andThen(Commands.print("worked")));
+    //driverController.povUp().onTrue(auto.pathfindToTarget(ReefTarget.CENTER, 0.05).andThen(Commands.print("worked")));
+    //driverController.povRight().onTrue(auto.pathfindToTarget(ReefTarget.RIGHT, 0.05).andThen(Commands.print("worked")));
 
-    //driverController.a().onTrue(odometry.trustVisionMeasurement("limelight-north"));
+    driverController.a().onTrue(odometry.trustVisionMeasurement("limelight-north"));  
 
-    operatorController.leftBumper().onTrue((pivot.zero()));
-    operatorController.rightBumper().onTrue(elevator.zero());    
+    operatorController.a().onTrue(superstructure.superstructureTo(SuperstructureState.STOW));
+    operatorController.b().onTrue(superstructure.superstructureTo(SuperstructureState.L1));
+    operatorController.x().onTrue(superstructure.superstructureTo(SuperstructureState.L2));
+    operatorController.y().onTrue(superstructure.superstructureTo(SuperstructureState.L3));
+    operatorController.rightBumper().onTrue(superstructure.superstructureTo(SuperstructureState.L4));
 
-    operatorController.leftTrigger().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
+    operatorController.leftStick().onTrue(superstructure.superstructureTo(SuperstructureState.ALGAE1));
+    operatorController.rightStick().onTrue(superstructure.superstructureTo(SuperstructureState.ALGAE2));
 
-    /*
-    operatorController.a().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.STOW)));
-    operatorController.b().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.L2)));
-    operatorController.x().onTrue(Commands.runOnce(() -> elevator.setTargetState(ElevatorState.L3)));
-    */
-
-    operatorController.a().onTrue(auto.pathfindToTarget(ReefTarget.LEFT, 0.6));
-    operatorController.b().onTrue(superstructure.autoScore(SuperstructureState.L2));
+    operatorController.povLeft().onTrue(superstructure.intakeCoral());
+    operatorController.povRight().whileTrue(superstructure.intakeTo(IntakeState.CORALINFAST));
+    operatorController.povUp().whileTrue(superstructure.intakeTo(IntakeState.CORALOUT));
+    operatorController.povDown().onTrue(superstructure.intakeTo(IntakeState.STOP));
   }
 
   public Command getAutonomousCommand() {
@@ -123,5 +123,5 @@ public class RobotContainer {
     }
 
     return Commands.print("Auto disabled");
-  }
+  } 
 }

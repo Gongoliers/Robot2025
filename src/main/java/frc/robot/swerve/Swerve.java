@@ -73,7 +73,7 @@ public class Swerve extends Subsystem {
       .motorConfig(
         MotorBuilder.defaults()
           .ccwPositive(false)
-          .motorToMechRatio(6.75)
+          .motorToMechRatio(6.12)
           .statorCurrentLimit(50.0)
           .build())
       .feedforwardControllerConfig(
@@ -217,6 +217,15 @@ public class Swerve extends Subsystem {
   }
 
   /**
+   * Returns robot relative chassis speeds
+   * 
+   * @return robot relative chassis speeds
+   */
+  public ChassisSpeeds getRobotRelativeChassisSpeeds() {
+    return ChassisSpeeds.fromFieldRelativeSpeeds(getChassisSpeeds(), Odometry.getInstance().getFieldRelativeHeading());
+  }
+
+  /**
    * Sets module setpoints given desired chassis speeds
    * 
    * @param speeds chassis speeds
@@ -227,6 +236,15 @@ public class Swerve extends Subsystem {
     SwerveModuleState[] setpoints = swerveKinematics.toSwerveModuleStates(speeds);
 
     setSetpoints(setpoints, true);
+  }
+
+  /**
+   * Sets robot relative chassis speeds
+   * 
+   * @param speeds chassis speeds
+   */
+  public void setRobotRelativeChassisSpeeds(ChassisSpeeds speeds) {
+    setChassisSpeeds(ChassisSpeeds.fromRobotRelativeSpeeds(speeds, Odometry.getInstance().getFieldRelativeHeading()));
   }
 
   /**
@@ -294,9 +312,8 @@ public class Swerve extends Subsystem {
           xAccelerationLimiter.calculate(chassisSpeeds.vxMetersPerSecond),
           yAccelerationLimiter.calculate(chassisSpeeds.vyMetersPerSecond),
           Units.rotationsToRadians(
-            rotationAccelerationLimiter.calculate(
               rotationVelocityLimiter.apply(
-                Units.radiansToRotations(chassisSpeeds.omegaRadiansPerSecond)))));
+                Units.radiansToRotations(chassisSpeeds.omegaRadiansPerSecond))));
       };
 
     final Function<DriveRequest, ChassisSpeeds> chassisSpeedsGetter =

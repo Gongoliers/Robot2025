@@ -110,7 +110,7 @@ public class Superstructure extends Subsystem {
     return Commands
       .runOnce(() -> {
         if (pivot.getState().isUnsafe()) {
-          pivot.setTargetState(PivotState.SCORE);
+          pivot.setTargetState(PivotState.ALGAE);
         }
       }).andThen(Commands.waitUntil(elevator::atTargetState))
       .andThen(
@@ -140,8 +140,22 @@ public class Superstructure extends Subsystem {
    * @return a command that moves the superstructure to some superstructure state
    */
   public Command superstructureTo(SuperstructureState targetState) {
-    return elevatorTo(targetState.getElevatorState())
-      .andThen(pivotTo(targetState.getPivotState()));
+    return Commands
+      .runOnce(() -> {
+        if (pivot.getState().isUnsafe()) {
+          pivot.setTargetState(PivotState.SAFE);
+        }
+      }).andThen(Commands.waitUntil(pivot::atTargetState))
+      .andThen(
+        () -> {
+          elevator.setTargetState(targetState.getElevatorState());
+        }
+      ).andThen(Commands.waitUntil(elevator::atTargetState))
+      .andThen(
+        () -> {
+          pivot.setTargetState(targetState.getPivotState());
+        }
+      ).andThen(Commands.waitUntil(pivot::atTargetState));
   }
 
   /**
@@ -150,11 +164,21 @@ public class Superstructure extends Subsystem {
    * @return a command that intakes coral from the coral station
    */
   public Command intakeCoral() {
-    return superstructureTo(SuperstructureState.INTAKE)
-      .alongWith(intakeTo(IntakeState.CORALIN))
-      .andThen(Commands.waitUntil(intake::beamBroken))
-      .andThen(superstructureTo(SuperstructureState.STOW))
-      .alongWith(intakeTo(IntakeState.STOP));
+    return Commands.parallel(
+        superstructureTo(SuperstructureState.INTAKE),
+        intakeTo(IntakeState.CORALIN))
+      .andThen(Commands.waitUntil(() -> intake.beamBroken() || elevator.getState() == ElevatorState.STOW))
+      .andThen(Commands.waitSeconds(0.01))
+      .andThen(Commands.parallel(
+        superstructureTo(SuperstructureState.STOW),
+        intakeTo(IntakeState.STOP)
+      ))
+      .andThen(Commands.waitUntil(() -> atTargetStates() 
+        && pivot.getState() == PivotState.STOW 
+        && elevator.getState() == ElevatorState.STOW))
+      .andThen(intakeTo(IntakeState.CORALOUT))
+      .andThen(Commands.waitSeconds(0.5))
+      .andThen(intakeTo(IntakeState.STOP));
   }
 
   /**

@@ -30,5 +30,5 @@ public class RobotConstants {
   /** Enabled subsystems */
   public static final Set<Subsystem> ENABLED_SUBSYSTEMS =
     EnumSet.of(
-      Subsystem.SWERVE, Subsystem.ODOMETRY, Subsystem.LIMELIGHT, Subsystem.ELEVATOR, Subsystem.PIVOT, Subsystem.INTAKE, Subsystem.SUPERSTRUCTURE, Subsystem.AUTO);
+      Subsystem.SWERVE, Subsystem.ODOMETRY, Subsystem.ELEVATOR, Subsystem.PIVOT, Subsystem.INTAKE, Subsystem.SUPERSTRUCTURE, Subsystem.AUTO);
 }

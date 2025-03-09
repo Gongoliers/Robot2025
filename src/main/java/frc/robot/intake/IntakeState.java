@@ -2,8 +2,10 @@ package frc.robot.intake;
 
 public enum IntakeState {
   STOP(0),
-  CORALIN(22),
-  CORALOUT(-22),
+  CORALIN(12),
+  CORALOUT(-26),
+  CORALINFAST(32),
+  CORALOUTFAST(-32),  
   NONE(999);
 
   private final double velRotationsPerSec;

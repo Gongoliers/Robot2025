@@ -49,19 +49,19 @@ public class Intake extends Subsystem {
     MechanismBuilder.defaults()
       .motorConfig(
         MotorBuilder.defaults()
-          .ccwPositive(false)
-          .motorToMechRatio(32/12)
+          .ccwPositive(true)
+          .motorToMechRatio(24/12)
           .statorCurrentLimit(20)
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
           .kA(0.0)
           .kS(0.0)
-          .kV(0.0)
+          .kV(0.3)
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(0)
+          .kP(0.25)
           .kI(0.0)
           .kD(0.0)
           .build())
