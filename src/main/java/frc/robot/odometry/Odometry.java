@@ -71,17 +71,17 @@ public class Odometry extends Subsystem {
     poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
 
     limelights = OdometryFactory.createLimelights();
-    limelights.addLimelight("limelight-north", 
+    /*limelights.addLimelight("limelight-north", 
       0.3302,
       -0.22225,
       0.219075,
       0,
       0,
-      0);
+      0);*/
     limelights.addLimelight("limelight-south",
-      -0.3302,
+      -0.3048,
       0.0127,
-      0.22225,
+      1.019175,
       0,
       0,
       180);
@@ -193,6 +193,16 @@ public class Odometry extends Subsystem {
       Rotation2d.fromRotations(gyroscopeValues.yawRotations), 
       modulePositionsSupplier.get(), 
       position);
+  }
+
+  public void forcePosition(Pose2d position) {
+    poseEstimator.resetPosition(
+      position.getRotation(),
+      modulePositionsSupplier.get(),
+      position
+    );
+
+    setRotation(position.getRotation());
   }
 
   /**

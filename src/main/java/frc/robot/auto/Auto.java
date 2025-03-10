@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -27,7 +28,10 @@ import frc.lib.Subsystem;
 import frc.lib.targetting.FieldTargetSupplier;
 import frc.lib.targetting.ReefTarget;
 import frc.robot.RobotConstants;
+import frc.robot.intake.IntakeState;
 import frc.robot.odometry.Odometry;
+import frc.robot.superstructure.Superstructure;
+import frc.robot.superstructure.SuperstructureState;
 import frc.robot.swerve.Swerve;
 
 /** Subsystem that handles all auto driving */
@@ -60,7 +64,7 @@ public class Auto extends Subsystem {
     odometry = Odometry.getInstance();
     swerve = Swerve.getInstance();
 
-    try {
+    try { 
       config = RobotConfig.fromGUISettings();
     } catch (Exception e) {
       e.printStackTrace();
@@ -70,10 +74,10 @@ public class Auto extends Subsystem {
       odometry::getPosition, 
       odometry::setPosition, 
       swerve::getRobotRelativeChassisSpeeds,
-      (speeds, feedforwards) -> swerve.setRobotRelativeChassisSpeeds(speeds), 
+      (speeds, feedforwards) -> swerve.setChassisSpeeds(speeds), 
       new PPHolonomicDriveController(
         new PIDConstants(5, 0, 0), 
-        new PIDConstants(5, 0, 0)), 
+        new PIDConstants(5, 0, 0)),
       config, 
       () -> {
         var alliance = DriverStation.getAlliance();
@@ -90,7 +94,25 @@ public class Auto extends Subsystem {
   }
 
   private void configureAutoCommands() {
+    System.out.println("did it");
+    final Superstructure superstructure = Superstructure.getInstance();
 
+    new EventTrigger("Score L4").onTrue(
+      Commands.print("doing L4")
+      .andThen(superstructure.superstructureTo(SuperstructureState.L4))
+      .andThen(superstructure.intakeTo(IntakeState.CORALINFAST))
+      .andThen(Commands.waitSeconds(0.7))
+      .andThen(superstructure.intakeTo(IntakeState.STOP))
+      .andThen(superstructure.superstructureTo(SuperstructureState.STOW))
+    );
+
+    new EventTrigger("Test L4").onTrue(
+      superstructure.superstructureTo(SuperstructureState.L4)
+    );
+
+    new EventTrigger("Intake").onTrue(
+      superstructure.intakeCoral()
+    );
   }
 
   @Override
@@ -104,7 +126,7 @@ public class Auto extends Subsystem {
 
   @Override
   public void periodic() {
-    
+
   }
 
   /** Get autonomous command selected by auto chooser */
@@ -143,6 +165,7 @@ public class Auto extends Subsystem {
       PathConstraints constraints = new PathConstraints(1, 2, 1*Math.PI, 2*Math.PI);
 
       PathPlannerPath path = new PathPlannerPath(waypoints, constraints, null, new GoalEndState(0.0, targetPose.getRotation()));
+      path.preventFlipping = true;
 
       return AutoBuilder.followPath(path);
     };

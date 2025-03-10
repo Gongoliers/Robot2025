@@ -3,25 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.2885245901639335,
-        "y": 4.030993852459016
+        "x": 5.849999999999999,
+        "y": 4.198821721311475
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.702725409836064,
-        "y": 4.022762295081968
+        "x": 6.737090163934425,
+        "y": 5.145850409836065
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.8619877049180324,
-        "y": 4.186834016393442
+        "x": 4.60327868852459,
+        "y": 6.704252049180327
       },
       "prevControl": {
-        "x": 6.401434426229507,
-        "y": 4.178602459016394
+        "x": 5.754098360655737,
+        "y": 6.6563012295081965
+      },
+      "nextControl": {
+        "x": 4.0184131284426705,
+        "y": 6.728621447517073
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.67827868852459,
+        "y": 7.303637295081967
+      },
+      "prevControl": {
+        "x": 2.2536885245901637,
+        "y": 6.104866803278688
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +49,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Score L4",
-      "waypointRelativePos": 1.0,
+      "name": "Intake",
+      "waypointRelativePos": 1.5232950708980428,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -49,13 +65,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 179.69572018974378
+    "rotation": 130.3141001604973
   },
   "reversed": false,
   "folder": "MS",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.7430699754965
+    "rotation": -178.78970583107878
   },
   "useDefaultConstraints": true
 }

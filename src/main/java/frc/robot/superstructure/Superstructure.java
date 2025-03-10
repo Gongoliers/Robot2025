@@ -28,9 +28,6 @@ public class Superstructure extends Subsystem {
   /** Intake reference */
   private final Intake intake;
 
-  /** Auto reference */
-  private final Auto auto;
-
   /** Superstructure Mechanism2d visualization */
   private SuperstructureMechanism mechanism;
 
@@ -39,7 +36,6 @@ public class Superstructure extends Subsystem {
     elevator = Elevator.getInstance();
     pivot = Pivot.getInstance();
     intake = Intake.getInstance();
-    auto = Auto.getInstance();
 
     mechanism = new SuperstructureMechanism(elevator::getPosMeters, pivot::getPosRotations);
   }
@@ -188,6 +184,8 @@ public class Superstructure extends Subsystem {
    * @return a command that automatically scores coral at some superstructure state
    */
   public Command autoScore(SuperstructureState scoreState) {
+    final Auto auto = Auto.getInstance();
+    
     return superstructureTo(scoreState) //TODO: CLEAN UP THIS GODAWFUL COMMAND
       .alongWith(auto.pathfindToRecentTarget(0.1))
       .andThen(intakeTo(IntakeState.CORALIN))

@@ -111,7 +111,7 @@ public class RobotContainer {
     operatorController.leftStick().onTrue(superstructure.superstructureTo(SuperstructureState.ALGAE1));
     operatorController.rightStick().onTrue(superstructure.superstructureTo(SuperstructureState.ALGAE2));
 
-    operatorController.povLeft().onTrue(superstructure.intakeCoral());
+    operatorController.povLeft().onTrue(superstructure.pivotTo(PivotState.FLOORALGAE));
     operatorController.povRight().whileTrue(superstructure.intakeTo(IntakeState.CORALINFAST));
     operatorController.povUp().whileTrue(superstructure.intakeTo(IntakeState.CORALOUT));
     operatorController.povDown().onTrue(superstructure.intakeTo(IntakeState.STOP));

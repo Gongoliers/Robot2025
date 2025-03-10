@@ -72,7 +72,7 @@ public class Swerve extends Subsystem {
     MechanismBuilder.defaults()
       .motorConfig(
         MotorBuilder.defaults()
-          .ccwPositive(false)
+          .ccwPositive(true)
           .motorToMechRatio(6.12)
           .statorCurrentLimit(50.0)
           .build())

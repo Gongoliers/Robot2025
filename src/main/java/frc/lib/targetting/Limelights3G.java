@@ -3,6 +3,7 @@ package frc.lib.targetting;
 import java.util.ArrayList;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import frc.robot.odometry.Odometry;
 import frc.robot.LimelightHelpers;
 
 /** Set of limelight 3Gs */

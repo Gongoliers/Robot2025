@@ -9,6 +9,24 @@
           "data": {
             "pathName": "RS - FWD"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score L4"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 4.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RS - to intake"
+          }
         }
       ]
     }
