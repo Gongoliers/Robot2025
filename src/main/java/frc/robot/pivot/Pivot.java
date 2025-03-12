@@ -172,6 +172,10 @@ public class Pivot extends Subsystem{
     return currentState;
   }
 
+  public boolean isUnsafe() {
+	return getState().isUnsafe();
+  }
+
   /** Gets target pivot state */
   public PivotState getTargetState() {
     return targetState;

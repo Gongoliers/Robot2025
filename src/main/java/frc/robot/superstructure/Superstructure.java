@@ -1,5 +1,7 @@
 package frc.robot.superstructure;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -89,12 +91,19 @@ public class Superstructure extends Subsystem {
    * @return a command that moves the pivot to a target state if the elevator is stowed
    */
   public Command pivotTo(PivotState targetState) {
-    return Commands.runOnce(() -> {
-      if (elevator.getState() == ElevatorState.STOW || targetState.isSafe()) {
-        pivot.setTargetState(targetState);
-      }
-    }).andThen(Commands.waitUntil(pivot::atTargetState));
+    Command movePivot = run(() -> pivot.setTargetState(targetState)).until(pivot::atTargetState);
+    BooleanSupplier isSafe = () -> targetState.isSafe() || elevator.getState() == ElevatorState.STOW;
+    return Commands.either(movePivot, Commands.none(), isSafe);
   };
+
+  /**
+   * Returns a command that moves the pivot to the safe position.
+   *
+   * @return a command that moves the pivot to the safe position.
+   */
+  private Command pivotToSafe() {
+    return Commands.either(pivotTo(PivotState.SAFE), Commands.none(), pivot::isUnsafe);
+  }
 
   /**
    * Returns a command that moves the elevator to a target state if the pivot is at a safe state
@@ -103,17 +112,8 @@ public class Superstructure extends Subsystem {
    * @return a command that moves the elevator to a target state if the pivot is at a safe state
    */
   public Command elevatorTo(ElevatorState targetState) {
-    return Commands
-      .runOnce(() -> {
-        if (pivot.getState().isUnsafe()) {
-          pivot.setTargetState(PivotState.ALGAE);
-        }
-      }).andThen(Commands.waitUntil(elevator::atTargetState))
-      .andThen(
-        () -> {
-          elevator.setTargetState(targetState);
-        }
-      ).andThen(Commands.waitUntil(elevator::atTargetState));
+    Command moveElevator = run(() -> elevator.setTargetState(targetState)).until(elevator::atTargetState);
+    return pivotToSafe().andThen(moveElevator);
   }
 
   /**
@@ -123,10 +123,9 @@ public class Superstructure extends Subsystem {
    * @return a command that spins up the intake to a target state
    */
   public Command intakeTo(IntakeState targetState) {
-    return Commands
-      .runOnce(() -> {
+      return run(() -> {
         intake.setTargetState(targetState);
-      });
+      }).until(intake::atTargetState);
   }
 
   /**
@@ -136,22 +135,7 @@ public class Superstructure extends Subsystem {
    * @return a command that moves the superstructure to some superstructure state
    */
   public Command superstructureTo(SuperstructureState targetState) {
-    return Commands
-      .runOnce(() -> {
-        if (pivot.getState().isUnsafe()) {
-          pivot.setTargetState(PivotState.SAFE);
-        }
-      }).andThen(Commands.waitUntil(pivot::atTargetState))
-      .andThen(
-        () -> {
-          elevator.setTargetState(targetState.getElevatorState());
-        }
-      ).andThen(Commands.waitUntil(elevator::atTargetState))
-      .andThen(
-        () -> {
-          pivot.setTargetState(targetState.getPivotState());
-        }
-      ).andThen(Commands.waitUntil(pivot::atTargetState));
+    return elevatorTo(targetState.getElevatorState()).andThen(pivotTo(targetState.getPivotState()));
   }
 
   /**
@@ -160,21 +144,23 @@ public class Superstructure extends Subsystem {
    * @return a command that intakes coral from the coral station
    */
   public Command intakeCoral() {
-    return Commands.parallel(
-        superstructureTo(SuperstructureState.INTAKE),
-        intakeTo(IntakeState.CORALIN))
-      .andThen(Commands.waitUntil(() -> intake.beamBroken() || elevator.getState() == ElevatorState.STOW))
-      .andThen(Commands.waitSeconds(0.01))
-      .andThen(Commands.parallel(
-        superstructureTo(SuperstructureState.STOW),
-        intakeTo(IntakeState.STOP)
-      ))
-      .andThen(Commands.waitUntil(() -> atTargetStates() 
-        && pivot.getState() == PivotState.STOW 
-        && elevator.getState() == ElevatorState.STOW))
-      .andThen(intakeTo(IntakeState.CORALOUT))
-      .andThen(Commands.waitSeconds(0.5))
-      .andThen(intakeTo(IntakeState.STOP));
+    Command toIntake = Commands.parallel(
+            superstructureTo(SuperstructureState.INTAKE),
+            intakeTo(IntakeState.CORALIN)
+        );
+
+    BooleanSupplier stopIntaking = () -> intake.beamBroken() || elevator.getState() == ElevatorState.STOW;
+
+    Command toStow = Commands.parallel(
+            superstructureTo(SuperstructureState.STOW),
+            intakeTo(IntakeState.STOP)
+        );
+
+    BooleanSupplier stowed = () -> atTargetStates() && pivot.getState() == PivotState.STOW && elevator.getState() == ElevatorState.STOW;
+
+    Command moveCoral = Commands.sequence(intakeTo(IntakeState.CORALOUT), Commands.waitSeconds(0.5), intakeTo(IntakeState.STOP));
+
+    return toIntake.until(stopIntaking).andThen(toStow).until(stowed).andThen(moveCoral);
   }
 
   /**
