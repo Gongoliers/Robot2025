@@ -60,6 +60,7 @@ public class Pivot extends Subsystem{
           .ccwPositive(false)
           .motorToMechRatio(25*(58/30)*(42/12)*2)
           .statorCurrentLimit(50)
+          .neutralBrake(true)
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()

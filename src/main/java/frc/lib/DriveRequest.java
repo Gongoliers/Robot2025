@@ -63,7 +63,7 @@ public record DriveRequest(
       Math.copySign(translationMagnitude * translationMagnitude, translationMagnitude);
 
     if (snipingRequested) {
-      translationMagnitude *= 0.25;
+      translationMagnitude *= 0.085;
     }
 
     Translation2d translationAxis = new Translation2d(translationMagnitude, translationDirection);
@@ -86,6 +86,10 @@ public record DriveRequest(
 
     if (rotationMode == RotationMode.SPINNING) {
       rotationVelocityAxis = headingAxis.getY();
+    }
+
+    if (snipingRequested) {
+      rotationVelocityAxis *= 0.25;
     }
 
     return new DriveRequest(

@@ -7,7 +7,7 @@ public enum PivotState {
   SCOREL4(0.16, false),
   INTAKE(0.34, false),
   FLOORALGAE(0.12, true),
-  L1(0.3, true),
+  L1(0.23, true),
   ALGAE(0.2, false),
   SAFE(0.29, true),
   MOVING(999, false);

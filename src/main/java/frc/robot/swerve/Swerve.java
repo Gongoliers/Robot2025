@@ -11,6 +11,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.DriveRequest;
 import frc.lib.Subsystem;
@@ -336,13 +337,14 @@ public class Swerve extends Subsystem {
           Odometry.getInstance().getDriverRelativeHeading());
       };
 
-    return run(
+    return Commands.run(
       () -> {
         if (!AutoCoordinator.getIsAuto()) {
           setChassisSpeeds(
             chassisSpeedsLimiter.apply(
               chassisSpeedsGetter.apply(DriveRequest.fromController(controller))));
         }
-      });
+      },
+      this);
   }
 }

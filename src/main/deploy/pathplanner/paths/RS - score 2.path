@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.240573770491803,
-        "y": 1.861219262295083
+        "x": 1.6183401639344261,
+        "y": 0.722387295081968
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.324073770491802,
-        "y": 1.8514692622950828
+        "x": 2.5893442622950817,
+        "y": 1.141956967213115
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.03483606557377,
-        "y": 2.724334016393442
+        "x": 3.8960040983606556,
+        "y": 2.736321721311475
       },
       "prevControl": {
-        "x": 5.670184426229507,
-        "y": 1.9571209016393452
+        "x": 3.4323770491803276,
+        "y": 1.8012807377049183
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "Score L4",
-      "waypointRelativePos": 0.985820391627278,
+      "waypointRelativePos": 0.9615124915597606,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -49,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 120.69972255081446
+    "rotation": 57.94152161574224
   },
   "reversed": false,
   "folder": "RS",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 53.74616226255519
   },
   "useDefaultConstraints": true
 }

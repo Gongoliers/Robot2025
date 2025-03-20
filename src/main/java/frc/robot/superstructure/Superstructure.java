@@ -164,7 +164,6 @@ public class Superstructure extends Subsystem {
         superstructureTo(SuperstructureState.INTAKE),
         intakeTo(IntakeState.CORALIN))
       .andThen(Commands.waitUntil(() -> intake.beamBroken() || elevator.getState() == ElevatorState.STOW))
-      .andThen(Commands.waitSeconds(0.01))
       .andThen(Commands.parallel(
         superstructureTo(SuperstructureState.STOW),
         intakeTo(IntakeState.STOP)
@@ -176,6 +175,30 @@ public class Superstructure extends Subsystem {
       .andThen(Commands.waitSeconds(0.5))
       .andThen(intakeTo(IntakeState.STOP));
   }
+  
+  /*
+  public Command intakeCoral() {
+    return Commands.parallel(
+        superstructureTo(SuperstructureState.INTAKE),
+        intakeTo(IntakeState.CORALINSLOW))
+      .andThen(Commands.waitUntil(() -> intake.beamBroken() || elevator.getState() == ElevatorState.STOW))
+      .andThen(Commands.either(
+        intakeTo(IntakeState.CORALIN)
+        .andThen(Commands.waitSeconds(0.05))
+        .andThen(Commands.parallel(
+          superstructureTo(SuperstructureState.STOW),
+          intakeTo(IntakeState.STOP)
+        ))
+        .andThen(Commands.waitUntil(() -> atTargetStates() 
+          && pivot.getState() == PivotState.STOW 
+          && elevator.getState() == ElevatorState.STOW))
+        .andThen(intakeTo(IntakeState.CORALOUT))
+        .andThen(Commands.waitSeconds(0.5))
+        .andThen(intakeTo(IntakeState.STOP)), // on true
+        Commands.none(), // on false
+        () -> elevator.getState() != ElevatorState.STOW)); // condition
+  }
+        */
 
   /**
    * Returns a command that automatically scores coral at some superstructure state

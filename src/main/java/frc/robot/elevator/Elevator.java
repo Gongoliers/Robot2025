@@ -57,6 +57,7 @@ public class Elevator extends Subsystem {
           .motorToMechRatio(5)
           .ccwPositive(false)
           .statorCurrentLimit(120)
+          .neutralBrake(true)
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()

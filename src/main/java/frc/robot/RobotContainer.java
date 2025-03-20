@@ -96,9 +96,15 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.y().onTrue(odometry.setYaw(0.0));
 
+    driverController.a().onTrue(odometry.trustVisionMeasurement("limelight-north"));
+
     //driverController.povLeft().onTrue(auto.pathfindToTarget(ReefTarget.LEFT, 0.05).andThen(Commands.print("worked")));
     //driverController.povUp().onTrue(auto.pathfindToTarget(ReefTarget.CENTER, 0.05).andThen(Commands.print("worked")));
     //driverController.povRight().onTrue(auto.pathfindToTarget(ReefTarget.RIGHT, 0.05).andThen(Commands.print("worked")));
+    driverController.povUp().whileTrue(auto.forward()).onFalse(auto.stop());
+    driverController.povDown().whileTrue(auto.backUp()).onFalse(auto.stop());
+    driverController.rightBumper().whileTrue(auto.right()).onFalse(auto.stop());
+    driverController.leftBumper().whileTrue(auto.left()).onFalse(auto.stop());    
 
     driverController.a().onTrue(odometry.trustVisionMeasurement("limelight-north"));  
 
@@ -111,9 +117,9 @@ public class RobotContainer {
     operatorController.leftStick().onTrue(superstructure.superstructureTo(SuperstructureState.ALGAE1));
     operatorController.rightStick().onTrue(superstructure.superstructureTo(SuperstructureState.ALGAE2));
 
-    operatorController.povLeft().onTrue(superstructure.pivotTo(PivotState.FLOORALGAE));
+    operatorController.povLeft().onTrue(superstructure.intakeCoral());
     operatorController.povRight().whileTrue(superstructure.intakeTo(IntakeState.CORALINFAST));
-    operatorController.povUp().whileTrue(superstructure.intakeTo(IntakeState.CORALOUT));
+    operatorController.povUp().whileTrue(superstructure.intakeTo(IntakeState.CORALOUTFAST));
     operatorController.povDown().onTrue(superstructure.intakeTo(IntakeState.STOP));
   }
 

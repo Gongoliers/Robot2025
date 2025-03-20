@@ -19,13 +19,25 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 4.0
+            "waitTime": 3.5
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "RS - to intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RS - score 2"
           }
         }
       ]

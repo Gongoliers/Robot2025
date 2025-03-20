@@ -18,6 +18,7 @@ import com.pathplanner.lib.path.Waypoint;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -76,7 +77,7 @@ public class Auto extends Subsystem {
       swerve::getRobotRelativeChassisSpeeds,
       (speeds, feedforwards) -> swerve.setChassisSpeeds(speeds), 
       new PPHolonomicDriveController(
-        new PIDConstants(5, 0, 0), 
+        new PIDConstants(15, 0, 0), 
         new PIDConstants(5, 0, 0)),
       config, 
       () -> {
@@ -100,6 +101,15 @@ public class Auto extends Subsystem {
     new EventTrigger("Score L4").onTrue(
       Commands.print("doing L4")
       .andThen(superstructure.superstructureTo(SuperstructureState.L4))
+      .andThen(superstructure.intakeTo(IntakeState.CORALINFAST))
+      .andThen(Commands.waitSeconds(0.7))
+      .andThen(superstructure.intakeTo(IntakeState.STOP))
+      .andThen(superstructure.superstructureTo(SuperstructureState.STOW))
+    );
+
+    new EventTrigger("Score L1").onTrue(
+      Commands.print("doing L1")
+      .andThen(superstructure.superstructureTo(SuperstructureState.L1))
       .andThen(superstructure.intakeTo(IntakeState.CORALINFAST))
       .andThen(Commands.waitSeconds(0.7))
       .andThen(superstructure.intakeTo(IntakeState.STOP))
@@ -195,5 +205,60 @@ public class Auto extends Subsystem {
    */
   public Command pathfindToRecentTarget(double safeDistance) {
     return pathfindToTarget(AutoCoordinator.getRecentReefTarget(), safeDistance);
+  }
+
+  public Command forward() {
+    return Commands.runOnce(
+      () -> {
+        AutoCoordinator.setIsTeleAuto(true);
+        swerve.setRobotRelativeChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+          0.25,
+          0.0,
+          0.0,
+          odometry.getFieldRelativeHeading()));
+      });
+  }
+
+  public Command backUp() {
+    return Commands.runOnce(
+      () -> {
+        AutoCoordinator.setIsTeleAuto(true);
+        swerve.setRobotRelativeChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+          -0.25,
+          0.0,
+          0.0,
+          odometry.getFieldRelativeHeading()));
+      });
+  }
+
+  public Command right() {
+    return Commands.runOnce(
+      () -> {
+        AutoCoordinator.setIsTeleAuto(true);
+        swerve.setRobotRelativeChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+          0.0,
+          -0.25,
+          0.0,
+          odometry.getFieldRelativeHeading()));
+      });
+  }
+
+  public Command left() {
+    return Commands.runOnce(
+      () -> {
+        AutoCoordinator.setIsTeleAuto(true);
+        swerve.setRobotRelativeChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+          0.0,
+          0.25,
+          0.0,
+          odometry.getFieldRelativeHeading()));
+      });
+  }
+
+  public Command stop() {
+    return Commands.runOnce(
+      () -> {
+        AutoCoordinator.setIsTeleAuto(false);
+      });
   }
 }
