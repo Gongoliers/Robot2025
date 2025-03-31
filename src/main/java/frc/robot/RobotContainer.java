@@ -96,17 +96,15 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.y().onTrue(odometry.setYaw(0.0));
 
-    driverController.a().onTrue(odometry.trustVisionMeasurement("limelight-north"));
-
     //driverController.povLeft().onTrue(auto.pathfindToTarget(ReefTarget.LEFT, 0.05).andThen(Commands.print("worked")));
     //driverController.povUp().onTrue(auto.pathfindToTarget(ReefTarget.CENTER, 0.05).andThen(Commands.print("worked")));
     //driverController.povRight().onTrue(auto.pathfindToTarget(ReefTarget.RIGHT, 0.05).andThen(Commands.print("worked")));
     driverController.povUp().whileTrue(auto.forward()).onFalse(auto.stop());
     driverController.povDown().whileTrue(auto.backUp()).onFalse(auto.stop());
     driverController.rightBumper().whileTrue(auto.right()).onFalse(auto.stop());
-    driverController.leftBumper().whileTrue(auto.left()).onFalse(auto.stop());    
+    driverController.leftBumper().whileTrue(auto.left()).onFalse(auto.stop());
 
-    driverController.a().onTrue(odometry.trustVisionMeasurement("limelight-north"));  
+    driverController.a().onTrue(auto.allign(ReefTarget.LEFT, 0.1));
 
     operatorController.a().onTrue(superstructure.superstructureTo(SuperstructureState.STOW));
     operatorController.b().onTrue(superstructure.superstructureTo(SuperstructureState.L1));

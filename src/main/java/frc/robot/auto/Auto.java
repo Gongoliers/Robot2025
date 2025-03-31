@@ -15,10 +15,15 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -52,6 +57,12 @@ public class Auto extends Subsystem {
 
   /** Swerve reference */
   private final Swerve swerve;
+
+  /** Translation motion profile */
+  private final TrapezoidProfile translationProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(2.0, 1.0));
+
+  /** Rotation motion profile */
+  private final TrapezoidProfile rotationProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(1.0, 0.5));
 
   public static Auto getInstance() {
     if (instance == null) {
@@ -144,67 +155,64 @@ public class Auto extends Subsystem {
     return autoChooser.getSelected();
   }
 
-  /**
-   * Gets a pathfinding command to a reef target with some safe distance
-   * 
-   * @param target field target (left right center)
-   * @param safeDistance distance in meters to keep between the target position and chassis rails
-   * @return a pathfinding command to a reef target with some safe distance
-   */
-  private static Supplier<Command> getPathingCommandSupplier(ReefTarget target, double safeDistance) {
-    return () -> {
-      Pose2d currentPose = Odometry.getInstance().getPosition();
-      Rotation2d reefFaceNormal = FieldTargetSupplier.getReefFaceNormal(currentPose);
-      Pose2d targetPose = new Pose2d(
-        new Translation2d(
-          target.getForwardOffset() + RobotConstants.CHASSIS_SIDE_LENGTH*0.0254/2 + safeDistance,
-          target.getHorizontalOffset())
-          .rotateBy(reefFaceNormal)
-          .plus(FieldTargetSupplier.getReefCenter()),
-        reefFaceNormal.rotateBy(Rotation2d.k180deg));
-
-      System.out.println(currentPose);
-      System.out.println(targetPose);
-
-      List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-        new Pose2d(
-          currentPose.getTranslation(),
-          targetPose.getTranslation().minus(currentPose.getTranslation()).getAngle()),
-        targetPose);
-
-      PathConstraints constraints = new PathConstraints(1, 2, 1*Math.PI, 2*Math.PI);
-
-      PathPlannerPath path = new PathPlannerPath(waypoints, constraints, null, new GoalEndState(0.0, targetPose.getRotation()));
-      path.preventFlipping = true;
-
-      return AutoBuilder.followPath(path);
-    };
+  /** Retruns a command that auto alligns to the nearest selected reef target if it is safe to do so */
+  public Command allign(ReefTarget target, double safeDistance) {
+    return Commands.either(
+      Commands.print("Can't allign right now"),
+      reefAllign(target, safeDistance),
+      () -> {
+        return AutoCoordinator.getIsAuto() // is currently auto
+        || FieldTargetSupplier.getSafeTranslation(odometry.getPosition(), target, safeDistance).getDistance(odometry.getPosition().getTranslation()) >= 3; // is currently too far
+      });
   }
 
-  /**
-   * Gets a command that follows a generated path to the nearest selected reef target
-   * 
-   * @param target reef target (left right center)
-   * @param safeDistance distance in meters to keep between the target and the cahssis of the robot
-   * @return a command that follows a generated path to the nearest selected reef target
-   */
-  public Command pathfindToTarget(ReefTarget target, double safeDistance) {
-    return Commands.defer(getPathingCommandSupplier(target, safeDistance), Set.of(swerve))
-      .alongWith(Commands.runOnce(() -> {
-        AutoCoordinator.setIsTeleAuto(true);
-        AutoCoordinator.setRecentReefTarget(target);;
-      }))
-      .andThen(() -> AutoCoordinator.setIsTeleAuto(false));
-  }
+  /** Returns a command that auto alligns to the nearest selected reef target */
+  public Command reefAllign(ReefTarget target, double safeDistance) {
+    return Commands.runOnce(() -> {
+      AutoCoordinator.setIsTeleAuto(true);
+      AutoCoordinator.setTargetPose(new Pose2d(
+        FieldTargetSupplier.getSafeTranslation(odometry.getPosition(), target, safeDistance),
+        FieldTargetSupplier.getReefFaceNormal(odometry.getPosition()).rotateBy(Rotation2d.k180deg)
+      ));
+    }).andThen(Commands.run(() -> {
+      Pose2d currentPose = odometry.getPosition();
+      Pose2d targetPose = AutoCoordinator.getTargetPose();
 
-  /**
-   * Gets a command that pathfinds to the most recent target
-   * 
-   * @param safeDistance distance in meters to keep between the target and the chassis of the robot
-   * @return a command that pathfinds to the most recent target
-   */
-  public Command pathfindToRecentTarget(double safeDistance) {
-    return pathfindToTarget(AutoCoordinator.getRecentReefTarget(), safeDistance);
+      Twist2d velocityTwist = odometry.getVelocity();
+      double velocity = Math.hypot(velocityTwist.dx, velocityTwist.dy);
+
+      Translation2d distanceVector = targetPose.getTranslation().minus(currentPose.getTranslation());
+      double distance = distanceVector.getNorm();
+
+      TrapezoidProfile.State targetTranslationState = translationProfile.calculate(RobotConstants.PERIODIC_DURATION,
+        new TrapezoidProfile.State(distance, -velocity),
+        new TrapezoidProfile.State(0, 0));
+
+      Translation2d targetVelocityVector = distanceVector.div(distance).times(-targetTranslationState.velocity);
+
+      TrapezoidProfile.State targetRotationState = new TrapezoidProfile.State(0, 0);
+      if (!MathUtil.isNear(0.0, currentPose.getRotation().minus(targetPose.getRotation()).getDegrees(), 1)) {
+        targetRotationState = rotationProfile.calculate(RobotConstants.PERIODIC_DURATION,
+          new TrapezoidProfile.State(currentPose.getRotation().getRotations(), Rotation2d.fromRadians(velocityTwist.dtheta).getRotations()),
+          new TrapezoidProfile.State(targetPose.getRotation().getRotations(), 0));
+      }
+
+      swerve.setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+        targetVelocityVector.getX(),
+        targetVelocityVector.getY(),
+        Rotation2d.fromRotations(targetRotationState.velocity).getRadians(),
+        currentPose.getRotation()));
+      
+    }).until(() -> {
+      Pose2d currentPose = odometry.getPosition();
+      Pose2d targetPose = AutoCoordinator.getTargetPose();
+
+      return (currentPose.getTranslation().minus(targetPose.getTranslation()).getNorm() <= 0.02
+        && MathUtil.isNear(0.0, currentPose.getRotation().minus(targetPose.getRotation()).getDegrees(), 1))
+        || !AutoCoordinator.getIsAuto();
+    }).andThen(() -> {
+      AutoCoordinator.setIsTeleAuto(false);
+    }));
   }
 
   public Command forward() {

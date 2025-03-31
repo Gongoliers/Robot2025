@@ -175,46 +175,4 @@ public class Superstructure extends Subsystem {
       .andThen(Commands.waitSeconds(0.5))
       .andThen(intakeTo(IntakeState.STOP));
   }
-  
-  /*
-  public Command intakeCoral() {
-    return Commands.parallel(
-        superstructureTo(SuperstructureState.INTAKE),
-        intakeTo(IntakeState.CORALINSLOW))
-      .andThen(Commands.waitUntil(() -> intake.beamBroken() || elevator.getState() == ElevatorState.STOW))
-      .andThen(Commands.either(
-        intakeTo(IntakeState.CORALIN)
-        .andThen(Commands.waitSeconds(0.05))
-        .andThen(Commands.parallel(
-          superstructureTo(SuperstructureState.STOW),
-          intakeTo(IntakeState.STOP)
-        ))
-        .andThen(Commands.waitUntil(() -> atTargetStates() 
-          && pivot.getState() == PivotState.STOW 
-          && elevator.getState() == ElevatorState.STOW))
-        .andThen(intakeTo(IntakeState.CORALOUT))
-        .andThen(Commands.waitSeconds(0.5))
-        .andThen(intakeTo(IntakeState.STOP)), // on true
-        Commands.none(), // on false
-        () -> elevator.getState() != ElevatorState.STOW)); // condition
-  }
-        */
-
-  /**
-   * Returns a command that automatically scores coral at some superstructure state
-   * 
-   * @param scoreState superstructure state to score at (only uses L1, L2, L3, L4)
-   * @return a command that automatically scores coral at some superstructure state
-   */
-  public Command autoScore(SuperstructureState scoreState) {
-    final Auto auto = Auto.getInstance();
-    
-    return superstructureTo(scoreState) //TODO: CLEAN UP THIS GODAWFUL COMMAND
-      .alongWith(auto.pathfindToRecentTarget(0.1))
-      .andThen(intakeTo(IntakeState.CORALIN))
-      .andThen(Commands.waitSeconds(1.5))
-      .andThen(auto.pathfindToRecentTarget(0.6)
-        .alongWith(intakeTo(IntakeState.STOP))
-        .alongWith(superstructureTo(SuperstructureState.STOW)));
-  }
 }

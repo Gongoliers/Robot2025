@@ -1,5 +1,6 @@
 package frc.robot.auto;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.targetting.ReefTarget;
 
@@ -11,6 +12,9 @@ public class AutoCoordinator {
 
   /** Most recently targetting reef target */
   private static ReefTarget recentReefTarget = ReefTarget.LEFT;
+
+  /** Saves what position is currently being targetting to prevent constant recalculation */
+  private static Pose2d currentTargetPose = new Pose2d();
 
   /** Set to true if robot is being controlled autonomously in teleop, false otherwise */
   public static void setIsTeleAuto(boolean isTeleAuto) {
@@ -30,5 +34,15 @@ public class AutoCoordinator {
   /** Get most recent reef target */
   public static ReefTarget getRecentReefTarget() {
     return AutoCoordinator.recentReefTarget;
+  }
+
+  /** Sets the current target pose to prevent constant recalculation */
+  public static void setTargetPose(Pose2d targetPose) {
+    currentTargetPose = targetPose;
+  }
+
+  /** Gets the current target pose to prevent constant recalculation */
+  public static Pose2d getTargetPose() {
+    return currentTargetPose;
   }
 }
