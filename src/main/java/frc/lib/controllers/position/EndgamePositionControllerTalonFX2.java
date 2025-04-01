@@ -18,6 +18,31 @@ import frc.lib.CAN;
 import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.appliers.TalonFXConfigApplier;
 
+
+
+
+
+
+
+
+
+/**
+ * This will almost 100% have to work differently but I have no time to test and figure stuff out, maybe mechanical advantage guy can help out
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /** TalonFX position controller for aiming the manipulator */
 public class EndgamePositionControllerTalonFX2 implements EndgamePositionController {
   
