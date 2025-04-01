@@ -22,7 +22,7 @@ public class PivotStateSendable implements Sendable {
 
   @Override
   public void initSendable(SendableBuilder builder) {
-    builder.setSmartDashboardType("ElevatorState");
+    builder.setSmartDashboardType("PivotState");
 
     builder.addStringProperty("Name", () -> stateSupplier.get().name(), null);
     builder.addDoubleProperty("Pos (m)", () -> stateSupplier.get().getPosRotations(), null);

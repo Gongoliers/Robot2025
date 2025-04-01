@@ -18,6 +18,7 @@ import frc.robot.intake.IntakeState;
 import frc.robot.odometry.Odometry;
 import frc.robot.pivot.Pivot;
 import frc.robot.pivot.PivotState;
+import frc.robot.ramp.Ramp;
 import frc.robot.superstructure.Superstructure;
 import frc.robot.superstructure.SuperstructureState;
 import frc.robot.swerve.Swerve;
@@ -43,6 +44,9 @@ public class RobotContainer {
   /** Intake subsystem reference */
   private final Intake intake;
 
+  /** Ramp subsystem reference */
+  private final Ramp ramp;
+
   /** Superstructure subystem reference */
   private final Superstructure superstructure;
 
@@ -62,6 +66,7 @@ public class RobotContainer {
     elevator = Elevator.getInstance();
     pivot = Pivot.getInstance();
     intake = Intake.getInstance();
+    ramp = Ramp.getInstance();
     superstructure = Superstructure.getInstance();
     auto = Auto.getInstance();
 

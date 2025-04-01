@@ -4,25 +4,25 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import frc.robot.intake.IntakeState;
+import frc.robot.ramp.RampState;
 
 /** Nice ElevatorState sendable */
-public class IntakeStateSendable implements Sendable {
+public class RampStateSendable implements Sendable {
   
-  private final Supplier<IntakeState> stateSupplier;
+  private final Supplier<RampState> stateSupplier;
 
   /**
    * Creates an ElevatorState sendable 
    * 
    * @param stateSupplier function that supplies ElevatorState enum
    */
-  public IntakeStateSendable(Supplier<IntakeState> stateSupplier) {
+  public RampStateSendable(Supplier<RampState> stateSupplier) {
     this.stateSupplier = stateSupplier;
   }
 
   @Override
   public void initSendable(SendableBuilder builder) {
-    builder.setSmartDashboardType("IntakeState");
+    builder.setSmartDashboardType("RampState");
 
     builder.addStringProperty("Name", () -> stateSupplier.get().name(), null);
     builder.addDoubleProperty("Vel (mps)", () -> stateSupplier.get().getVelRotationsPerSec(), null);
