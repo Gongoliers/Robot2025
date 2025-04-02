@@ -41,15 +41,15 @@ public class Ramp extends Subsystem {
     MechanismBuilder.defaults()
       .motorConfig(
         MotorBuilder.defaults()
-          .ccwPositive(true)
-          .motorToMechRatio(24/12)
-          .statorCurrentLimit(20)
+          .ccwPositive(false)
+          .motorToMechRatio(2)
+          .statorCurrentLimit(50)
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
           .kA(0.0)
-          .kS(0.0)
-          .kV(0.3)
+          .kS(0.512)
+          .kV(0.22)
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
@@ -81,7 +81,7 @@ public class Ramp extends Subsystem {
   @Override
   public void initializeTab() {
     // Get tab
-    ShuffleboardTab tab = Shuffleboard.getTab("Intake");
+    ShuffleboardTab tab = Shuffleboard.getTab("Ramp");
 
     // State info
     tab.add("Target state", new RampStateSendable(() -> targetState));

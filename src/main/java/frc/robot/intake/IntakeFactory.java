@@ -29,7 +29,7 @@ public class IntakeFactory {
   public static TimeOfFlight createTimeOfFlightSensor() {
     if (Robot.isReal() && RobotConstants.ENABLED_SUBSYSTEMS.contains(Subsystem.INTAKE)) {
       return new TimeOfFlightCANrange(
-        new CAN(40));
+        new CAN(5));
     }
 
     return new TimeOfFlightSim();

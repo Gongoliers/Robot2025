@@ -21,7 +21,7 @@ public class PivotFactory {
   public static PositionController createPivotMotor(MechanismConfig config) {
     if (Robot.isReal() && RobotConstants.ENABLED_SUBSYSTEMS.contains(Subsystem.PIVOT)) {
       return new PositionControllerTalonFXPivot(
-        new CAN(20), 
+        new CAN(25), 
         config, 
         config.motorConfig().ccwPositive(), //TODO: this is dumb just pass config
         false);

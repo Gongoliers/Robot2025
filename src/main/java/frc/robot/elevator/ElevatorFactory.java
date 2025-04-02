@@ -20,7 +20,7 @@ public class ElevatorFactory {
         config,
         false,
         false,
-        0.03637 * Math.PI * 3)
+        0.031 * Math.PI * 3)
         ;
     }
 

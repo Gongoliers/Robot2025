@@ -9,13 +9,13 @@ import frc.robot.pivot.PivotState;
 /** Enum that represents target pivot states and whether or not they are safe */
 public enum SuperstructureState {
   STOW(ElevatorState.STOW, PivotState.STOW),
-  INTAKE(ElevatorState.INTAKE, PivotState.INTAKE),
-  L1(ElevatorState.L1, PivotState.L1),
-  L2(ElevatorState.L2, PivotState.SCORE),
-  L3(ElevatorState.L3, PivotState.SCORE),
-  L4(ElevatorState.L4, PivotState.SCOREL4),
-  ALGAE1(ElevatorState.ALGAE1, PivotState.ALGAE),
-  ALGAE2(ElevatorState.ALGAE2, PivotState.ALGAE);
+  INTAKE(ElevatorState.STOW, PivotState.STOW),
+  L1(ElevatorState.L1, PivotState.STOW),
+  L2(ElevatorState.L2, PivotState.OUT),
+  L3(ElevatorState.L3, PivotState.OUT),
+  L4(ElevatorState.L4, PivotState.OUT),
+  ALGAE1(ElevatorState.ALGAE1, PivotState.OUT),
+  ALGAE2(ElevatorState.ALGAE2, PivotState.OUT);
 
   private final ElevatorState elevatorState;
   private final PivotState pivotState;

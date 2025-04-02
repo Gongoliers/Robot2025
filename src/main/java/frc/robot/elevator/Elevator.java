@@ -1,5 +1,6 @@
 package frc.robot.elevator;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -61,21 +62,21 @@ public class Elevator extends Subsystem {
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(16)
+          .kP(7)
           .kI(0)
           .kD(0)
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
-          .kA(0.5)
-          .kG(0.9995)
-          .kS(0.41)
-          .kV(0.3)
+          .kA(0.1)
+          .kG(0.516)
+          .kS(0.128)
+          .kV(1.4)
           .build())
       .motionProfileConfig(
         MotionProfileBuilder.defaults()
-          .maxVelocity(2)
-          .maxAcceleration(3)
+          .maxVelocity(4)
+          .maxAcceleration(6)
           .build())
       .build();
 
@@ -150,7 +151,7 @@ public class Elevator extends Subsystem {
     motor.setSetpoint(profiledSetpoint.position, profiledSetpoint.velocity);
 
     // update current state if safely reached target state
-    if (Math.abs(motorValues.posMeters - targetState.getPosMeters()) < stateTolerance) {
+    if (MathUtil.isNear(targetState.getPosMeters(), motorValues.posMeters, stateTolerance)) {
       currentState = targetState;
     } else {
       currentState = ElevatorState.MOVING;

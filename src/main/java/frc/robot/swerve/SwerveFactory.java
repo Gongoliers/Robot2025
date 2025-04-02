@@ -67,7 +67,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromDegrees(-141.06445).unaryMinus())
+            .offset(Rotation2d.fromDegrees(0.0).unaryMinus())
             .build())
         .build(),
       driveConfig,

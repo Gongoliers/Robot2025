@@ -8,7 +8,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.lib.CAN;
 import frc.lib.Telemetry;
+import frc.lib.configs.MechanismConfig.MechanismBuilder;
+import frc.lib.controllers.position.EndgamePositionController;
+import frc.lib.controllers.position.EndgamePositionControllerTalonFX2;
 import frc.lib.targetting.ReefTarget;
 import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
@@ -19,6 +23,7 @@ import frc.robot.odometry.Odometry;
 import frc.robot.pivot.Pivot;
 import frc.robot.pivot.PivotState;
 import frc.robot.ramp.Ramp;
+import frc.robot.ramp.RampState;
 import frc.robot.superstructure.Superstructure;
 import frc.robot.superstructure.SuperstructureState;
 import frc.robot.swerve.Swerve;
@@ -73,10 +78,19 @@ public class RobotContainer {
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
 
-    Telemetry.initializeTabs(odometry, swerve, elevator, pivot, intake, superstructure, auto);
+    Telemetry.initializeTabs(odometry, swerve, elevator, pivot, intake, superstructure, auto, ramp);
 
     configureDefaultCommands();
     configureBindings();
+
+    EndgamePositionController endgame = new EndgamePositionControllerTalonFX2(
+      new CAN(43), 
+      new CAN(44), 
+      MechanismBuilder.defaults().build(), 
+      false, 
+      false);
+
+    endgame.configure();
   }
 
   /**
@@ -111,19 +125,25 @@ public class RobotContainer {
 
     driverController.a().onTrue(auto.allign(ReefTarget.LEFT, 0.1));
 
+    operatorController.povLeft().onTrue(Commands.runOnce(() -> {
+      intake.setTargetState(IntakeState.CORALOUTFAST);
+      ramp.setTargetState(RampState.INTAKEFAST);
+    }));
+    operatorController.povRight().onTrue(Commands.runOnce(() -> {
+      intake.setTargetState(IntakeState.STOP);
+      ramp.setTargetState(RampState.STOP);
+    }));
+
     operatorController.a().onTrue(superstructure.superstructureTo(SuperstructureState.STOW));
     operatorController.b().onTrue(superstructure.superstructureTo(SuperstructureState.L1));
     operatorController.x().onTrue(superstructure.superstructureTo(SuperstructureState.L2));
     operatorController.y().onTrue(superstructure.superstructureTo(SuperstructureState.L3));
     operatorController.rightBumper().onTrue(superstructure.superstructureTo(SuperstructureState.L4));
 
-    operatorController.leftStick().onTrue(superstructure.superstructureTo(SuperstructureState.ALGAE1));
-    operatorController.rightStick().onTrue(superstructure.superstructureTo(SuperstructureState.ALGAE2));
+    operatorController.povUp().onTrue(Commands.runOnce(() -> pivot.setTargetState(PivotState.OUT)));
+    operatorController.povDown().onTrue(Commands.runOnce(() -> pivot.setTargetState(PivotState.STOW)));
 
-    operatorController.povLeft().onTrue(superstructure.intakeCoral());
-    operatorController.povRight().whileTrue(superstructure.intakeTo(IntakeState.CORALINFAST));
-    operatorController.povUp().whileTrue(superstructure.intakeTo(IntakeState.CORALOUTFAST));
-    operatorController.povDown().onTrue(superstructure.intakeTo(IntakeState.STOP));
+    operatorController.leftBumper().onTrue(superstructure.intakeCoral());
   }
 
   public Command getAutonomousCommand() {

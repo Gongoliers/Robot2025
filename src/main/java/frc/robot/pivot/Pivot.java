@@ -57,23 +57,23 @@ public class Pivot extends Subsystem{
     MechanismBuilder.defaults()
       .motorConfig(
         MotorBuilder.defaults()
-          .ccwPositive(false)
-          .motorToMechRatio(25*(58/30)*(42/12)*2)
+          .ccwPositive(true)
+          .motorToMechRatio(25*(48/18))
           .statorCurrentLimit(50)
           .neutralBrake(true)
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()
-          .kA(1)
-          .kG(0.1789)
-          .kS(0.0605)
-          .kV(2.8)
-          .build())
+          .kA(0)
+          .kG(0)
+          .kS(0)
+          .kV(1)
+          .build()) // not running feedforward yet, keep in mind the pivot is zeroed in the wrong spot if you want to use ff to improve movement
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(18)
+          .kP(10)
           .kI(0.0)
-          .kD(0.0)
+          .kD(1)
           .build())
       .motionProfileConfig(
         MotionProfileBuilder.defaults()
@@ -106,7 +106,7 @@ public class Pivot extends Subsystem{
     idealPosRotations = 0.0;
     idealVelRotationsPerSec = 0.0;
 
-    motor.setPos(0.34);
+    motor.setPos(0.0);
   }
 
   @Override
