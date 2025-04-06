@@ -59,6 +59,7 @@ public class Elevator extends Subsystem {
           .ccwPositive(false)
           .statorCurrentLimit(120)
           .neutralBrake(true)
+          .setRampRates(0.25)
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()

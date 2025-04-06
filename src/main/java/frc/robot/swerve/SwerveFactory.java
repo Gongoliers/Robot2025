@@ -21,7 +21,7 @@ import frc.robot.RobotConstants.Subsystem;
 
 /** Creates swerve hardware */
 public class SwerveFactory {
-  
+
   /**
    * Creates a generic swerve module
    * 
@@ -67,7 +67,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromDegrees(0.0).unaryMinus())
+            .offset(Rotation2d.fromDegrees(-124.8925).unaryMinus())
             .build())
         .build(),
       driveConfig,
@@ -103,7 +103,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromDegrees(55.3).unaryMinus())
+            .offset(Rotation2d.fromDegrees(-72.1582).unaryMinus())
             .build())
         .build(),
       driveConfig,
@@ -139,7 +139,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromDegrees(-72.9).unaryMinus())
+            .offset(Rotation2d.fromDegrees(103.7988).unaryMinus())
             .build())
         .build(),
       driveConfig,
@@ -175,7 +175,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromDegrees(105.3).unaryMinus())
+            .offset(Rotation2d.fromDegrees(160.7519).unaryMinus())
             .build())
         .build(),
       driveConfig,

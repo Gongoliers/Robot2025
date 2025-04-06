@@ -2,10 +2,10 @@ package frc.robot.elevator;
 
 public enum ElevatorState {
   STOW(0),
-  L1(0.1),
-  L2(0.35),
-  L3(0.68),
-  L4(1.0),
+  L1(0.1), 
+  L2(0.62),
+  L3(1.02),
+  L4(1.57),
   ALGAE1(0.45),
   ALGAE2(0.85),
   MOVING(999);

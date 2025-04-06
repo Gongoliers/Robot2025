@@ -1,5 +1,6 @@
 package frc.lib.configs.appliers;
 
+import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -106,6 +107,8 @@ public class TalonFXConfigApplier extends ConfigApplier {
     CurrentLimitsConfigs currentLimitsConfigs = createCurrentLimitsConfigs(motorConfig);
     FeedbackConfigs feedbackConfigs = createFeedbackConfigs(motorConfig);
     MotorOutputConfigs motorOutputConfigs = createMotorOutputConfigs(motorConfig);
+    ClosedLoopRampsConfigs motorRampConfigs = new ClosedLoopRampsConfigs();
+    motorRampConfigs.VoltageClosedLoopRampPeriod = motorConfig.voltageRampRate();
 
     TalonFXConfigurator configurator = talonFX.getConfigurator();
 
@@ -118,6 +121,9 @@ public class TalonFXConfigApplier extends ConfigApplier {
     }
 
     if (attempt(() -> configurator.apply(motorOutputConfigs)) == false) {
+      report(talonFX);
+    }
+    if (attempt(() -> configurator.apply(motorRampConfigs)) == false){
       report(talonFX);
     }
   }

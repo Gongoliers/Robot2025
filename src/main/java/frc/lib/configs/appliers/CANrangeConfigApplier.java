@@ -26,6 +26,7 @@ public class CANrangeConfigApplier extends ConfigApplier {
    */
   public static void applyFactoryDefault(CANrange canRange) {
     CANrangeConfiguration factoryDefaults = new CANrangeConfiguration();
+    factoryDefaults.ProximityParams.ProximityThreshold = 0.1;
 
     CANrangeConfigurator configurator = canRange.getConfigurator();
 

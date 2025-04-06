@@ -7,6 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.CAN;
 import frc.lib.Telemetry;
@@ -15,6 +17,7 @@ import frc.lib.controllers.position.EndgamePositionController;
 import frc.lib.controllers.position.EndgamePositionControllerTalonFX2;
 import frc.lib.targetting.ReefTarget;
 import frc.robot.auto.Auto;
+import frc.robot.climber.climber;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
 import frc.robot.intake.Intake;
@@ -52,6 +55,9 @@ public class RobotContainer {
   /** Ramp subsystem reference */
   private final Ramp ramp;
 
+  // private final EndgamePositionController endgame;
+  private final climber climber;
+
   /** Superstructure subystem reference */
   private final Superstructure superstructure;
 
@@ -83,14 +89,17 @@ public class RobotContainer {
     configureDefaultCommands();
     configureBindings();
 
-    EndgamePositionController endgame = new EndgamePositionControllerTalonFX2(
-      new CAN(43), 
-      new CAN(44), 
-      MechanismBuilder.defaults().build(), 
-      false, 
-      false);
+    climber = new climber(new CAN(43),
+        new CAN(44));
 
-    endgame.configure();
+    // endgame = new EndgamePositionControllerTalonFX2(
+    //   new CAN(43), 
+    //   new CAN(44), 
+    //   MechanismBuilder.defaults().build(), 
+    //   false, 
+    //   false);
+
+    // endgame.configure();
   }
 
   /**
@@ -115,9 +124,12 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.y().onTrue(odometry.setYaw(0.0));
 
-    //driverController.povLeft().onTrue(auto.pathfindToTarget(ReefTarget.LEFT, 0.05).andThen(Commands.print("worked")));
-    //driverController.povUp().onTrue(auto.pathfindToTarget(ReefTarget.CENTER, 0.05).andThen(Commands.print("worked")));
-    //driverController.povRight().onTrue(auto.pathfindToTarget(ReefTarget.RIGHT, 0.05).andThen(Commands.print("worked")));
+    // driverController.povLeft().onTrue(auto.pathfindToTarget(ReefTarget.LEFT,
+    // 0.05).andThen(Commands.print("worked")));
+    // driverController.povUp().onTrue(auto.pathfindToTarget(ReefTarget.CENTER,
+    // 0.05).andThen(Commands.print("worked")));
+    // driverController.povRight().onTrue(auto.pathfindToTarget(ReefTarget.RIGHT,
+    // 0.05).andThen(Commands.print("worked")));
     driverController.povUp().whileTrue(auto.forward()).onFalse(auto.stop());
     driverController.povDown().whileTrue(auto.backUp()).onFalse(auto.stop());
     driverController.rightBumper().whileTrue(auto.right()).onFalse(auto.stop());
@@ -126,7 +138,11 @@ public class RobotContainer {
     driverController.a().onTrue(auto.allign(ReefTarget.LEFT, 0.1));
 
     operatorController.povLeft().onTrue(Commands.runOnce(() -> {
-      intake.setTargetState(IntakeState.CORALOUTFAST);
+      intake.setTargetState(IntakeState.CORALINSLOW);
+      ramp.setTargetState(RampState.INTAKESLOW);
+    }));
+    operatorController.povUp().onTrue(Commands.runOnce(() -> {
+      intake.setTargetState(IntakeState.CORALOUT);
       ramp.setTargetState(RampState.INTAKEFAST);
     }));
     operatorController.povRight().onTrue(Commands.runOnce(() -> {
@@ -138,12 +154,19 @@ public class RobotContainer {
     operatorController.b().onTrue(superstructure.superstructureTo(SuperstructureState.L1));
     operatorController.x().onTrue(superstructure.superstructureTo(SuperstructureState.L2));
     operatorController.y().onTrue(superstructure.superstructureTo(SuperstructureState.L3));
-    operatorController.rightBumper().onTrue(superstructure.superstructureTo(SuperstructureState.L4));
+    operatorController.rightBumper().onTrue(superstructure.superstructureTo(SuperstructureState.L4)
+        .andThen(new RunCommand(() -> intake.setTargetState(IntakeState.CORALOUT), superstructure)).withTimeout(1.15)
+        .andThen(Commands.runOnce(() -> intake.setTargetState(IntakeState.STOP), superstructure)));
 
-    operatorController.povUp().onTrue(Commands.runOnce(() -> pivot.setTargetState(PivotState.OUT)));
+    //operatorController.povUp().onTrue(Commands.runOnce(() -> pivot.setTargetState(PivotState.OUT)));
     operatorController.povDown().onTrue(Commands.runOnce(() -> pivot.setTargetState(PivotState.STOW)));
 
     operatorController.leftBumper().onTrue(superstructure.intakeCoral());
+
+    operatorController.leftTrigger().whileTrue(new InstantCommand(() -> climber.percentOutput(0.8), superstructure)).onFalse(
+        Commands.runOnce(() -> climber.percentOutput(0)));
+    operatorController.rightTrigger().whileTrue(new InstantCommand(() -> climber.percentOutput(-0.8), superstructure)).onFalse(
+      Commands.runOnce(() -> climber.percentOutput(0)));
   }
 
   public Command getAutonomousCommand() {
@@ -152,5 +175,5 @@ public class RobotContainer {
     }
 
     return Commands.print("Auto disabled");
-  } 
+  }
 }

@@ -2,6 +2,7 @@ package frc.lib.controllers.position;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -62,6 +63,7 @@ public class EndgamePositionControllerTalonFX2 implements EndgamePositionControl
   private final PIDController feedback;
 
   private final VoltageOut voltage;
+  private final DutyCycleOut dutycycleout;
 
   private double setpointPosRotations = 0.0;
   private double setpointVelRotationsPerSec = 0.0;
@@ -81,7 +83,7 @@ public class EndgamePositionControllerTalonFX2 implements EndgamePositionControl
     // create hardware
     leader = new TalonFX(leaderCAN.id(), leaderCAN.bus());
     follower = new TalonFX(followerCAN.id(), followerCAN.bus());
-    follower.setControl(new Follower(leaderCAN.id(), true));
+    //follower.setControl(new Follower(leaderCAN.id(), true));
 
     // status signals
     position = leader.getPosition();
@@ -97,6 +99,7 @@ public class EndgamePositionControllerTalonFX2 implements EndgamePositionControl
 
     // default voltage
     voltage = new VoltageOut(0.0).withEnableFOC(enableFOC);
+    dutycycleout = new DutyCycleOut(0);
   }
 
   @Override
@@ -137,7 +140,8 @@ public class EndgamePositionControllerTalonFX2 implements EndgamePositionControl
   @Override
   public void periodic() {
     if (manualVoltage) {
-      leader.setControl(voltage.withOutput(setVoltage));
+      leader.set(setVoltage);
+      follower.set(setVoltage);
     } else {
       // approach setpoint
       double measuredPosRotations = position.getValueAsDouble();

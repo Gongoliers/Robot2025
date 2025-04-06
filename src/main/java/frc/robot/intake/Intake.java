@@ -52,6 +52,7 @@ public class Intake extends Subsystem {
           .ccwPositive(false)
           .motorToMechRatio(2)
           .statorCurrentLimit(80)
+          .neutralBrake(true)
           .build())
       .feedforwardControllerConfig(
         FeedforwardControllerBuilder.defaults()

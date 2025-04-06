@@ -14,7 +14,8 @@ public record MotorConfig(
     boolean ccwPositive,
     double motorToMechRatio,
     double statorCurrentLimit,
-    double supplyCurrentLimit) {
+    double supplyCurrentLimit,
+    double voltageRampRate) {
 
   /** Easier and more modular way to construct a motor config */
   public static class MotorBuilder {
@@ -24,18 +25,29 @@ public record MotorConfig(
     private double statorCurrentLimit;
     private double supplyCurrentLimit;
 
+    private double voltageRampRate;
+
     private MotorBuilder(
         boolean neutralBrake,
         boolean ccwPositive,
         double motorToMechRatio,
         double statorCurrentLimit,
-        double supplyCurrentLimit) {
+        double supplyCurrentLimit,
+        double voltageRampRate) {
       this.neutralBrake = neutralBrake;
       this.ccwPositive = ccwPositive;
       this.motorToMechRatio = motorToMechRatio;
       this.statorCurrentLimit = statorCurrentLimit;
       this.supplyCurrentLimit = supplyCurrentLimit;
+      this.voltageRampRate = voltageRampRate;
     }
+
+
+    public double getVoltageRampRates(){
+      return voltageRampRate;
+    }
+
+    
 
     /**
      * Returns a builder with default values
@@ -48,7 +60,8 @@ public record MotorConfig(
         true, 
         1.0, 
         80.0, 
-        40.0);
+        40.0,
+        0.25);
     }
 
     /**
@@ -63,7 +76,8 @@ public record MotorConfig(
         config.ccwPositive(), 
         config.motorToMechRatio(), 
         config.statorCurrentLimit(), 
-        config.supplyCurrentLimit());
+        config.supplyCurrentLimit(),
+        config.voltageRampRate());
     }
 
     public MotorBuilder neutralBrake(boolean neutralBrake) {
@@ -91,6 +105,11 @@ public record MotorConfig(
       return this;
     }
 
+    public MotorBuilder setRampRates(double voltage){
+      this.voltageRampRate = voltage;
+      return this;
+    }
+
     /**
      * Returns the builder as a config with private immutable values
      * 
@@ -102,7 +121,8 @@ public record MotorConfig(
         this.ccwPositive,
         this.motorToMechRatio,
         this.statorCurrentLimit,
-        this.supplyCurrentLimit);
+        this.supplyCurrentLimit,
+        this.voltageRampRate);
     }
   }
 }

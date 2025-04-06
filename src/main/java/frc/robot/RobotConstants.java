@@ -23,6 +23,7 @@ public class RobotConstants {
     ELEVATOR,
     PIVOT,
     INTAKE,
+    CLIMBER,
     SUPERSTRUCTURE,
     AUTO,
   }
