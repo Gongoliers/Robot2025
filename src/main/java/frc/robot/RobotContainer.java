@@ -7,6 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.CAN;
 import frc.lib.Telemetry;
@@ -17,6 +19,8 @@ import frc.lib.targetting.ReefTarget;
 import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
+import frc.robot.endgame.Endgame;
+import frc.robot.endgame.EndgameState;
 import frc.robot.intake.Intake;
 import frc.robot.intake.IntakeState;
 import frc.robot.odometry.Odometry;
@@ -46,6 +50,9 @@ public class RobotContainer {
   /** Pivot subsystem reference */
   private final Pivot pivot;
 
+  /** Engame subsystem reference */
+  private final Endgame endgame;
+
   /** Intake subsystem reference */
   private final Intake intake;
 
@@ -70,6 +77,7 @@ public class RobotContainer {
     swerve = Swerve.getInstance();
     elevator = Elevator.getInstance();
     pivot = Pivot.getInstance();
+    endgame = Endgame.getInstance();
     intake = Intake.getInstance();
     ramp = Ramp.getInstance();
     superstructure = Superstructure.getInstance();
@@ -78,19 +86,10 @@ public class RobotContainer {
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
 
-    Telemetry.initializeTabs(odometry, swerve, elevator, pivot, intake, superstructure, auto, ramp);
+    Telemetry.initializeTabs(odometry, swerve, elevator, pivot, endgame, intake, superstructure, auto, ramp);
 
     configureDefaultCommands();
     configureBindings();
-
-    EndgamePositionController endgame = new EndgamePositionControllerTalonFX2(
-      new CAN(43), 
-      new CAN(44), 
-      MechanismBuilder.defaults().build(), 
-      false, 
-      false);
-
-    endgame.configure();
   }
 
   /**
@@ -115,18 +114,28 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.y().onTrue(odometry.setYaw(0.0));
 
-    //driverController.povLeft().onTrue(auto.pathfindToTarget(ReefTarget.LEFT, 0.05).andThen(Commands.print("worked")));
-    //driverController.povUp().onTrue(auto.pathfindToTarget(ReefTarget.CENTER, 0.05).andThen(Commands.print("worked")));
-    //driverController.povRight().onTrue(auto.pathfindToTarget(ReefTarget.RIGHT, 0.05).andThen(Commands.print("worked")));
+    // driverController.povLeft().onTrue(auto.pathfindToTarget(ReefTarget.LEFT,
+    // 0.05).andThen(Commands.print("worked")));
+    // driverController.povUp().onTrue(auto.pathfindToTarget(ReefTarget.CENTER,
+    // 0.05).andThen(Commands.print("worked")));
+    // driverController.povRight().onTrue(auto.pathfindToTarget(ReefTarget.RIGHT,
+    // 0.05).andThen(Commands.print("worked")));
     driverController.povUp().whileTrue(auto.forward()).onFalse(auto.stop());
     driverController.povDown().whileTrue(auto.backUp()).onFalse(auto.stop());
     driverController.rightBumper().whileTrue(auto.right()).onFalse(auto.stop());
     driverController.leftBumper().whileTrue(auto.left()).onFalse(auto.stop());
 
-    driverController.a().onTrue(auto.allign(ReefTarget.LEFT, 0.1));
+    driverController.leftStick().onTrue(Commands.runOnce(() -> endgame.setTargetState(EndgameState.STOW)));
+    driverController.rightStick().onTrue(Commands.runOnce(() -> endgame.setTargetState(EndgameState.ARMED)));
+    driverController.a().onTrue(endgame.climb());
+    driverController.b().onTrue(endgame.stopClimb());
 
     operatorController.povLeft().onTrue(Commands.runOnce(() -> {
-      intake.setTargetState(IntakeState.CORALOUTFAST);
+      intake.setTargetState(IntakeState.CORALINSLOW);
+      ramp.setTargetState(RampState.INTAKESLOW);
+    }));
+    operatorController.povUp().onTrue(Commands.runOnce(() -> {
+      intake.setTargetState(IntakeState.CORALINFAST);
       ramp.setTargetState(RampState.INTAKEFAST);
     }));
     operatorController.povRight().onTrue(Commands.runOnce(() -> {
@@ -138,10 +147,9 @@ public class RobotContainer {
     operatorController.b().onTrue(superstructure.superstructureTo(SuperstructureState.L1));
     operatorController.x().onTrue(superstructure.superstructureTo(SuperstructureState.L2));
     operatorController.y().onTrue(superstructure.superstructureTo(SuperstructureState.L3));
-    operatorController.rightBumper().onTrue(superstructure.superstructureTo(SuperstructureState.L4));
-
-    operatorController.povUp().onTrue(Commands.runOnce(() -> pivot.setTargetState(PivotState.OUT)));
-    operatorController.povDown().onTrue(Commands.runOnce(() -> pivot.setTargetState(PivotState.STOW)));
+    operatorController.rightBumper().onTrue(superstructure.superstructureTo(SuperstructureState.L4)
+        .andThen(new RunCommand(() -> intake.setTargetState(IntakeState.CORALOUT), superstructure)).withTimeout(1.15)
+        .andThen(Commands.runOnce(() -> intake.setTargetState(IntakeState.STOP), superstructure)));
 
     operatorController.leftBumper().onTrue(superstructure.intakeCoral());
   }
@@ -152,5 +160,5 @@ public class RobotContainer {
     }
 
     return Commands.print("Auto disabled");
-  } 
+  }
 }

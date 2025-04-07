@@ -9,7 +9,7 @@ package frc.lib.controllers.position;
 public interface EndgamePositionController {
   
   /** Position controller values */
-  public static class PositionControllerValues {
+  public static class EndgamePositionControllerValues {
     
     /** Current position in rotations */
     public double posRotations = 0.0;
@@ -35,7 +35,7 @@ public interface EndgamePositionController {
    * 
    * @param values values class to be updated
    */
-  public void getUpdatedVals(PositionControllerValues values);
+  public void getUpdatedVals(EndgamePositionControllerValues values);
 
   /**
    * Sets the position of the position controller

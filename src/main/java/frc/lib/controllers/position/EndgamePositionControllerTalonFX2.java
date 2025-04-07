@@ -5,7 +5,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.MeasurementHealthValue;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
@@ -112,7 +111,7 @@ public class EndgamePositionControllerTalonFX2 implements EndgamePositionControl
   }
 
   @Override
-  public void getUpdatedVals(PositionControllerValues values) {
+  public void getUpdatedVals(EndgamePositionControllerValues values) {
     BaseStatusSignal.refreshAll(position, velocity, acceleration, volts, amps);
 
     values.posRotations = position.getValueAsDouble();
