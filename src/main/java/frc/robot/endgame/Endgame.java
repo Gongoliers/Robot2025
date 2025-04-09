@@ -61,7 +61,7 @@ public class Endgame extends Subsystem {
       .motorConfig(
         MotorBuilder.defaults()
           .ccwPositive(false)
-          .motorToMechRatio(100)
+          .motorToMechRatio(500)
           .statorCurrentLimit(200)
           .neutralBrake(true)
           .build())
@@ -69,19 +69,19 @@ public class Endgame extends Subsystem {
         FeedforwardControllerBuilder.defaults()
           .kA(0)
           .kG(0)
-          .kS(0.15)
-          .kV(1.75)
+          .kS(0.167)
+          .kV(9.2)
           .build())
       .feedbackControllerConfig(
         FeedbackControllerBuilder.defaults()
-          .kP(3)
+          .kP(2)
           .kI(0)
           .kD(0)
           .build())
       .motionProfileConfig(
         MotionProfileBuilder.defaults()
-          .maxVelocity(1)
-          .maxAcceleration(2)
+          .maxVelocity(0.175)
+          .maxAcceleration(1)
           .build())
       .build();
 
@@ -106,7 +106,7 @@ public class Endgame extends Subsystem {
     stateTolerance = 0.03;
 
     profiledSetpoint = new TrapezoidProfile.State();
-    idealPosRotations = 0.0;
+    idealPosRotations = -0.25;
     idealVelRotationsPerSec = 0.0;
 
     motor.clearSetVoltage();
@@ -157,7 +157,7 @@ public class Endgame extends Subsystem {
       currentState = EndgameState.MOVING;
     }
 
-    if (motorValues.posRotations >= 0.4) {
+    if (motorValues.posRotations >= 0.55) {
       motor.clearSetVoltage();
     }
 
@@ -194,6 +194,10 @@ public class Endgame extends Subsystem {
   /** Returns true if at target endgame state */
   public boolean atTargetState() {
     return targetState == currentState;
+  }
+
+  public void setVoltage(double voltage) {
+    motor.setVoltage(voltage);
   }
 
   public Command zero() {

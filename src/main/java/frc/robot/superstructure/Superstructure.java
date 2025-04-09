@@ -8,6 +8,8 @@ import frc.lib.Subsystem;
 import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
+import frc.robot.endgame.Endgame;
+import frc.robot.endgame.EndgameState;
 import frc.robot.intake.Intake;
 import frc.robot.intake.IntakeState;
 import frc.robot.pivot.Pivot;
@@ -33,6 +35,9 @@ public class Superstructure extends Subsystem {
   /** Ramp reference */
   private final Ramp ramp;
 
+  /** Endgame reference */
+  private final Endgame endgame;
+
   /** Target superstructre state (for cancelling things mostly) */
   private SuperstructureState targetState = SuperstructureState.STOW;
 
@@ -45,6 +50,7 @@ public class Superstructure extends Subsystem {
     pivot = Pivot.getInstance();
     intake = Intake.getInstance();
     ramp = Ramp.getInstance();
+    endgame = Endgame.getInstance();
 
     mechanism = new SuperstructureMechanism(elevator::getPosMeters, pivot::getPosRotations);
   }
@@ -136,7 +142,12 @@ public class Superstructure extends Subsystem {
     .andThen(pivotTo(targetState.getPivotState()))
     .andThen(Commands.waitUntil(() -> {
       return elevator.atTargetState() && pivot.atTargetState();
-    }));
+    }))
+    .andThen(Commands.either(
+      intakeTo(IntakeState.CORALOUT, RampState.STOP)
+      .andThen(Commands.waitSeconds(0.1))
+      .andThen(intakeTo(IntakeState.STOP, RampState.STOP)), 
+      Commands.none(), () -> targetState.getElevatorState() == ElevatorState.L4));
   }
 
   /**
@@ -152,5 +163,29 @@ public class Superstructure extends Subsystem {
     })
     .andThen(superstructureTo(SuperstructureState.STOW))
     .andThen(intakeTo(IntakeState.STOP, RampState.STOP)));
+  }
+
+  public Command scoreCoral() {
+    return Commands.either(
+      intakeTo(IntakeState.CORALINFAST, RampState.STOP)
+        .andThen(Commands.waitSeconds(0.3)), 
+      intakeTo(IntakeState.CORALINSLOW, RampState.STOP)
+        .andThen(Commands.waitSeconds(0.4)), 
+      () -> this.targetState == SuperstructureState.L4)
+        .andThen(intakeTo(IntakeState.STOP, RampState.STOP)
+        .alongWith(superstructureTo(SuperstructureState.STOW)));
+  }
+  
+  public Command climb() {
+    return Commands.runOnce(() -> {
+      endgame.setTargetState(EndgameState.ARMED);
+    }).andThen(Commands.waitUntil(() -> endgame.atTargetState()))
+    .andThen(Commands.run(() -> {
+      if (endgame.getPosRotations() < 0.4) {
+        endgame.setVoltage(0.3);
+      } else {
+        endgame.setVoltage(0.0);
+      }
+    }));
   }
 }

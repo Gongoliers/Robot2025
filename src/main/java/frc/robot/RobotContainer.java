@@ -125,15 +125,11 @@ public class RobotContainer {
     driverController.rightBumper().whileTrue(auto.right()).onFalse(auto.stop());
     driverController.leftBumper().whileTrue(auto.left()).onFalse(auto.stop());
 
-    driverController.leftStick().onTrue(Commands.runOnce(() -> endgame.setTargetState(EndgameState.STOW)));
-    driverController.rightStick().onTrue(Commands.runOnce(() -> endgame.setTargetState(EndgameState.ARMED)));
-    driverController.a().onTrue(endgame.climb());
-    driverController.b().onTrue(endgame.stopClimb());
+    operatorController.leftStick().onTrue(Commands.runOnce(() -> endgame.setTargetState(EndgameState.STOW)));
+    operatorController.rightStick().onTrue(Commands.runOnce(() -> endgame.setTargetState(EndgameState.HOOK)));
+    
 
-    operatorController.povLeft().onTrue(Commands.runOnce(() -> {
-      intake.setTargetState(IntakeState.CORALINSLOW);
-      ramp.setTargetState(RampState.INTAKESLOW);
-    }));
+    operatorController.povLeft().onTrue(superstructure.scoreCoral());
     operatorController.povUp().onTrue(Commands.runOnce(() -> {
       intake.setTargetState(IntakeState.CORALINFAST);
       ramp.setTargetState(RampState.INTAKEFAST);
@@ -147,9 +143,7 @@ public class RobotContainer {
     operatorController.b().onTrue(superstructure.superstructureTo(SuperstructureState.L1));
     operatorController.x().onTrue(superstructure.superstructureTo(SuperstructureState.L2));
     operatorController.y().onTrue(superstructure.superstructureTo(SuperstructureState.L3));
-    operatorController.rightBumper().onTrue(superstructure.superstructureTo(SuperstructureState.L4)
-        .andThen(new RunCommand(() -> intake.setTargetState(IntakeState.CORALOUT), superstructure)).withTimeout(1.15)
-        .andThen(Commands.runOnce(() -> intake.setTargetState(IntakeState.STOP), superstructure)));
+    operatorController.rightBumper().onTrue(superstructure.superstructureTo(SuperstructureState.L4));
 
     operatorController.leftBumper().onTrue(superstructure.intakeCoral());
   }

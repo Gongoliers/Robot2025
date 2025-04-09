@@ -67,7 +67,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromDegrees(0.0).unaryMinus())
+            .offset(Rotation2d.fromDegrees(-128.9).unaryMinus())
             .build())
         .build(),
       driveConfig,
@@ -103,7 +103,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromDegrees(55.3).unaryMinus())
+            .offset(Rotation2d.fromDegrees(-70.65).unaryMinus())
             .build())
         .build(),
       driveConfig,
@@ -139,7 +139,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromDegrees(-72.9).unaryMinus())
+            .offset(Rotation2d.fromDegrees(95.3).unaryMinus())
             .build())
         .build(),
       driveConfig,
@@ -175,7 +175,7 @@ public class SwerveFactory {
       MechanismBuilder.edit(steerConfig)
         .absoluteEncoderConfig(
           AbsoluteEncoderBuilder.edit(steerConfig.absoluteEncoderConfig())
-            .offset(Rotation2d.fromDegrees(105.3).unaryMinus())
+            .offset(Rotation2d.fromDegrees(158.6).unaryMinus())
             .build())
         .build(),
       driveConfig,

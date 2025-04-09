@@ -2,7 +2,8 @@ package frc.robot.endgame;
 
 /** Enum that represents target endgame states and whether or not they are safe */
 public enum EndgameState {
-  ARMED(0.15, false),
+  ARMED(0.35, false),
+  HOOK(0.15, false),
   STOW(-0.25, true),
   MOVING(999, false);
 
