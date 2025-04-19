@@ -76,7 +76,7 @@ public class Elevator extends Subsystem {
       .motionProfileConfig(
         MotionProfileBuilder.defaults()
           .maxVelocity(4)
-          .maxAcceleration(6)
+          .maxAcceleration(3)
           .build())
       .build();
 

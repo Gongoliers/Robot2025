@@ -7,9 +7,13 @@
     "MS",
     "RS"
   ],
-  "autoFolders": [],
-  "defaultMaxVel": 2.0,
-  "defaultMaxAccel": 2.0,
+  "autoFolders": [
+    "LS",
+    "MS",
+    "RS"
+  ],
+  "defaultMaxVel": 1.5,
+  "defaultMaxAccel": 1.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
   "defaultNominalVoltage": 12.0,

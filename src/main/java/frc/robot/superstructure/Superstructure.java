@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Subsystem;
 import frc.robot.auto.Auto;
 import frc.robot.elevator.Elevator;
@@ -43,6 +44,9 @@ public class Superstructure extends Subsystem {
 
   /** Superstructure Mechanism2d visualization */
   private SuperstructureMechanism mechanism;
+
+  /** Cancels all waits when true */
+  private boolean cancelAll = false;
 
   /** Initializes superstructure subsystem */
   private Superstructure() {
@@ -104,7 +108,8 @@ public class Superstructure extends Subsystem {
    * @return a command that moves the pivot to a target state if the elevator is stowed
    */
   public Command pivotTo(PivotState targetState) {
-    return Commands.runOnce(() -> pivot.setTargetState(targetState));
+    return Commands.runOnce(() -> pivot.setTargetState(targetState))
+      .andThen(Commands.waitUntil(() -> pivot.atTargetState() || cancelAll));
   };
 
   /**
@@ -114,7 +119,8 @@ public class Superstructure extends Subsystem {
    * @return a command that moves the elevator to a target state if the pivot is at a safe state
    */
   public Command elevatorTo(ElevatorState targetState) {
-    return Commands.runOnce(() -> elevator.setTargetState(targetState));
+    return Commands.runOnce(() -> elevator.setTargetState(targetState))
+      .andThen(Commands.waitUntil(() -> elevator.atTargetState() || cancelAll));
   }
 
   /**
@@ -138,16 +144,19 @@ public class Superstructure extends Subsystem {
    */
   public Command superstructureTo(SuperstructureState targetState) {
     return Commands.runOnce(() -> this.targetState = targetState)
-    .andThen(elevatorTo(targetState.getElevatorState()))
-    .andThen(pivotTo(targetState.getPivotState()))
-    .andThen(Commands.waitUntil(() -> {
-      return elevator.atTargetState() && pivot.atTargetState();
-    }))
     .andThen(Commands.either(
-      intakeTo(IntakeState.CORALOUT, RampState.STOP)
-      .andThen(Commands.waitSeconds(0.1))
-      .andThen(intakeTo(IntakeState.STOP, RampState.STOP)), 
-      Commands.none(), () -> targetState.getElevatorState() == ElevatorState.L4));
+      pivotTo(targetState.getPivotState())
+        .andThen(elevatorTo(targetState.getElevatorState())),
+      elevatorTo(targetState.getElevatorState())
+        .andThen(pivotTo(targetState.getPivotState())),
+      () -> targetState.getElevatorState() == ElevatorState.STOW))
+      .andThen(Commands.either(
+        intakeTo(IntakeState.CORALOUTSLOW, RampState.STOP)
+          .andThen(Commands.waitSeconds(0.1))
+          .andThen(intakeTo(IntakeState.STOP, RampState.STOP)),
+        Commands.none(),
+        () -> targetState.getElevatorState() == ElevatorState.L4))
+      .andThen(Commands.print("Done superstructure"));
   }
 
   /**
@@ -159,10 +168,22 @@ public class Superstructure extends Subsystem {
     return superstructureTo(SuperstructureState.INTAKE)
     .andThen(intakeTo(IntakeState.CORALIN, RampState.INTAKEFAST))
     .andThen(Commands.waitUntil(() -> {
-      return intake.beamBroken() || this.targetState == SuperstructureState.STOW;
+      return intake.beamBroken() || this.targetState == SuperstructureState.STOW || cancelAll;
     })
-    .andThen(superstructureTo(SuperstructureState.STOW))
-    .andThen(intakeTo(IntakeState.STOP, RampState.STOP)));
+    .andThen(Commands.either(
+      Commands.waitSeconds(0.05)
+        .andThen(intakeTo(IntakeState.STOP, RampState.STOP))
+        .andThen(superstructureTo(SuperstructureState.HARDSTOP))
+        .andThen(intakeTo(IntakeState.CORALOUTSLOW, RampState.STOP))
+        .andThen(Commands.waitSeconds(0.3))
+        .andThen(intakeTo(IntakeState.STOP, RampState.STOP))
+        .andThen(intakeTo(IntakeState.CORALINSLOW, RampState.STOP))
+        .andThen(Commands.waitSeconds(0.14))
+        .andThen(intakeTo(IntakeState.STOP, RampState.STOP))
+        .andThen(superstructureTo(SuperstructureState.STOW)), 
+      superstructureTo(SuperstructureState.STOW)
+        .andThen(intakeTo(IntakeState.STOP, RampState.STOP)), 
+      () -> this.targetState != SuperstructureState.STOW || !this.cancelAll)));
   }
 
   public Command scoreCoral() {
@@ -173,19 +194,36 @@ public class Superstructure extends Subsystem {
         .andThen(Commands.waitSeconds(0.4)), 
       () -> this.targetState == SuperstructureState.L4)
         .andThen(intakeTo(IntakeState.STOP, RampState.STOP)
-        .alongWith(superstructureTo(SuperstructureState.STOW)));
+        .andThen(superstructureTo(SuperstructureState.STOW)));
   }
   
-  public Command climb() {
+  public Command manualClimb(CommandXboxController controller) {
     return Commands.runOnce(() -> {
       endgame.setTargetState(EndgameState.ARMED);
     }).andThen(Commands.waitUntil(() -> endgame.atTargetState()))
     .andThen(Commands.run(() -> {
-      if (endgame.getPosRotations() < 0.4) {
-        endgame.setVoltage(0.3);
-      } else {
+      if (endgame.getPosRotations() > 0.45) { // super professional code
         endgame.setVoltage(0.0);
+      } else if (controller.rightTrigger().getAsBoolean()) {
+        endgame.setVoltage(-2.0);
+      } else if (controller.leftTrigger().getAsBoolean()) {
+        endgame.setVoltage(2.0);
+      } else {
+        endgame.setVoltage(0.25);
       }
-    }));
+    }).until(() -> this.cancelAll));
+  }
+
+  /**
+   * Returns a command that SHOULD force all wait commands to stop waiting
+   */
+  public Command cancelAll() {
+    return Commands.runOnce(() -> {
+      cancelAll = true;
+    }).andThen(
+      () -> {
+        cancelAll = false;
+      }
+    );
   }
 }

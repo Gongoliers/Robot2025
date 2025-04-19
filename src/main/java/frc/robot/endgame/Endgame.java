@@ -206,18 +206,4 @@ public class Endgame extends Subsystem {
         motor.setPos(0.0);
       });
   }
-
-  public Command climb() {
-    return Commands.runOnce(
-      () -> {
-        motor.setVoltage(2.0);
-      });
-  }
-
-  public Command stopClimb() {
-    return Commands.runOnce(
-      () -> {
-        motor.clearSetVoltage();
-      });
-  }
 }

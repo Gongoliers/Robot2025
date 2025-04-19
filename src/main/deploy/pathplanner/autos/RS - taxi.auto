@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "MS - FWD"
+            "pathName": "RS - taxi"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "MS",
+  "folder": "RS",
   "choreoAuto": false
 }

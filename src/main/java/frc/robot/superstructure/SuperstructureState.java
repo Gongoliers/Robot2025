@@ -10,6 +10,7 @@ import frc.robot.pivot.PivotState;
 public enum SuperstructureState {
   STOW(ElevatorState.STOW, PivotState.STOW),
   INTAKE(ElevatorState.STOW, PivotState.STOW),
+  HARDSTOP(ElevatorState.HARDSTOP, PivotState.STOW),
   L1(ElevatorState.L1, PivotState.STOW),
   L2(ElevatorState.L2, PivotState.OUT),
   L3(ElevatorState.L3, PivotState.OUT),

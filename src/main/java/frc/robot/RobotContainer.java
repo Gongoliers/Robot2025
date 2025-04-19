@@ -114,20 +114,21 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.y().onTrue(odometry.setYaw(0.0));
 
-    // driverController.povLeft().onTrue(auto.pathfindToTarget(ReefTarget.LEFT,
-    // 0.05).andThen(Commands.print("worked")));
-    // driverController.povUp().onTrue(auto.pathfindToTarget(ReefTarget.CENTER,
-    // 0.05).andThen(Commands.print("worked")));
-    // driverController.povRight().onTrue(auto.pathfindToTarget(ReefTarget.RIGHT,
-    // 0.05).andThen(Commands.print("worked")));
+    driverController.povLeft().onTrue(auto.allign(ReefTarget.LEFT, 0.2));
+    driverController.povRight().onTrue(auto.allign(ReefTarget.RIGHT, 0.2));
+    
     driverController.povUp().whileTrue(auto.forward()).onFalse(auto.stop());
     driverController.povDown().whileTrue(auto.backUp()).onFalse(auto.stop());
     driverController.rightBumper().whileTrue(auto.right()).onFalse(auto.stop());
     driverController.leftBumper().whileTrue(auto.left()).onFalse(auto.stop());
 
-    operatorController.leftStick().onTrue(Commands.runOnce(() -> endgame.setTargetState(EndgameState.STOW)));
-    operatorController.rightStick().onTrue(Commands.runOnce(() -> endgame.setTargetState(EndgameState.HOOK)));
-    
+    driverController.x().onTrue(elevator.zero());
+
+    //for testing
+    operatorController.a().onTrue(odometry.trustVisionMeasurement("limelight-west"));
+
+    operatorController.leftStick().onTrue(Commands.runOnce(() -> endgame.setTargetState(EndgameState.HOOK)));
+    operatorController.povDown().onTrue(superstructure.manualClimb(operatorController));
 
     operatorController.povLeft().onTrue(superstructure.scoreCoral());
     operatorController.povUp().onTrue(Commands.runOnce(() -> {
@@ -146,6 +147,8 @@ public class RobotContainer {
     operatorController.rightBumper().onTrue(superstructure.superstructureTo(SuperstructureState.L4));
 
     operatorController.leftBumper().onTrue(superstructure.intakeCoral());
+
+    operatorController.rightStick().onTrue(superstructure.cancelAll());
   }
 
   public Command getAutonomousCommand() {

@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Taxi"
+            "pathName": "LS - taxi"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "LS",
   "choreoAuto": false
 }

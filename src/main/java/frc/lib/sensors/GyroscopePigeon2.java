@@ -54,6 +54,7 @@ public class GyroscopePigeon2 implements Gyroscope {
 
   @Override
   public void setYaw(double yawRotations) {
+    System.out.println("setYaw in controler");
     gyroscope.setYaw(Units.rotationsToDegrees(yawRotations));
   }
 

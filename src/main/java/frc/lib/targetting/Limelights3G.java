@@ -25,7 +25,7 @@ public class Limelights3G implements Limelights {
   @Override
   public void addVisionMeasurements(SwerveDrivePoseEstimator poseEstimator) {
     for (String limelight : limelights) {
-      LimelightHelpers.SetRobotOrientation(limelight, Odometry.getInstance().getFieldRelativeHeading().getDegrees(), 0, 0, 0, 0, 0);
+      LimelightHelpers.SetRobotOrientation(limelight, Odometry.getInstance().getRawGyroYaw().getDegrees(), 0, 0, 0, 0, 0);
       LimelightHelpers.PoseEstimate measurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelight);
 
       if (measurement.tagCount >= 1) {

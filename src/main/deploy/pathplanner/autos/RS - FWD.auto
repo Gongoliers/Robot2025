@@ -11,15 +11,9 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "Score L4"
-          }
-        },
-        {
           "type": "wait",
           "data": {
-            "waitTime": 3.5
+            "waitTime": 4.0
           }
         },
         {
@@ -44,6 +38,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "RS",
   "choreoAuto": false
 }

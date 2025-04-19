@@ -5,27 +5,21 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "MS - FWD"
-          }
-        },
-        {
           "type": "wait",
           "data": {
-            "waitTime": 5.0
+            "waitTime": 4.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "MS - to intake"
+            "pathName": "MS - FWD alligned"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "MS",
   "choreoAuto": false
 }

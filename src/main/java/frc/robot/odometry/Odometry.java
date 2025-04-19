@@ -71,20 +71,20 @@ public class Odometry extends Subsystem {
     poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
 
     limelights = OdometryFactory.createLimelights();
-    limelights.addLimelight("limelight-north", 
-      0.3302,
-      0.0,
-      0.219075,
-      0,
-      22.5,
-      0);
-    /*limelights.addLimelight("limelight-south",
-      -0.3048,
-      0.0127,
-      1.019175,
-      0,
-      0,
-      180);*/
+    limelights.addLimelight("limelight-east", 
+      0.2715768,
+      0.0809498,
+      0.1539494,
+      5,
+      25,
+      30);
+    limelights.addLimelight("limelight-west",
+      0.2715768,
+      -0.0812292,
+      0.1539494,
+      5,
+      25,
+      -30);
 
     field = new Field2d();
   }
@@ -137,10 +137,8 @@ public class Odometry extends Subsystem {
     velocity.addDouble("Angular Velocity (dps)", () -> Units.radiansToDegrees((getVelocity().dtheta)));
     velocity.addDouble("Velocity", () -> Math.hypot(getVelocity().dx, getVelocity().dy));
 
-    // make field list widget
-    ShuffleboardLayout field = tab.getLayout("Field", BuiltInLayouts.kList);
-
-    field.add("Field", this.field);
+    // make field widget
+    tab.add("Field", this.field);
   }
 
   /**
@@ -189,6 +187,7 @@ public class Odometry extends Subsystem {
    * @param position the position of the robot on the field
    */
   public void setPosition(Pose2d position) {
+    System.out.println("setPosition");
     poseEstimator.resetPosition(
       Rotation2d.fromRotations(gyroscopeValues.yawRotations), 
       modulePositionsSupplier.get(), 
@@ -196,6 +195,7 @@ public class Odometry extends Subsystem {
   }
 
   public void forcePosition(Pose2d position) {
+    System.out.println("forcePosition");
     poseEstimator.resetPosition(
       position.getRotation(),
       modulePositionsSupplier.get(),
@@ -212,6 +212,7 @@ public class Odometry extends Subsystem {
    * @param rotation the position of the robot on the field
    */
   public void setRotation(Rotation2d rotation) {
+    System.out.println("setRotation");
     Pose2d position = getPosition();
 
     setPosition(new Pose2d(position.getTranslation(), rotation));
@@ -242,7 +243,7 @@ public class Odometry extends Subsystem {
       () -> {
         gyroscope.setYaw(yawRotations);
         setRotation(Rotation2d.fromRotations(yawRotations));
-      });
+      }).andThen(Commands.print("setYaw"));
   }
 
   /**

@@ -7,25 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LS - FWD"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Score L4"
+            "pathName": "RS - cooking"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 4.0
+            "waitTime": 2.5
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LS - to intake"
+            "pathName": "RS - cooking pt 2"
           }
         }
       ]

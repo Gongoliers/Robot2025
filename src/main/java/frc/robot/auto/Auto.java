@@ -113,10 +113,12 @@ public class Auto extends Subsystem {
     new EventTrigger("Score L4").onTrue(
       Commands.print("doing L4")
       .andThen(superstructure.superstructureTo(SuperstructureState.L4))
-      .andThen(superstructure.intakeTo(IntakeState.CORALINFAST, RampState.STOP))
-      .andThen(Commands.waitSeconds(0.7))
-      .andThen(superstructure.intakeTo(IntakeState.STOP, RampState.STOP))
-      .andThen(superstructure.superstructureTo(SuperstructureState.STOW))
+      .andThen(superstructure.scoreCoral())
+    );
+
+    new EventTrigger("Lift").onTrue(
+      superstructure.cancelAll()
+      .andThen(superstructure.superstructureTo(SuperstructureState.L1))
     );
 
     new EventTrigger("Score L1").onTrue(

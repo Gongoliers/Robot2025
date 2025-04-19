@@ -3,8 +3,9 @@ package frc.robot.intake;
 public enum IntakeState {
   STOP(0),
   CORALINSLOW(4),
-  CORALIN(7),
+  CORALIN(10),
   CORALOUT(-7),
+  CORALOUTSLOW(-4),
   CORALINFAST(32),
   CORALOUTFAST(-32),  
   NONE(999);
