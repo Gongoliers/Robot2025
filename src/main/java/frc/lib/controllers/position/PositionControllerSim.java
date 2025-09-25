@@ -38,8 +38,8 @@ public class PositionControllerSim implements PositionController {
   }
 
   @Override
-  public void setPos(Angle pos) {
-    position = pos;
+  public void setPos(Angle newPos) {
+    position = newPos;
   }
 
   @Override

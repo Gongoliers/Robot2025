@@ -1,5 +1,8 @@
 package frc.lib.sensors;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -44,18 +47,17 @@ public class GyroscopePigeon2 implements Gyroscope {
   public void getUpdatedVals(GyroscopeValues values) {
     BaseStatusSignal.refreshAll(roll, pitch, yaw, rollVelocity, pitchVelocity, yawVelocity);
     
-    values.rollRotations = Units.degreesToRotations(roll.getValueAsDouble());
-    values.pitchRotations = Units.degreesToRotations(pitch.getValueAsDouble());
-    values.yawRotations = Units.degreesToRotations(yaw.getValueAsDouble());
-    values.rollVelRotationsPerSec = Units.degreesToRotations(rollVelocity.getValueAsDouble());
-    values.pitchVelRotationsPerSec = Units.degreesToRotations(pitchVelocity.getValueAsDouble());
-    values.yawVelRotationsPerSec = Units.degreesToRotations(yawVelocity.getValueAsDouble());
+    values.roll = Degrees.of(roll.getValueAsDouble());
+    values.pitch = Degrees.of(pitch.getValueAsDouble());
+    values.yaw = Degrees.of(yaw.getValueAsDouble());
+    values.rollVelocity = DegreesPerSecond.of(rollVelocity.getValueAsDouble());
+    values.pitchVelocity = DegreesPerSecond.of(pitchVelocity.getValueAsDouble());
+    values.yawVelociy = DegreesPerSecond.of(yawVelocity.getValueAsDouble());
   }
 
   @Override
-  public void setYaw(double yawRotations) {
-    System.out.println("setYaw in controler");
-    gyroscope.setYaw(Units.rotationsToDegrees(yawRotations));
+  public void setYaw(Angle newYaw) {
+    gyroscope.setYaw(newYaw.in(Degrees));
   }
 
   @Override

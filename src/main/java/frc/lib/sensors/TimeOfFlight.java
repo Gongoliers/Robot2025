@@ -1,5 +1,8 @@
 package frc.lib.sensors;
 
+import static edu.wpi.first.units.Units.Meters;
+
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -13,10 +16,10 @@ public interface TimeOfFlight {
   /** Time of Flight values */
   public static class TimeOfFlightValues {
 
-    /** Distance in meters */
-    public double distanceMeters = 0.0;
+    /** Distance */
+    public Distance distance = Meters.of(0.0);
 
-    /** True if distance in meters is below the beam broken threshhold */
+    /** True if distance is below the beam broken threshhold */
     public boolean beamBroken = false;
   }
 
@@ -33,9 +36,9 @@ public interface TimeOfFlight {
   /**
    * Set the distance threshold for beam to be considered broken
    * 
-   * @param distanceMeters distance threshold in meters
+   * @param distanceThreshold distance threshold
    */
-  public void setBeambreakThreshold(double distanceMeters);
+  public void setBeambreakThreshold(Distance distanceThreshold);
 
   /** Called every periodic loop */
   public void periodic();

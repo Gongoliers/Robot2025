@@ -1,5 +1,7 @@
 package frc.lib.sensors;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANrange;
@@ -15,7 +17,7 @@ public class TimeOfFlightCANrange implements TimeOfFlight {
 
   private final StatusSignal<Distance> distance;
 
-  private double beambreakThresholdMeters;
+  private Distance beambreakThreshold;
 
   public TimeOfFlightCANrange(
       CAN timeOfFlightCAN) {
@@ -35,13 +37,13 @@ public class TimeOfFlightCANrange implements TimeOfFlight {
   @Override
   public void getUpdatedVals(TimeOfFlightValues values) {
     BaseStatusSignal.refreshAll(distance);
-    values.distanceMeters = distance.getValueAsDouble();
-    values.beamBroken = values.distanceMeters < beambreakThresholdMeters;
+    values.distance = Meters.of(distance.getValueAsDouble());
+    values.beamBroken = values.distance.baseUnitMagnitude() < beambreakThreshold.baseUnitMagnitude();
   }
 
   @Override
-  public void setBeambreakThreshold(double distanceMeters) {
-    beambreakThresholdMeters = distanceMeters;
+  public void setBeambreakThreshold(Distance distanceMeters) {
+    beambreakThreshold = distanceMeters;
   }
 
   @Override

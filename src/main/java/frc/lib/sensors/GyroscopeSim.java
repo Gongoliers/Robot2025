@@ -1,18 +1,24 @@
 package frc.lib.sensors;
 
-import java.util.function.DoubleSupplier;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Seconds;
 
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.RobotConstants;
 
 /** Simulated gyroscope */
 public class GyroscopeSim implements Gyroscope {
   
-  private final DoubleSupplier yawVelRotationsPerSec;
+  private final Supplier<AngularVelocity> yawVelocity;
 
-  private double yawRotations = 0.0;
+  private Angle yaw = Rotations.of(0.0);
 
-  public GyroscopeSim(DoubleSupplier yawVelRotationsPerSec) {
-    this.yawVelRotationsPerSec = yawVelRotationsPerSec;
+  public GyroscopeSim(Supplier<AngularVelocity> yawVelocitySupplier) {
+    this.yawVelocity = yawVelocitySupplier;
   }
 
   @Override
@@ -20,17 +26,17 @@ public class GyroscopeSim implements Gyroscope {
 
   @Override
   public void getUpdatedVals(GyroscopeValues values) {
-    values.yawRotations = yawRotations;
-    values.yawVelRotationsPerSec = yawVelRotationsPerSec.getAsDouble();
+    values.yaw = yaw;
+    values.yawVelociy = yawVelocity.get();
   }
 
   @Override
-  public void setYaw(double yawRotations) {
-    this.yawRotations = yawRotations;
+  public void setYaw(Angle newYaw) {
+    this.yaw = newYaw;
   }
 
   @Override
   public void periodic() {
-    yawRotations += yawVelRotationsPerSec.getAsDouble() * RobotConstants.PERIODIC_DURATION;
+    yaw = yaw.plus(yawVelocity.get().times(Seconds.of(RobotConstants.PERIODIC_DURATION)));
   }
 }

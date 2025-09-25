@@ -1,5 +1,11 @@
 package frc.lib.sensors;
 
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+
 /**
  * Basic interface for gyroscopes
  * 
@@ -11,23 +17,23 @@ public interface Gyroscope {
   /** Gyroscope values */
   public static class GyroscopeValues {
 
-    /** Roll angle in rotations */
-    public double rollRotations = 0.0;
+    /** Roll angle */
+    public Angle roll = Rotations.of(0.0);
 
-    /** Pitch angle in rotations */
-    public double pitchRotations = 0.0;
+    /** Pitch angle */
+    public Angle pitch = Rotations.of(0.0);
 
-    /** Yaw angle in rotations */
-    public double yawRotations = 0.0;
+    /** Yaw angle */
+    public Angle yaw = Rotations.of(0.0);
 
-    /** Roll angle velocity in rotations per second */
-    public double rollVelRotationsPerSec = 0.0;
+    /** Roll angle velocity */
+    public AngularVelocity rollVelocity = RotationsPerSecond.of(0.0);
 
-    /** Pitch angle velocity in rotations per second */
-    public double pitchVelRotationsPerSec = 0.0;
+    /** Pitch angle velocity */
+    public AngularVelocity pitchVelocity = RotationsPerSecond.of(0.0);
 
-    /** Yaw angle in rotations per second */
-    public double yawVelRotationsPerSec = 0.0;
+    /** Yaw angle velocity */
+    public AngularVelocity yawVelociy = RotationsPerSecond.of(0.0);
   }
 
   /** Configures the gyroscope */
@@ -41,11 +47,11 @@ public interface Gyroscope {
   public void getUpdatedVals(GyroscopeValues values);
 
   /**
-   * Sets the gyroscope's yaw in rotations
+   * Sets the gyroscope's yaw
    * 
-   * @param yawRotations yaw in rotations
+   * @param newYaw new gyroscope yaw
    */
-  public void setYaw(double yawRotations);
+  public void setYaw(Angle newYaw);
 
   /** Called every periodic loop */
   public void periodic();

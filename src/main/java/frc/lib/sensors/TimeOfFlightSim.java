@@ -1,5 +1,8 @@
 package frc.lib.sensors;
 
+import static edu.wpi.first.units.Units.Meters;
+
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class TimeOfFlightSim implements TimeOfFlight {
@@ -13,12 +16,12 @@ public class TimeOfFlightSim implements TimeOfFlight {
 
   @Override
   public void getUpdatedVals(TimeOfFlightValues values) {
-    values.distanceMeters = 0.0;
+    values.distance = Meters.of(0.0);
     values.beamBroken = beamBroken;
   }
 
   @Override
-  public void setBeambreakThreshold(double distanceMeters) {
+  public void setBeambreakThreshold(Distance distance) {
     
   }
 
