@@ -33,11 +33,6 @@ public class PositionControllerSim implements PositionController {
   }
 
   @Override
-  public Angle getPos() {
-    return this.position;
-  }
-
-  @Override
   public void setPos(Angle newPos) {
     position = newPos;
   }
