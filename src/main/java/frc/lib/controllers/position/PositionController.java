@@ -53,7 +53,7 @@ public interface PositionController {
    * 
    * @param pos new position
    */
-  public void setPos(Angle newPos);
+  public void setPosition(Angle newPos);
 
   /**
    * Sets setpoint of position controller
