@@ -7,7 +7,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANrange;
 
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CAN;
 import frc.lib.configs.appliers.CANrangeConfigApplier;
 

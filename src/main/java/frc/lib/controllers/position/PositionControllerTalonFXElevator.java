@@ -26,7 +26,6 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.CAN;
 import frc.lib.configs.MechanismConfig;
-import frc.lib.configs.appliers.TalonFXConfigApplier;
 
 /** Position controller implementation for elevator driven by 2 TalonFX motors */
 public class PositionControllerTalonFXElevator implements PositionController {
