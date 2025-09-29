@@ -48,9 +48,6 @@ public class PositionControllerTalonFXSteer implements PositionController{
   /** Position of setpoint */
   private Angle setpointPosition;
 
-  /** Velocity of setpoint */
-  private AngularVelocity setpointVelocity;
-
   // Status signals
   private final StatusSignal<Angle> position;
   private final StatusSignal<AngularVelocity> velocity;
@@ -98,7 +95,6 @@ public class PositionControllerTalonFXSteer implements PositionController{
 
     // Initialize other variable
     setpointPosition = Rotations.of(0.0);
-    setpointVelocity = RotationsPerSecond.of(0.0);
 
     // Configure hardware
     configure();
@@ -145,7 +141,6 @@ public class PositionControllerTalonFXSteer implements PositionController{
 
   public void setSetpoint(Angle setpointPosition, AngularVelocity setpointVelocity) {
     this.setpointPosition = setpointPosition;
-    this.setpointVelocity = setpointVelocity;
   }
 
   public void setVoltage(Voltage volts) {
