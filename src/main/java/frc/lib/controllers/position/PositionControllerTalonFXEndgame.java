@@ -1,49 +1,50 @@
 package frc.lib.controllers.position;
 
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.CANcoderConfigurator;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.CAN;
 import frc.lib.configs.MechanismConfig;
 
-/** Position controller with TalonFX motor controller and CANcoder for absolute encoder used as a steer motor */
-public class PositionControllerTalonFXSteer implements PositionController{
+/** Position controller for endgame with 2 TalonFX controlled motors */
+public class PositionControllerTalonFXEndgame implements PositionController {
 
   /** Mechanism config */
   private final MechanismConfig config;
-  
-  /** TalonFX motor controller */
-  private final TalonFX motor;
 
-  /** CANcoder absolute encoder */
-  private final CANcoder azimuth;
+  /** Leader motor */
+  private final TalonFX leader;
 
-  /** Position of setpoint */
+  /** Follower motor */
+  private final TalonFX follower;
+
+  /** Setpoint position */
   private Angle setpointPosition;
+
+  /** Setpoint velocity */
+  private AngularVelocity setpointVelocity;
 
   // Status signals
   private final StatusSignal<Angle> position;
@@ -57,51 +58,66 @@ public class PositionControllerTalonFXSteer implements PositionController{
   private final PIDController feedback;
 
   /** Feedforward controller */
-  private final SimpleMotorFeedforward feedforward;
+  private final ArmFeedforward feedforward;
 
-  /** Voltage control request */
+  /** Voltage conrol request object */
   private final VoltageOut voltage;
 
-  public PositionControllerTalonFXSteer(
+  /** Position offset (used to re zero without messing with motor control) */
+  private Angle positionOffset;
+
+  /** True if there is a manually set voltage */
+  private boolean voltageSet;
+
+  /** If there is a manually set voltage, this is the voltage */
+  private Voltage setVoltage;
+
+  public PositionControllerTalonFXEndgame(
       MechanismConfig config,
-      CAN motorCAN,
-      CAN encoderCAN) {
+      CAN leaderCAN,
+      CAN followerCAN,
+      boolean invertFollower) {
     
     // Set config
     this.config = config;
 
-    // Initiialize hardware
-    motor = new TalonFX(motorCAN.id(), motorCAN.bus());
-    azimuth = new CANcoder(encoderCAN.id(), encoderCAN.bus());
+    // Initialize hardware
+    leader = new TalonFX(leaderCAN.id(), leaderCAN.bus());
+    follower = new TalonFX(followerCAN.id(), followerCAN.bus());
 
     // Get status signals
-    position = azimuth.getAbsolutePosition();
-    velocity = azimuth.getVelocity();
-    acceleration = motor.getAcceleration();
-    motorVoltage = motor.getMotorVoltage();
-    statorCurrent = motor.getStatorCurrent();
-    supplyCurrent = motor.getSupplyCurrent();
+    position = leader.getPosition();
+    velocity = leader.getVelocity();
+    acceleration = leader.getAcceleration();
+    motorVoltage = leader.getMotorVoltage();
+    statorCurrent = leader.getStatorCurrent();
+    supplyCurrent = leader.getSupplyCurrent();
 
     BaseStatusSignal.setUpdateFrequencyForAll(100, position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
-    motor.optimizeBusUtilization();
-    azimuth.optimizeBusUtilization();
+    leader.optimizeBusUtilization();
+    follower.optimizeBusUtilization();
 
-    // Set up feedforward and feedback
+    // Set up feedback and feedforward
     feedback = config.feedbackControllerConfig().createPIDController();
-    feedforward = config.feedforwardControllerConfig().createSimpleMotorFeedforward();
+    feedforward = config.feedforwardControllerConfig().createArmFeedforward();
 
-    // Initialize other variable
-    setpointPosition = Rotations.of(0.0);
+    // Other initialization
     voltage = new VoltageOut(0.0);
+    voltageSet = false;
+    setVoltage = Volts.of(0.0);
+    positionOffset = Rotations.of(0.0);
+
+    follower.setControl(new Follower(leaderCAN.id(), invertFollower));
 
     // Configure hardware
     configure();
   }
 
+  @Override
   public void configure() {
-    TalonFXConfigurator motorConfigurator = motor.getConfigurator();
-    CANcoderConfigurator encoderConfigurator = azimuth.getConfigurator();
-    
+    TalonFXConfigurator leaderConfigurator = leader.getConfigurator();
+    TalonFXConfigurator followerConfigurator = follower.getConfigurator();
+
     TalonFXConfiguration motorConfiguration = new TalonFXConfiguration()
       .withCurrentLimits(new CurrentLimitsConfigs()
         .withStatorCurrentLimit(config.motorConfig().statorCurrentLimit())
@@ -112,18 +128,15 @@ public class PositionControllerTalonFXSteer implements PositionController{
       .withFeedback(new FeedbackConfigs()
         .withRotorToSensorRatio(config.motorConfig().motorToMechRatio()));
 
-    CANcoderConfiguration encoderConfiguration = new CANcoderConfiguration()
-      .withMagnetSensor(new MagnetSensorConfigs()
-        .withMagnetOffset(config.absoluteEncoderConfig().sensorToMechRatio()));
-
-    motorConfigurator.apply(motorConfiguration);
-    encoderConfigurator.apply(encoderConfiguration);
+    leaderConfigurator.apply(motorConfiguration);
+    followerConfigurator.apply(motorConfiguration);
   }
 
+  @Override
   public void getUpdatedVals(PositionControllerValues values) {
     BaseStatusSignal.refreshAll(position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
-    
-    values.position = position.getValue();
+
+    values.position = position.getValue().plus(positionOffset);
     values.velocity = velocity.getValue();
     values.acceleration = acceleration.getValue();
     values.motorVoltage = motorVoltage.getValue();
@@ -131,32 +144,40 @@ public class PositionControllerTalonFXSteer implements PositionController{
     values.supplyCurrent = supplyCurrent.getValue();
   }
 
+  @Override
   public void setPosition(Angle newPos) {
-    azimuth.setPosition(newPos);
+    positionOffset = newPos.minus(position.getValue().plus(positionOffset));
   }
 
-  public void setSetpoint(Angle setpointPosition, AngularVelocity setpointVelocity) {
-    this.setpointPosition = setpointPosition;
+  @Override
+  public void setSetpoint(Angle pos, AngularVelocity vel) {
+    setpointPosition = pos;
+    setpointVelocity = vel;
   }
 
+  @Override
   public void setVoltage(Voltage volts) {
-    DriverStation.reportWarning("There should be no reason to set or reset the voltage of a steer motor directly", true);
+    setVoltage = volts;
+    voltageSet = true;
   }
 
+  @Override
   public void clearVoltage() {
-    DriverStation.reportWarning("There should be no reason to set or reset the voltage of a steer motor directly", true);
+    voltageSet = false;
   }
 
-  private double calculateFeedforward(double measurement, double setpoint) {
-    return (feedback.atSetpoint() ? ((measurement > setpoint) ? feedforward.getKs() : -feedforward.getKs()) : 0.0);
-  }
-
+  @Override
   public void periodic() {
-    Angle motorPosition = position.getValue();
+    if (voltageSet) {
+      leader.setControl(voltage.withOutput(setVoltage));
+    } else {
+      Angle motorPosition = position.getValue().plus(positionOffset);
 
-    double feedbackVolts = feedback.calculate(motorPosition.in(Radians), setpointPosition.in(Radians));
-    double feedforwardVolts = calculateFeedforward(motorPosition.in(Radians), setpointPosition.in(Radians));
+      double feedbackVolts = feedback.calculate(motorPosition.in(Radians), setpointPosition.in(Radians));
+      double feedforwardVolts = feedforward.calculate(setpointPosition.in(Radians), setpointVelocity.in(RadiansPerSecond));
 
-    motor.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
+      leader.setControl(voltage.withOutput(Volts.of(feedforwardVolts + feedbackVolts)));
+    }
   }
+  
 }

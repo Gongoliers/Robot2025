@@ -1,5 +1,7 @@
 package frc.lib.controllers.position;
 
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -147,7 +149,7 @@ public class PositionControllerTalonFXElevator implements PositionController {
 
   @Override
   public void setPosition(Angle newPos) {
-    positionOffset = newPos.minus(position.getValue());
+    positionOffset = newPos.minus(position.getValue().plus(positionOffset));
   }
 
   @Override
@@ -172,13 +174,12 @@ public class PositionControllerTalonFXElevator implements PositionController {
     if (voltageSet) {
       leader.setControl(voltage.withOutput(setVoltage));
     } else {
-      Angle motorPosition = position.getValue().minus(positionOffset);
+      Angle motorPosition = position.getValue().plus(positionOffset);
 
-      double feedbackVolts = feedback.calculate(motorPosition.in(Rotations), setpointPosition.in(Rotations));
-      double feedforwardVolts = feedforward.calculate(setpointPosition.in(Rotations), setpointVelocity.in(RotationsPerSecond));
+      double feedbackVolts = feedback.calculate(motorPosition.in(Radians), setpointPosition.in(Radians));
+      double feedforwardVolts = feedforward.calculate(setpointPosition.in(Radians), setpointVelocity.in(RadiansPerSecond));
 
       leader.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
     }
   }
-  
 }
