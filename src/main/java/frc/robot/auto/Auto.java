@@ -43,9 +43,6 @@ import frc.robot.swerve.Swerve;
 
 /** Subsystem that handles all auto driving */
 public class Auto extends Subsystem {
-  
-  /** Instance of auto subsystem */
-  private static Auto instance = null;
 
   /** Robot config */
   private RobotConfig config;
@@ -59,23 +56,19 @@ public class Auto extends Subsystem {
   /** Swerve reference */
   private final Swerve swerve;
 
+  /** Superstructure reference */
+  private final Superstructure superstructure;
+
   /** Translation motion profile */
   private final TrapezoidProfile translationProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(2.0, 1.0));
 
   /** Rotation motion profile */
   private final TrapezoidProfile rotationProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(1.0, 0.5));
 
-  public static Auto getInstance() {
-    if (instance == null) {
-      instance = new Auto();
-    }
-
-    return instance;
-  }
-
-  private Auto() {
-    odometry = Odometry.getInstance();
-    swerve = Swerve.getInstance();
+  public Auto(Odometry odometry, Swerve swerve, Superstructure superstructure) {
+    this.odometry = odometry;
+    this.swerve = swerve;
+    this.superstructure = superstructure;
 
     try { 
       config = RobotConfig.fromGUISettings();
@@ -108,7 +101,6 @@ public class Auto extends Subsystem {
 
   private void configureAutoCommands() {
     System.out.println("did it");
-    final Superstructure superstructure = Superstructure.getInstance();
 
     new EventTrigger("Score L4").onTrue(
       Commands.print("doing L4")

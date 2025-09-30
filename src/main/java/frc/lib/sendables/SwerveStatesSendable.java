@@ -1,9 +1,11 @@
 package frc.lib.sendables;
 
+import java.util.function.Supplier;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.lib.controllers.swerve.SwerveModule;
-import frc.robot.odometry.Odometry;
 
 /** Nice swerve drive states sendable that allows for pretty visualization */
 public class SwerveStatesSendable implements Sendable {
@@ -12,6 +14,7 @@ public class SwerveStatesSendable implements Sendable {
   private final SwerveModule ne;
   private final SwerveModule sw;
   private final SwerveModule se;
+  private final Supplier<Rotation2d> robotAngleSupplier;
 
   /**
    * Creates a swerve states sendable that can easily be used to visualize swerves in a dashboard
@@ -25,12 +28,14 @@ public class SwerveStatesSendable implements Sendable {
       SwerveModule nwModule,
       SwerveModule neModule,
       SwerveModule swModule,
-      SwerveModule seModule) {
+      SwerveModule seModule,
+	  Supplier<Rotation2d> robotAngleSupplier) {
     
     nw = nwModule;
     ne = neModule;
     sw = swModule;
     se = seModule;
+	this.robotAngleSupplier = robotAngleSupplier;
   }
 
   @Override
@@ -49,6 +54,6 @@ public class SwerveStatesSendable implements Sendable {
     builder.addDoubleProperty("Back Right Angle", () -> se.getState().angle.getDegrees(), null);
     builder.addDoubleProperty("Back Right Velocity", () -> se.getState().speedMetersPerSecond, null);
 
-    builder.addDoubleProperty("Robot Angle", () -> Odometry.getInstance().getDriverRelativeHeading().getDegrees(), null);
+    builder.addDoubleProperty("Robot Angle", () -> robotAngleSupplier.get().getDegrees(), null);
   }
 }

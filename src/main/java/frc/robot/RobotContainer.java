@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -34,9 +36,6 @@ import frc.robot.swerve.Swerve;
 
 /** Robot container */
 public class RobotContainer {
-
-  /** Robot container singleton */
-  private static RobotContainer instance = null;
 
   /** Odometry subsystem reference */
   private final Odometry odometry;
@@ -72,16 +71,21 @@ public class RobotContainer {
   private final CommandXboxController operatorController;
 
   /** Initializes the robot container */
-  private RobotContainer() {
-    odometry = Odometry.getInstance();
-    swerve = Swerve.getInstance();
-    elevator = Elevator.getInstance();
-    pivot = Pivot.getInstance();
-    endgame = Endgame.getInstance();
-    intake = Intake.getInstance();
-    ramp = Ramp.getInstance();
-    superstructure = Superstructure.getInstance();
-    auto = Auto.getInstance();
+  public RobotContainer() {
+    swerve = new Swerve();
+    odometry = new Odometry(swerve.createPoseEstimator(Rotation2d.kZero, new Pose2d()));
+
+    swerve.setDriverRotationSupplier(odometry::getDriverRelativeHeading);
+    odometry.setChassisSpeedsSupplier(swerve::getChassisSpeeds);
+    odometry.setModulePositionsSupplier(swerve::getModulePositions);
+
+    elevator = new Elevator();
+    pivot = new Pivot();
+    endgame = new Endgame();
+    intake = new Intake();
+    ramp = new Ramp();
+    superstructure = new Superstructure(elevator, pivot, intake, ramp, endgame);
+    auto = new Auto(odometry, swerve, superstructure);
 
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
@@ -90,19 +94,6 @@ public class RobotContainer {
 
     configureDefaultCommands();
     configureBindings();
-  }
-
-  /**
-   * Returns the robot container
-   * 
-   * @return the robot container
-   */
-  public static RobotContainer getInstance() {
-    if (instance == null) {
-      instance = new RobotContainer();
-    }
-
-    return instance;
   }
 
   /** Configures subsystem default commands for teleop */

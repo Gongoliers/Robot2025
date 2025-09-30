@@ -18,9 +18,6 @@ import frc.lib.sendables.RampStateSendable;
 /** Ramp subsystem */
 public class Ramp extends Subsystem {
 
-  /** Ramp singleton */
-  private static Ramp instance = null;
-
   /** Ramp motor */
   private final VelocityController motor;
 
@@ -59,16 +56,7 @@ public class Ramp extends Subsystem {
           .build())
       .build();
 
-  /** Gets ramp subsystem instance */
-  public static Ramp getInstance() {
-    if (instance == null) {
-      instance = new Ramp();
-    }
-
-    return instance;
-  }
-
-  private Ramp() {
+  public Ramp() {
     motor = RampFactory.createRampMotor(rampConfig);
     motor.configure();
     

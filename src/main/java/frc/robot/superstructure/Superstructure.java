@@ -21,9 +21,6 @@ import frc.robot.ramp.RampState;
 /** Superstructure subsystem */
 public class Superstructure extends Subsystem {
   
-  /** Superstructure subsystem singleton */
-  private static Superstructure instance = null;
-
   /** Elevator reference */
   private final Elevator elevator;
 
@@ -49,27 +46,14 @@ public class Superstructure extends Subsystem {
   private boolean cancelAll = false;
 
   /** Initializes superstructure subsystem */
-  private Superstructure() {
-    elevator = Elevator.getInstance();
-    pivot = Pivot.getInstance();
-    intake = Intake.getInstance();
-    ramp = Ramp.getInstance();
-    endgame = Endgame.getInstance();
+  public Superstructure(Elevator elevator, Pivot pivot, Intake intake, Ramp ramp, Endgame endgame) {
+    this.elevator = elevator;
+    this.pivot = pivot;
+    this.intake = intake;
+    this.ramp = ramp;
+    this.endgame = endgame;
 
     mechanism = new SuperstructureMechanism(elevator::getPosMeters, pivot::getPosRotations);
-  }
-
-  /**
-   * Gets superstructure subsystem instance if there is one, and creates and returns one if there isn't
-   * 
-   * @return superstructure subsystem instance
-   */
-  public static Superstructure getInstance() {
-    if (instance == null) {
-      instance = new Superstructure();
-    }
-
-    return instance;
   }
 
   @Override

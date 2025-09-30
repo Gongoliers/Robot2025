@@ -22,9 +22,6 @@ import frc.robot.RobotConstants;
 
 public class Pivot extends Subsystem{
   
-  /** Pivot subsystem instance */
-  private static Pivot instance = null;
-
   /** Pivot motor */
   private final PositionController motor;
 
@@ -82,17 +79,8 @@ public class Pivot extends Subsystem{
           .build())
       .build();
 
-  /** Gets pivot subsystem instance */
-  public static Pivot getInstance() {
-    if (instance == null) {
-      instance = new Pivot();
-    }
-
-    return instance;
-  }
-
   /** Initializes pivot subsystem */
-  private Pivot() {
+  public Pivot() {
     motor = PivotFactory.createPivotMotor(pivotConfig);
     motor.configure();
 

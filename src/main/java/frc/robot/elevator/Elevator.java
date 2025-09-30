@@ -24,9 +24,6 @@ import frc.robot.RobotConstants;
 /** Elevator subsystem */
 public class Elevator extends Subsystem {
 
-  /** Elevator singleton */
-  private static Elevator instance = null;
-
   /** Motor(s) that drives the elevator */
   private final ElevatorPositionController motor;
 
@@ -81,7 +78,7 @@ public class Elevator extends Subsystem {
       .build();
 
   /** Initializes the elevator subsystem and configures hardware */
-  private Elevator() {
+  public Elevator() {
     motor = ElevatorFactory.createDriveMotor(config);
     motor.configure();
     motor.setElevatorPos(0.0);
@@ -97,15 +94,6 @@ public class Elevator extends Subsystem {
     stateTolerance = 0.04;
 
     motionProfile = config.motionProfileConfig().createTrapezoidProfile();
-  }
-
-  /** Gets elevator subsystem instance if there is one, and creates one if there isn't */
-  public static Elevator getInstance() {
-    if (instance == null) {
-      instance = new Elevator();
-    }
-
-    return instance;
   }
 
   @Override

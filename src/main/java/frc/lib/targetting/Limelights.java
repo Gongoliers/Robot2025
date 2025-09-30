@@ -1,6 +1,7 @@
 package frc.lib.targetting;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.LimelightHelpers;
 
 /**
@@ -28,8 +29,9 @@ public interface Limelights {
    * Adds vision measurements to a swerve pose estimator
    * 
    * @param poseEstimator swerve drive pose estimator to add vision measurements to
+   * @param yaw rotation representing the current yaw of the robot
    */
-  public void addVisionMeasurements(SwerveDrivePoseEstimator poseEstimator);
+  public void addVisionMeasurements(SwerveDrivePoseEstimator poseEstimator, Rotation2d yaw);
 
   /**
    * Gets a raw vision measurement from some limelight

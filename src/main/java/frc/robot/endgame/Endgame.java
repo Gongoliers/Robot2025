@@ -25,9 +25,6 @@ import frc.robot.RobotConstants;
 
 public class Endgame extends Subsystem {
   
-  /** Endgame subsystem instance */
-  private static Endgame instance = null;
-
   /** Endgame motor */
   private final EndgamePositionController motor;
 
@@ -85,17 +82,8 @@ public class Endgame extends Subsystem {
           .build())
       .build();
 
-  /** Gets pivot subsystem instance */
-  public static Endgame getInstance() {
-    if (instance == null) {
-      instance = new Endgame();
-    }
-
-    return instance;
-  }
-
   /** Initializes endgame subsystem */
-  private Endgame() {
+  public Endgame() {
     motor = EndgameFactory.createEndgameMotor(endgameConfig);
     motor.configure();
 

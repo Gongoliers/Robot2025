@@ -20,9 +20,6 @@ import frc.lib.sensors.TimeOfFlight.TimeOfFlightValues;
 /** Intake subsystem */
 public class Intake extends Subsystem {
   
-  /** Intake singleton */
-  private static Intake instance = null;
-
   /** Intake motor */
   private final VelocityController motor;
 
@@ -67,17 +64,8 @@ public class Intake extends Subsystem {
           .build())
       .build();
 
-  /** Gets intake subsystem instance */
-  public static Intake getInstance() {
-    if (instance == null) {
-      instance = new Intake();
-    }
-
-    return instance;
-  }
-
   /** Initialize intake subsystem */
-  private Intake() {
+  public Intake() {
     motor = IntakeFactory.createIntakeMotor(intakeConfig);
     motor.configure();
 

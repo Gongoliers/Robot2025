@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
@@ -23,14 +24,10 @@ import frc.lib.sensors.Gyroscope.GyroscopeValues;
 import frc.lib.targetting.Limelights;
 import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
-import frc.robot.swerve.Swerve;
 
 /** Odometry subsystem */
 public class Odometry extends Subsystem {
   
-  /** Odometry subsystem singleton */
-  private static Odometry instance = null;
-
   /** Gyroscope */
   private final Gyroscope gyroscope;
 
@@ -41,10 +38,10 @@ public class Odometry extends Subsystem {
   private final Limelights limelights;
 
   /** Supplies swerve module positions */
-  private final Supplier<SwerveModulePosition[]> modulePositionsSupplier;
+  private Supplier<SwerveModulePosition[]> modulePositionsSupplier = () -> new SwerveModulePosition[4];
 
   /** Supplies swerve chassis speeds */
-  private final Supplier<ChassisSpeeds> chassisSpeedsSupplier;
+  private Supplier<ChassisSpeeds> chassisSpeedsSupplier = () -> new ChassisSpeeds();
 
   /** Swerve drive pose estimator */
   private final SwerveDrivePoseEstimator poseEstimator;
@@ -53,22 +50,13 @@ public class Odometry extends Subsystem {
   private final Field2d field;
 
   /** Initializes odometry subsystem and odometry hardware */
-  private Odometry() {
+  public Odometry(SwerveDrivePoseEstimator poseEstimator) {
     gyroscope = OdometryFactory.createGyroscope(this);
     gyroscope.configure();
 
-    modulePositionsSupplier = () -> Swerve.getInstance().getModulePositions();
-    chassisSpeedsSupplier = () -> Swerve.getInstance().getChassisSpeeds();
-
-    gyroscope.getUpdatedVals(gyroscopeValues);
-
-    poseEstimator =
-      new SwerveDrivePoseEstimator(
-        Swerve.getInstance().getKinematics(), 
-        Rotation2d.fromRotations(gyroscopeValues.yawRotations), 
-        modulePositionsSupplier.get(), 
-        new Pose2d());
+    this.poseEstimator = poseEstimator;
     poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
+	// TODO: Seed the gyroscope with the initial pose yaw?
 
     limelights = OdometryFactory.createLimelights();
     limelights.addLimelight("limelight-east", 
@@ -89,17 +77,12 @@ public class Odometry extends Subsystem {
     field = new Field2d();
   }
 
-  /** 
-   * Returns the odometry subsystem instance, creates a new instance if instance is null (singleton)
-   * 
-   * @return the odometry subsystem instance
-   */
-  public static Odometry getInstance() {
-    if (instance == null) {
-      instance = new Odometry();
-    }
+  public void setModulePositionsSupplier(Supplier<SwerveModulePosition[]> modulePositionsSupplier) {
+    this.modulePositionsSupplier = modulePositionsSupplier;
+  }
 
-    return instance;
+  public void setChassisSpeedsSupplier(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
+    this.chassisSpeedsSupplier = chassisSpeedsSupplier;
   }
 
   @Override
@@ -107,7 +90,7 @@ public class Odometry extends Subsystem {
     gyroscope.periodic();
     gyroscope.getUpdatedVals(gyroscopeValues);
 
-    limelights.addVisionMeasurements(poseEstimator);
+    limelights.addVisionMeasurements(poseEstimator, Rotation2d.fromRotations(gyroscopeValues.yawRotations));
 
     poseEstimator.update(
       Rotation2d.fromRotations(gyroscopeValues.yawRotations), 
@@ -169,15 +152,6 @@ public class Odometry extends Subsystem {
       (Robot.isRedAlliance())
         ? Rotation2d.k180deg
         : Rotation2d.kZero);
-  }
-
-  /**
-   * Get raw yaw measurement from gyroscope (ignores the pose estimator to prevent possible feedback loops with limelights)
-   * 
-   * @reutrn raw yaw measurement from gyroscope
-   */
-  public Rotation2d getRawGyroYaw() {
-    return Rotation2d.fromRotations(gyroscopeValues.yawRotations);
   }
   
   /**

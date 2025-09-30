@@ -3,6 +3,7 @@ package frc.lib.targetting;
 import java.util.ArrayList;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.odometry.Odometry;
 import frc.robot.LimelightHelpers;
 
@@ -23,9 +24,9 @@ public class Limelights3G implements Limelights {
   }
 
   @Override
-  public void addVisionMeasurements(SwerveDrivePoseEstimator poseEstimator) {
+  public void addVisionMeasurements(SwerveDrivePoseEstimator poseEstimator, Rotation2d yaw) {
     for (String limelight : limelights) {
-      LimelightHelpers.SetRobotOrientation(limelight, Odometry.getInstance().getRawGyroYaw().getDegrees(), 0, 0, 0, 0, 0);
+      LimelightHelpers.SetRobotOrientation(limelight, yaw.getDegrees(), 0, 0, 0, 0, 0);
       LimelightHelpers.PoseEstimate measurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelight);
 
       if (measurement.tagCount >= 1) {

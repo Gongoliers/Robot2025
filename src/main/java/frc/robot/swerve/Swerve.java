@@ -1,7 +1,11 @@
 package frc.robot.swerve;
 
+import java.util.function.Supplier;
+import java.util.function.Function;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -25,15 +29,12 @@ import frc.lib.controllers.swerve.SwerveModule;
 import frc.lib.sendables.SwerveStatesSendable;
 import frc.robot.RobotConstants;
 import frc.robot.auto.AutoCoordinator;
-import frc.robot.odometry.Odometry;
-
-import java.util.function.Function;
 
 /** Swerve subsystem */
 public class Swerve extends Subsystem {
-  
-  /** Swerve subsystem singleton */
-  private static Swerve instance = null;
+
+  /** Supplier for the rotation of the robot relative to the driver. */
+  private Supplier<Rotation2d> driverRotationSupplier = () -> Rotation2d.kZero;
 
   /** Swerve modules */
   private final SwerveModule[] swerves = new SwerveModule[4];
@@ -100,7 +101,7 @@ public class Swerve extends Subsystem {
     new MotionProfileConfig(1.0, 2);
   
   /** Initializes the swerve subsystem and configures swerve hardware */
-  private Swerve() {
+  public Swerve() {
     swerves[0] =
       SwerveFactory.createNorthWestModule(steerConfig, driveConfig, wheelCircumference);
     swerves[1] =
@@ -121,17 +122,12 @@ public class Swerve extends Subsystem {
     yawPidController.setTolerance(0.02);
   }
 
-  /** 
-   * Returns the swerve subsystem instance, creates a new instance if instance is null (singleton)
-   * 
-   * @return the swerve subsystem instance
-   */
-  public static Swerve getInstance() {
-    if (instance == null) {
-      instance = new Swerve();
-    }
+  public SwerveDrivePoseEstimator createPoseEstimator(Rotation2d gyroAngle, Pose2d initialPose) {
+	return new SwerveDrivePoseEstimator(swerveKinematics, gyroAngle, getModulePositions(), initialPose);
+  }
 
-    return instance;
+  public void setDriverRotationSupplier(Supplier<Rotation2d> driverRotationSupplier) {
+    this.driverRotationSupplier = driverRotationSupplier;
   }
 
   @Override
@@ -146,12 +142,16 @@ public class Swerve extends Subsystem {
     // Get shuffleboard tab
     ShuffleboardTab tab = Shuffleboard.getTab("Swerve Drive");
 
+    // NOTE: Since the `driverRotationSupplier` function pointer can be changed, it is possible that the sendable
+    // will end up with a stale `driverRotationSupplier`; always set the correct `driverRotationSupplier` before this
     // Add swerve states sendable to shuffleboard
     tab.add("Module States", new SwerveStatesSendable(
         swerves[0], 
         swerves[1], 
         swerves[3], 
-        swerves[2]));
+        swerves[2],
+		driverRotationSupplier
+		));
   }
 
   /**
@@ -223,7 +223,8 @@ public class Swerve extends Subsystem {
    * @return robot relative chassis speeds
    */
   public ChassisSpeeds getRobotRelativeChassisSpeeds() {
-    return ChassisSpeeds.fromFieldRelativeSpeeds(getChassisSpeeds(), Odometry.getInstance().getFieldRelativeHeading());
+    // NOTE: Fixes a possible bug; `ChassisSpeeds.fromRobotRelativeSpeeds` expects robot rotation but used field rotation
+    return ChassisSpeeds.fromFieldRelativeSpeeds(getChassisSpeeds(), driverRotationSupplier.get());
   }
 
   /**
@@ -245,7 +246,8 @@ public class Swerve extends Subsystem {
    * @param speeds chassis speeds
    */
   public void setRobotRelativeChassisSpeeds(ChassisSpeeds speeds) {
-    setChassisSpeeds(ChassisSpeeds.fromRobotRelativeSpeeds(speeds, Odometry.getInstance().getFieldRelativeHeading()));
+    // NOTE: Fixes a possible bug; `ChassisSpeeds.fromRobotRelativeSpeeds` expects robot rotation but used field rotation
+    setChassisSpeeds(ChassisSpeeds.fromRobotRelativeSpeeds(speeds, driverRotationSupplier.get()));
   }
 
   /**
@@ -324,7 +326,7 @@ public class Swerve extends Subsystem {
         rotationVelocity = request.rotationVelocityAxis() * Units.rotationsToRadians(rotationMotionProfileConfig.maxVelocity());
 
         if (request.rotationMode() == DriveRequest.RotationMode.ALIGNING) {
-          Rotation2d angleMeasurement = Odometry.getInstance().getDriverRelativeHeading();
+          Rotation2d angleMeasurement = driverRotationSupplier.get();
           Rotation2d setpointAngle = request.headingAxis().getAngle();
 
           rotationVelocity = yawPidController.calculate(angleMeasurement.getRotations(), setpointAngle.getRotations());
@@ -334,7 +336,7 @@ public class Swerve extends Subsystem {
           request.translationAxis().getX() * translationMotionProfileConfig.maxVelocity(),
           request.translationAxis().getY() * translationMotionProfileConfig.maxVelocity(),
           rotationVelocity,
-          Odometry.getInstance().getDriverRelativeHeading());
+          driverRotationSupplier.get());
       };
 
     return Commands.run(
