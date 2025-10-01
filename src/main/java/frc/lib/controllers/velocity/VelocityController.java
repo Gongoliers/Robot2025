@@ -55,6 +55,16 @@ public interface VelocityController {
    */
   public void setSetpoint(AngularVelocity velocity);
 
+  /**
+   * Sets a manual voltage for the position controller
+   * 
+   * @param volts manual voltage to set
+   */
+  public void setVoltage(Voltage volts);
+
+  /** Clears a set voltage */
+  public void clearVoltage();
+
   /** Called every periodic loop */
   public void periodic();
 }

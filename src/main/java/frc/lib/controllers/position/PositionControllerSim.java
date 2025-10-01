@@ -13,13 +13,16 @@ public class PositionControllerSim implements PositionController {
     
   private Angle position;
   private AngularVelocity velocity;
-  private Voltage voltage;
+
+  private boolean voltageSet;
+  private Voltage setVoltage;
 
   /** Initialize simulated position controller */
   public PositionControllerSim() {
     position = Rotations.of(0.0);
     velocity = RotationsPerSecond.of(0.0);
-    voltage = Volts.of(0.0);
+    voltageSet = false;
+    setVoltage = Volts.of(0.0);
   }
 
   @Override
@@ -29,7 +32,7 @@ public class PositionControllerSim implements PositionController {
   public void getUpdatedVals(PositionControllerValues values) {
     values.position = position;
     values.velocity = velocity;
-    values.motorVoltage = voltage;
+    values.motorVoltage = (voltageSet) ? setVoltage : Volts.of(0.0);
   }
 
   @Override
@@ -45,14 +48,19 @@ public class PositionControllerSim implements PositionController {
 
   @Override
   public void setVoltage(Voltage volts) {
-    voltage = volts;
+    setVoltage = volts;
+    voltageSet = true;
   }
 
   @Override
   public void clearVoltage() {
-    voltage = Volts.of(0.0);
+    voltageSet = false;
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    if (voltageSet) {
+      position = position.plus(Rotations.of(setVoltage.in(Volts)*2));
+    }
+  }
 }

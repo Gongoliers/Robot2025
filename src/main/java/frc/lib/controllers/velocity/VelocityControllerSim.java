@@ -3,9 +3,11 @@ package frc.lib.controllers.velocity;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.RobotConstants;
 
 /** Simulated velocity controller */
@@ -14,9 +16,15 @@ public class VelocityControllerSim implements VelocityController {
   private Angle position;
   private AngularVelocity velocity;
 
+  private boolean voltageSet;
+  private Voltage setVoltage;
+
   public VelocityControllerSim() {
     position = Rotations.of(0.0);
     velocity = RotationsPerSecond.of(0.0);
+
+    voltageSet = false;
+    setVoltage = Volts.of(0.0);
   } 
 
   @Override
@@ -26,11 +34,27 @@ public class VelocityControllerSim implements VelocityController {
   public void getUpdatedVals(VelocityControllerValues values) {
     values.position = position;
     values.velocity = velocity;
+    values.motorVoltage = (voltageSet) ? setVoltage : Volts.of(0.0);
   }
 
   @Override
   public void setSetpoint(AngularVelocity velocity) {
-    this.velocity = velocity;
+    if (!voltageSet) {
+      this.velocity = velocity;
+    }
+  }
+
+  @Override
+  public void setVoltage(Voltage volts) {
+    setVoltage = volts;
+    voltageSet = true;
+
+    this.velocity = RotationsPerSecond.of(volts.in(Volts)*1);
+  }
+
+  @Override
+  public void clearVoltage() {
+    voltageSet = false;
   }
 
   @Override
