@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.elevator.Elevator;
 
 /** Robot container */
 public class RobotContainer {
@@ -20,10 +21,21 @@ public class RobotContainer {
   /** Operator controller */
   private final CommandXboxController operatorController;
 
+  /** Multithreader */
+  private final Multithreader multithreader;
+
+  /** Elevator subsystem reference */
+  private final Elevator elevator;
+
   /** Initializes the robot container */
   private RobotContainer() {
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
+
+    elevator = Elevator.getInstance();
+
+    multithreader = Multithreader.getInstance();
+    multithreader.start();
 
     configureDefaultCommands();
     configureBindings();

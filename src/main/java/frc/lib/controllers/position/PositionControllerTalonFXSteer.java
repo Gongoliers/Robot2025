@@ -110,7 +110,8 @@ public class PositionControllerTalonFXSteer implements PositionController{
         .withInverted(config.motorConfig().ccwPositive() ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive)
         .withNeutralMode(config.motorConfig().neutralBrake() ? NeutralModeValue.Brake : NeutralModeValue.Coast))
       .withFeedback(new FeedbackConfigs()
-        .withRotorToSensorRatio(config.motorConfig().motorToMechRatio()));
+        .withRotorToSensorRatio(config.motorConfig().rotorToSensorRatio())
+        .withSensorToMechanismRatio(config.motorConfig().sensorToMechRatio()));
 
     CANcoderConfiguration encoderConfiguration = new CANcoderConfiguration()
       .withMagnetSensor(new MagnetSensorConfigs()

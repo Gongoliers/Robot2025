@@ -12,6 +12,12 @@ public class RobotConstants {
   /** Duration of each robot periodic call in seconds */
   public static final double PERIODIC_DURATION = 1.0/PERIODIC_RATE;
 
+  /** Number of fast peridic calls per second */
+  public static final double FAST_PERIODIC_RATE = 100;
+
+  /** Duration of each fast periodic call in seconds */
+  public static final double FAST_PERIODIC_DURATION = 1.0/FAST_PERIODIC_RATE;
+
   /** Side lengths of robot chassis */
   public static final double CHASSIS_SIDE_LENGTH = 24;
 

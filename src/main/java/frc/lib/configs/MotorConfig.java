@@ -5,14 +5,16 @@ package frc.lib.configs;
  * 
  * @param neutralBrake true means the motor will brake when given no voltage
  * @param ccwPositive true means positive voltage rotates the motor ccw
- * @param motorToMechRatio ratio of motor rotations to mechanism rotations
+ * @param rotorToSensorRatio ratio of rotor rotations to sensor rotations
+ * @param sensorTOMechRatio ratio of sensor rotations to mechanism rotations
  * @param statorCurrentLimit current limit in the stator
  * @param supplyCurrentLimit supply current limit
  */
 public record MotorConfig(
     boolean neutralBrake,
     boolean ccwPositive,
-    double motorToMechRatio,
+    double rotorToSensorRatio,
+    double sensorToMechRatio,
     double statorCurrentLimit,
     double supplyCurrentLimit) {
 
@@ -20,19 +22,22 @@ public record MotorConfig(
   public static class MotorBuilder {
     private boolean neutralBrake;
     private boolean ccwPositive;
-    private double motorToMechRatio;
+    private double rotorToSensorRatio;
+    private double sensorToMechRatio;
     private double statorCurrentLimit;
     private double supplyCurrentLimit;
 
     private MotorBuilder(
         boolean neutralBrake,
         boolean ccwPositive,
-        double motorToMechRatio,
+        double rotorToSensorRatio,
+        double sensorToMechRatio,
         double statorCurrentLimit,
         double supplyCurrentLimit) {
       this.neutralBrake = neutralBrake;
       this.ccwPositive = ccwPositive;
-      this.motorToMechRatio = motorToMechRatio;
+      this.rotorToSensorRatio = rotorToSensorRatio;
+      this.sensorToMechRatio = sensorToMechRatio;
       this.statorCurrentLimit = statorCurrentLimit;
       this.supplyCurrentLimit = supplyCurrentLimit;
     }
@@ -46,7 +51,8 @@ public record MotorConfig(
       return new MotorBuilder(
         false, 
         true, 
-        1.0, 
+        1.0,
+        1.0,
         80.0, 
         40.0);
     }
@@ -61,7 +67,8 @@ public record MotorConfig(
       return new MotorBuilder(
         config.neutralBrake(), 
         config.ccwPositive(), 
-        config.motorToMechRatio(), 
+        config.rotorToSensorRatio(),
+        config.sensorToMechRatio(),
         config.statorCurrentLimit(), 
         config.supplyCurrentLimit());
     }
@@ -76,8 +83,13 @@ public record MotorConfig(
       return this;
     }
 
-    public MotorBuilder motorToMechRatio(double motorToMechRatio) {
-      this.motorToMechRatio = motorToMechRatio;
+    public MotorBuilder rotorToSensorRatio(double rotorToSensorRatio) {
+      this.rotorToSensorRatio = rotorToSensorRatio;
+      return this;
+    }
+
+    public MotorBuilder sensorToMechRatio(double sensorToMechRatio) {
+      this.sensorToMechRatio = sensorToMechRatio;
       return this;
     }
 
@@ -100,7 +112,8 @@ public record MotorConfig(
       return new MotorConfig(
         this.neutralBrake,
         this.ccwPositive,
-        this.motorToMechRatio,
+        this.rotorToSensorRatio,
+        this.sensorToMechRatio,
         this.statorCurrentLimit,
         this.supplyCurrentLimit);
     }
