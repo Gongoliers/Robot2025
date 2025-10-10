@@ -1,13 +1,19 @@
 package frc.robot.elevator;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.MultithreadedSubsystem;
@@ -107,7 +113,32 @@ public class Elevator extends MultithreadedSubsystem {
 
   @Override
   public void initializeTab() {
-    
+    // Get shuffleboard tab
+    ShuffleboardTab tab = Shuffleboard.getTab("Elevator");
+
+    // State info
+    tab.addString("Target state", () -> targetState.name());
+    tab.addBoolean("At target state", () -> targetState == currentState);
+
+    // Setpoint column
+    ShuffleboardLayout setpointColumn = tab.getLayout("Setpoint", BuiltInLayouts.kList);
+
+    setpointColumn.addDouble("Setpoint position (m)", () -> profiledSetpoint.position);
+    setpointColumn.addDouble("Setpoint velocity (m/s)", () -> profiledSetpoint.velocity);
+
+    // Current position/velocity column
+    ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
+
+    stateColumn.addString("Name", () -> currentState.name());
+    stateColumn.addDouble("ELevator position (m)", () -> positionControllerValues.position.in(Rotations) * rotationsToMeters);
+    stateColumn.addDouble("Elevator velocity (m/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
+    stateColumn.addDouble("Elevator acceleration (m/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters);
+    stateColumn.addDouble("Motor position (r)", () -> positionControllerValues.position.in(Rotations));
+    stateColumn.addDouble("Motor velocity (r/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond));
+    stateColumn.addDouble("Motor acceleration (r/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond));
+    stateColumn.addDouble("Motor voltage",  () -> positionControllerValues.motorVoltage.in(Volts));
+    stateColumn.addDouble("Stator current", () -> positionControllerValues.statorCurrent.in(Amps));
+    stateColumn.addDouble("Supply current", () -> positionControllerValues.supplyCurrent.in(Amps));
   }
   
   @Override
