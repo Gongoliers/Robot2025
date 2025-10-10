@@ -130,12 +130,12 @@ public class Elevator extends MultithreadedSubsystem {
     ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
 
     stateColumn.addString("Name", () -> currentState.name());
-    stateColumn.addDouble("ELevator position (m)", () -> positionControllerValues.position.in(Rotations) * rotationsToMeters);
+    stateColumn.addDouble("Elevator position (m)", () -> positionControllerValues.position.in(Rotations) * rotationsToMeters);
     stateColumn.addDouble("Elevator velocity (m/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
     stateColumn.addDouble("Elevator acceleration (m/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters);
-    stateColumn.addDouble("Motor position (r)", () -> positionControllerValues.position.in(Rotations));
-    stateColumn.addDouble("Motor velocity (r/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond));
-    stateColumn.addDouble("Motor acceleration (r/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond));
+    stateColumn.addDouble("Motor position (rot)", () -> positionControllerValues.position.in(Rotations));
+    stateColumn.addDouble("Motor velocity (rot/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond));
+    stateColumn.addDouble("Motor acceleration (rot/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond));
     stateColumn.addDouble("Motor voltage",  () -> positionControllerValues.motorVoltage.in(Volts));
     stateColumn.addDouble("Stator current", () -> positionControllerValues.statorCurrent.in(Amps));
     stateColumn.addDouble("Supply current", () -> positionControllerValues.supplyCurrent.in(Amps));
