@@ -1,8 +1,6 @@
 package frc.robot;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import frc.lib.Multithreaded;
@@ -53,6 +51,7 @@ public class Multithreader extends Thread {
 
       fastPeriodic();
 
+      // Pause the thread just long enough for every loop of the thread to last exactly as long as expected
       long sleepTime = nanoTime - System.nanoTime() + startTime;
 
       if (sleepTime > 0) {
@@ -63,6 +62,7 @@ public class Multithreader extends Thread {
           break;
         }
       } else {
+        // If thread takes longer to execute tasks than expected, don't pause, and log how much it has overrun by
         System.out.println("SpeedThread overran by " + (-sleepTime / 1000000) + "ms");
       }
     }
