@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.lib.Telemetry;
 import frc.robot.elevator.Elevator;
 
 /** Robot container */
@@ -33,6 +34,8 @@ public class RobotContainer {
     operatorController = new CommandXboxController(1);
 
     elevator = Elevator.getInstance();
+
+    Telemetry.initializeTabs(elevator);
 
     multithreader = Multithreader.getInstance();
     multithreader.start();
