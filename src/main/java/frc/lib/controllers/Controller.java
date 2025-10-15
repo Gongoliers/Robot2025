@@ -1,34 +1,30 @@
 package frc.lib.controllers;
 
 /**
- * Represents a generic controller for a mechanism.
+ * A generic interface for implementing control logic for a system.
  * <p>
- * This controller is responsible for reaching a specified goal by executing
- * control logic during periodic updates. It is parameterized by the type of
- * goal and the type of values that it outputs.
+ * A {@code Controller} is responsible for driving a system to a goal by performing
+ * periodic control updates. It accepts a goal that the system should achieve, and
+ * returns output values that represent the system state.
  *
- * @param <ControllerGoalType> The type of goal that the controller should achieve.
- * @param <OutputValuesType> The type of values reported by the controller.
+ * @param <ControllerGoalType> The type of the goal that the controller should achieve.
+ * @param <OutputValuesType> The type of the output values returned by the controller.
  */
 public interface Controller<ControllerGoalType, OutputValuesType> {
     /**
-     * Configures the hardware used by the controller.
+     * Returns the output values of the system.
      *
-     * @return True if the configuration was successful.
-     */
-    boolean configure();
-
-    /**
-     * Returns the output values from the controller.
-     *
-     * @return the output values from the controller.
+     * @return the output values of the system.
      */
     OutputValuesType getOutputValues();
 
     /**
-     * Sets the controller goal and performs a control update.
+     * Performs a control update to achieve the goal.
+     * <p>
+     * This method should be called once per periodic iteration to maintain
+     * continuous control, regardless of whether the goal has changed.
      *
-     * @param goal The controller goal.
+     * @param goal The goal for the controller to achieve.
      */
     void update(ControllerGoalType goal);
 }

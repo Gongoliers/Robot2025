@@ -1,7 +1,10 @@
 package frc.lib.controllers;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.units.measure.*;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Time;
 import frc.lib.MotorOutputValues;
 
 import static edu.wpi.first.units.Units.*;
@@ -36,11 +39,6 @@ public class ProfiledPositionController implements Controller<Angle, MotorOutput
                                 accelerationConstraint.in(RotationsPerSecondPerSecond)));
         this.goal = new TrapezoidProfile.State(initialPosition.in(Rotations), 0.0);
         this.setpoint = this.goal;
-    }
-
-    @Override
-    public boolean configure() {
-        return controller.configure();
     }
 
     @Override
