@@ -1,6 +1,5 @@
 package frc.lib.controllers;
 
-import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -9,6 +8,8 @@ import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
+import frc.lib.MotorOutputValues;
+import frc.lib.TalonFXOutputValues;
 
 /**
  * Represents a controller for a mechanism that reaches a velocity using voltage
@@ -21,11 +22,11 @@ import edu.wpi.first.units.measure.Voltage;
  * for V, the amount of voltage required to reach a steady-state speed ω is kS + V ÷ kV.
  * Often, V ÷ kV is written as the multiplication kV × V, where kV is inverted.
  */
-public class OpenLoopVelocityController implements Controller<AngularVelocity, AngularVelocity> {
+public class OpenLoopVelocityController implements Controller<AngularVelocity, MotorOutputValues> {
 
     private final TalonFX motor;
 
-    private final StatusSignal<AngularVelocity> velocity;
+    private final TalonFXOutputValues outputValues;
 
     private final VoltageOut control;
 
@@ -36,9 +37,9 @@ public class OpenLoopVelocityController implements Controller<AngularVelocity, A
     public OpenLoopVelocityController(
             TalonFX motor, Voltage kS, Per<VoltageUnit, AngularVelocityUnit> kV) {
         this.motor = motor;
+        this.outputValues = new TalonFXOutputValues(this.motor);
         this.kS = kS;
         this.kV = kV;
-        this.velocity = this.motor.getVelocity();
         this.control = new VoltageOut(0.0);
     }
 
@@ -48,9 +49,8 @@ public class OpenLoopVelocityController implements Controller<AngularVelocity, A
     }
 
     @Override
-    public AngularVelocity getValues() {
-        velocity.refresh();
-        return velocity.getValue();
+    public MotorOutputValues getOutputValues() {
+        return this.outputValues.refresh().toMotorOutputValues();
     }
 
     @Override
