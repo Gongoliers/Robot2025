@@ -5,7 +5,7 @@ import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
-import frc.lib.MotorOutputValues;
+import frc.lib.MotorValues;
 import frc.lib.Output;
 
 /**
@@ -19,23 +19,23 @@ import frc.lib.Output;
  * for V, the amount of voltage required to reach a steady-state speed ω is kS + V ÷ kV.
  * Often, V ÷ kV is written as the multiplication kV × V, where kV is inverted.
  */
-public class OpenLoopVelocityController implements Controller<AngularVelocity, MotorOutputValues> {
+public class OpenLoopVelocityController implements Controller<AngularVelocity, MotorValues> {
 
-    private final Output<Voltage, MotorOutputValues> output;
+    private final Output<Voltage, MotorValues> output;
 
     private final Voltage kS;
 
     private final Per<VoltageUnit, AngularVelocityUnit> kV;
 
     public OpenLoopVelocityController(
-            Output<Voltage, MotorOutputValues> output, Voltage kS, Per<VoltageUnit, AngularVelocityUnit> kV) {
+            Output<Voltage, MotorValues> output, Voltage kS, Per<VoltageUnit, AngularVelocityUnit> kV) {
         this.output = output;
         this.kS = kS;
         this.kV = kV;
     }
 
     @Override
-    public MotorOutputValues getOutputValues() {
+    public MotorValues getOutputValues() {
         return this.output.getOutputValues();
     }
 

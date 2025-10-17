@@ -11,7 +11,7 @@ import edu.wpi.first.units.measure.Voltage;
 /**
  * A TalonFX that accepts voltage as input and returns motor values.
  */
-public class TalonFXVoltageOutput implements Output<Voltage, MotorOutputValues> {
+public class TalonFXVoltageOutput implements Output<Voltage, MotorValues> {
 
     /**
      * The TalonFX that accepts the voltage.
@@ -21,7 +21,7 @@ public class TalonFXVoltageOutput implements Output<Voltage, MotorOutputValues> 
     /**
      * The output values returned by the TalonFX.
      */
-    private final TalonFXOutputValues outputValues;
+    private final TalonFXValues outputValues;
 
     /**
      * The invert state of the TalonFX, as seen from the front of the motor.
@@ -41,7 +41,7 @@ public class TalonFXVoltageOutput implements Output<Voltage, MotorOutputValues> 
      */
     public TalonFXVoltageOutput(TalonFX motor, boolean invert) {
         this.motor = motor;
-        this.outputValues = new TalonFXOutputValues(this.motor);
+        this.outputValues = new TalonFXValues(this.motor);
         this.inverted = invert ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
         this.control = new VoltageOut(0.0);
     }
@@ -55,8 +55,8 @@ public class TalonFXVoltageOutput implements Output<Voltage, MotorOutputValues> 
     }
 
     @Override
-    public MotorOutputValues getOutputValues() {
-        return outputValues.refresh().toMotorOutputValues();
+    public MotorValues getOutputValues() {
+        return outputValues.refreshed();
     }
 
     @Override
