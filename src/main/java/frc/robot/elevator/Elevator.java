@@ -108,7 +108,7 @@ public class Elevator extends MultithreadedSubsystem {
     stateTolerance = Meters.of(0.02);
 
     motionProfile = config.motionProfileConfig().createTrapezoidProfile();
-    profiledSetpoint = new TrapezoidProfile.State(0, 0);
+    profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0);
   }
 
   @Override
@@ -126,10 +126,9 @@ public class Elevator extends MultithreadedSubsystem {
     setpointColumn.addDouble("Setpoint position (m)", () -> profiledSetpoint.position);
     setpointColumn.addDouble("Setpoint velocity (m/s)", () -> profiledSetpoint.velocity);
 
-    // Current position/velocity column
+    // Current state column
     ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
 
-    stateColumn.addString("Name", () -> currentState.name());
     stateColumn.addDouble("Elevator position (m)", () -> positionControllerValues.position.in(Rotations) * rotationsToMeters);
     stateColumn.addDouble("Elevator velocity (m/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
     stateColumn.addDouble("Elevator acceleration (m/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters);
