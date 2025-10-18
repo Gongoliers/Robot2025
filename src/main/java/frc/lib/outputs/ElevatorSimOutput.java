@@ -1,9 +1,7 @@
 package frc.lib.outputs;
 
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.AngularVelocityUnit;
-import edu.wpi.first.units.DistanceUnit;
-import edu.wpi.first.units.LinearVelocityUnit;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.*;
 import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
@@ -20,6 +18,10 @@ public class ElevatorSimOutput implements Output<Voltage, MotorValues> {
     private final Per<AngularVelocityUnit, LinearVelocityUnit> velocityRatio;
 
     private Voltage voltage = Volts.zero();
+
+    public ElevatorSimOutput(Per<VoltageUnit, AngularVelocityUnit> kV, Per<VoltageUnit, AngularAccelerationUnit> kA, DCMotor motor, Per<AngleUnit, DistanceUnit> ratio) {
+        this(new ElevatorSim(kV.in(Volts.per(RotationsPerSecond)) * ratio.in(Rotations.per(Meter)), kA.in(Volts.per(RotationsPerSecondPerSecond)) * ratio.in(Rotations.per(Meter)), motor, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, false, 0), ratio);
+    }
 
     public ElevatorSimOutput(ElevatorSim sim, Per<AngleUnit, DistanceUnit> ratio) {
         this.sim = sim;

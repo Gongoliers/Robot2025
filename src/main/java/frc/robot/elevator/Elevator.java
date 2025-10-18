@@ -1,7 +1,6 @@
 package frc.robot.elevator;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.*;
@@ -12,7 +11,6 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Subsystem;
@@ -22,8 +20,9 @@ import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.MechanismConfig.MechanismBuilder;
 import frc.lib.configs.MotionProfileConfig.MotionProfileBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
-import frc.lib.controllers.ClosedLoopPositionController;
 import frc.lib.controllers.Controller;
+import frc.lib.controllers.OpenLoopVelocityController;
+import frc.lib.controllers.ProfiledPositionController;
 import frc.lib.controllers.position.PositionController;
 import frc.lib.outputs.ElevatorSimOutput;
 import frc.lib.values.MotorValues;
@@ -112,9 +111,13 @@ public class Elevator extends Subsystem {
       rpsToMps = MetersPerSecond.of(0.02).per(RotationsPerSecond);
       rpspsToMpsps = MetersPerSecondPerSecond.of(0.02).per(RotationsPerSecondPerSecond);
 
-      var sim = new ElevatorSim(1, 0.1, DCMotor.getKrakenX60(2), 0, 2, false, 0);
-      var output = new ElevatorSimOutput(sim, Rotations.of(50).per(Meter));
-      positionController2 = new ClosedLoopPositionController(output, new PIDController(0.5, 0, 0));
+      // NOTE: These values of kV and kA are placeholder data for the actual subsystem; changing these values might have
+      // unexpected results;
+      var kV = Volts.of(0.005).per(RotationsPerSecond);
+      var kA = Volts.of(0.0001).per(RotationsPerSecondPerSecond);
+      var output = new ElevatorSimOutput(kV, kA, DCMotor.getKrakenX60(2), Rotations.of(50).per(Meter));
+      var velocityController = new OpenLoopVelocityController(output, Volts.zero(), kV);
+      positionController2 = new ProfiledPositionController(velocityController, RotationsPerSecond.of(300), RotationsPerSecondPerSecond.of(3000), Rotations.of(0));
 
     currentState = ElevatorState.STOW;
     targetState = ElevatorState.STOW;
