@@ -1,4 +1,4 @@
-package frc.lib;
+package frc.lib.values;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;

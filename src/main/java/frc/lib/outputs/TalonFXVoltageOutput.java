@@ -1,4 +1,4 @@
-package frc.lib;
+package frc.lib.outputs;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -7,6 +7,8 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.units.measure.Voltage;
+import frc.lib.values.MotorValues;
+import frc.lib.values.TalonFXValues;
 
 /**
  * A TalonFX that accepts voltage as input and returns motor values.

@@ -5,8 +5,8 @@ import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
-import frc.lib.MotorValues;
-import frc.lib.Output;
+import frc.lib.outputs.Output;
+import frc.lib.values.MotorValues;
 
 /**
  * Represents a controller for a mechanism that reaches a velocity using open loop

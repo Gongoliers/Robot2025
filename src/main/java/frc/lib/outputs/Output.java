@@ -1,4 +1,4 @@
-package frc.lib;
+package frc.lib.outputs;
 
 /**
  * A generic interface for applying control inputs.
