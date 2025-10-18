@@ -1,0 +1,51 @@
+package frc.lib.outputs;
+
+import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.DistanceUnit;
+import edu.wpi.first.units.LinearVelocityUnit;
+import edu.wpi.first.units.measure.Per;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import frc.lib.values.MotorValues;
+
+import static edu.wpi.first.units.Units.*;
+
+public class ElevatorSimOutput implements Output<Voltage, MotorValues> {
+
+    private final ElevatorSim sim;
+
+    private final Per<AngleUnit, DistanceUnit> positionRatio;
+
+    private final Per<AngularVelocityUnit, LinearVelocityUnit> velocityRatio;
+
+    private Voltage voltage = Volts.zero();
+
+    public ElevatorSimOutput(ElevatorSim sim, Per<AngleUnit, DistanceUnit> ratio) {
+        this.sim = sim;
+        this.positionRatio = ratio;
+        this.velocityRatio = RotationsPerSecond.per(MetersPerSecond).ofNative(ratio.in(Rotations.per(Meter)));
+    }
+
+    @Override
+    public boolean configure() {
+        return true;
+    }
+
+    @Override
+    public MotorValues getOutputValues() {
+        MotorValues motorValues = new MotorValues();
+        motorValues.position = Meters.of(sim.getPositionMeters()).timesConversionFactor(positionRatio);
+        motorValues.velocity = MetersPerSecond.of(sim.getVelocityMetersPerSecond()).timesConversionFactor(velocityRatio);
+        motorValues.motorVoltage = voltage;
+        motorValues.statorCurrent = Amps.of(sim.getCurrentDrawAmps());
+        return motorValues;
+    }
+
+    @Override
+    public void update(Voltage input) {
+        this.voltage = input;
+        sim.setInputVoltage(input.in(Volts));
+        sim.update(0.02);
+    }
+}

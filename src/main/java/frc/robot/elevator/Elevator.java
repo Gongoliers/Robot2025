@@ -1,33 +1,37 @@
 package frc.robot.elevator;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.units.*;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.MultithreadedSubsystem;
-import frc.lib.configs.MechanismConfig;
+import frc.lib.Subsystem;
 import frc.lib.configs.FeedbackControllerConfig.FeedbackControllerBuilder;
 import frc.lib.configs.FeedforwardControllerConfig.FeedforwardControllerBuilder;
+import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.MechanismConfig.MechanismBuilder;
 import frc.lib.configs.MotionProfileConfig.MotionProfileBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
+import frc.lib.controllers.ClosedLoopPositionController;
+import frc.lib.controllers.Controller;
 import frc.lib.controllers.position.PositionController;
-import frc.lib.controllers.position.PositionController.PositionControllerValues;
+import frc.lib.outputs.ElevatorSimOutput;
+import frc.lib.values.MotorValues;
 import frc.robot.RobotConstants;
 
-public class Elevator extends MultithreadedSubsystem {
+import static edu.wpi.first.units.Units.*;
+
+public class Elevator extends Subsystem {
 
   /** Elevator subsystem singleton */
   private static Elevator instance = null;
@@ -36,10 +40,14 @@ public class Elevator extends MultithreadedSubsystem {
   private final PositionController positionController;
 
   /** Elevator position controller values */
-  private PositionControllerValues positionControllerValues;
+  private MotorValues positionControllerValues = new MotorValues();
 
   /** Ratio of meters travelled by elevator per rotations made by position controller */
-  private final double rotationsToMeters;
+  private final Per<DistanceUnit, AngleUnit> rotationsToMeters;
+    private final Per<LinearVelocityUnit, AngularVelocityUnit> rpsToMps;
+    private final Per<LinearAccelerationUnit, AngularAccelerationUnit> rpspsToMpsps;
+
+    private final Controller<Angle, MotorValues> positionController2;
 
   /** Target elevator state */
   private ElevatorState targetState;
@@ -100,7 +108,13 @@ public class Elevator extends MultithreadedSubsystem {
   private Elevator() {
     positionController = ElevatorFactory.createElevatorPositionController(config);
 
-    rotationsToMeters = 0.02/1;
+      rotationsToMeters = Meters.of(0.02).per(Rotation);
+      rpsToMps = MetersPerSecond.of(0.02).per(RotationsPerSecond);
+      rpspsToMpsps = MetersPerSecondPerSecond.of(0.02).per(RotationsPerSecondPerSecond);
+
+      var sim = new ElevatorSim(1, 0.1, DCMotor.getKrakenX60(2), 0, 2, false, 0);
+      var output = new ElevatorSimOutput(sim, Rotations.of(50).per(Meter));
+      positionController2 = new ClosedLoopPositionController(output, new PIDController(0.5, 0, 0));
 
     currentState = ElevatorState.STOW;
     targetState = ElevatorState.STOW;
@@ -123,16 +137,15 @@ public class Elevator extends MultithreadedSubsystem {
     // Setpoint column
     ShuffleboardLayout setpointColumn = tab.getLayout("Setpoint", BuiltInLayouts.kList);
 
-    setpointColumn.addDouble("Setpoint position (m)", () -> profiledSetpoint.position);
-    setpointColumn.addDouble("Setpoint velocity (m/s)", () -> profiledSetpoint.velocity);
+      setpointColumn.addDouble("Setpoint position (m)", () -> targetState.getPosMeters());
 
     // Current position/velocity column
     ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
 
     stateColumn.addString("Name", () -> currentState.name());
-    stateColumn.addDouble("Elevator position (m)", () -> positionControllerValues.position.in(Rotations) * rotationsToMeters);
-    stateColumn.addDouble("Elevator velocity (m/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
-    stateColumn.addDouble("Elevator acceleration (m/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters);
+      stateColumn.addDouble("Elevator position (m)", () -> positionControllerValues.position.timesConversionFactor(rotationsToMeters).in(Meters));
+      stateColumn.addDouble("Elevator velocity (m/s)", () -> positionControllerValues.velocity.timesConversionFactor(rpsToMps).in(MetersPerSecond));
+      stateColumn.addDouble("Elevator acceleration (m/s/s)", () -> positionControllerValues.acceleration.timesConversionFactor(rpspsToMpsps).in(MetersPerSecondPerSecond));
     stateColumn.addDouble("Motor position (rot)", () -> positionControllerValues.position.in(Rotations));
     stateColumn.addDouble("Motor velocity (rot/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond));
     stateColumn.addDouble("Motor acceleration (rot/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond));
@@ -140,17 +153,18 @@ public class Elevator extends MultithreadedSubsystem {
     stateColumn.addDouble("Stator current", () -> positionControllerValues.statorCurrent.in(Amps));
     stateColumn.addDouble("Supply current", () -> positionControllerValues.supplyCurrent.in(Amps));
   }
-  
+
+//  @Override
+//  public void periodic() {
+//
+//  }
+
   @Override
   public void periodic() {
+      // positionController.getUpdatedVals(positionControllerValues);
+      positionControllerValues = positionController2.getOutputValues();
 
-  }
-
-  @Override
-  public void fastPeriodic() {
-    positionController.getUpdatedVals(positionControllerValues);
-
-    Distance position = Meters.of(positionControllerValues.position.in(Rotations) * rotationsToMeters);
+      Distance position = positionControllerValues.position.timesConversionFactor(rotationsToMeters);
 
     if (MathUtil.isNear(targetState.getPosMeters(), position.in(Meters), stateTolerance.in(Meters))) {
       // If close enough to target state, consider the eleevator to be at that state
@@ -165,6 +179,7 @@ public class Elevator extends MultithreadedSubsystem {
       positionController.setVoltage(Volts.of(0.01));
     } else {
       positionController.clearVoltage();
+        positionController2.update(Meters.of(targetState.getPosMeters()).timesConversionFactor(Rotations.of(50).per(Meter)));
 
       if (currentState != targetState) {
         // If not at target state yet, approach state with motion profile
@@ -173,14 +188,14 @@ public class Elevator extends MultithreadedSubsystem {
             profiledSetpoint, 
             new TrapezoidProfile.State(targetState.getPosMeters(), 0));
 
-        positionController.setSetpoint(
-            Rotations.of(profiledSetpoint.position / rotationsToMeters), 
-            RotationsPerSecond.of(profiledSetpoint.velocity / rotationsToMeters));
+//        positionController.setSetpoint(
+//            Rotations.of(profiledSetpoint.position / rotationsToMeters),
+//            RotationsPerSecond.of(profiledSetpoint.velocity / rotationsToMeters));
       } else {
         // If reached target state, set setpont to hold at that state
-        positionController.setSetpoint(
-            Rotations.of(targetState.getPosMeters() / rotationsToMeters), 
-            RotationsPerSecond.of(0));
+//        positionController.setSetpoint(
+//            Rotations.of(targetState.getPosMeters() / rotationsToMeters),
+//            RotationsPerSecond.of(0));
       }
     }
   }

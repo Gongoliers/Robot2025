@@ -1,8 +1,10 @@
 package frc.lib.controllers;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
 import frc.lib.values.MotorValues;
@@ -22,14 +24,12 @@ public class ProfiledPositionController implements Controller<Angle, MotorValues
 
     private final TrapezoidProfile profile;
 
-    private TrapezoidProfile.State goal;
-
     private TrapezoidProfile.State setpoint;
 
     public ProfiledPositionController(
             Controller<AngularVelocity, MotorValues> controller,
-            AngularVelocity velocityConstraint,
-            AngularAcceleration accelerationConstraint,
+            Measure<AngularVelocityUnit> velocityConstraint,
+            Measure<AngularAccelerationUnit> accelerationConstraint,
             Angle initialPosition) {
         this.controller = controller;
         this.profile =
@@ -37,8 +37,7 @@ public class ProfiledPositionController implements Controller<Angle, MotorValues
                         new TrapezoidProfile.Constraints(
                                 velocityConstraint.in(RotationsPerSecond),
                                 accelerationConstraint.in(RotationsPerSecondPerSecond)));
-        this.goal = new TrapezoidProfile.State(initialPosition.in(Rotations), 0.0);
-        this.setpoint = this.goal;
+        this.setpoint = new TrapezoidProfile.State(initialPosition.in(Rotations), 0.0);
     }
 
     @Override
@@ -48,9 +47,9 @@ public class ProfiledPositionController implements Controller<Angle, MotorValues
 
     @Override
     public void update(Angle goal) {
-        this.goal = new TrapezoidProfile.State(goal.in(Rotations), 0.0);
+        var goalState = new TrapezoidProfile.State(goal.in(Rotations), 0.0);
         this.setpoint =
-                this.profile.calculate(DT.in(Seconds), this.setpoint, this.goal);
+                this.profile.calculate(DT.in(Seconds), this.setpoint, goalState);
         var angularVelocity = RotationsPerSecond.of(this.setpoint.velocity);
         this.controller.update(angularVelocity);
     }

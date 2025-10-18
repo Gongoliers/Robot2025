@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
 import frc.robot.elevator.Elevator;
+import frc.robot.elevator.ElevatorState;
 
 /** Robot container */
 public class RobotContainer {
@@ -21,9 +22,7 @@ public class RobotContainer {
 
   /** Operator controller */
   private final CommandXboxController operatorController;
-
-  /** Multithreader */
-  private final Multithreader multithreader;
+    ;
 
   /** Elevator subsystem reference */
   private final Elevator elevator;
@@ -36,9 +35,6 @@ public class RobotContainer {
     elevator = Elevator.getInstance();
 
     Telemetry.initializeTabs(elevator);
-
-    multithreader = Multithreader.getInstance();
-    multithreader.start();
 
     configureDefaultCommands();
     configureBindings();
@@ -68,10 +64,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    if (RobotConstants.ENABLED_SUBSYSTEMS.contains(RobotConstants.Subsystem.AUTO)) {
-      ;
-    }
-
-    return Commands.print("Auto disabled");
+      return Commands.sequence(elevator.setTargetState(ElevatorState.L4), Commands.waitSeconds(3), elevator.setTargetState(ElevatorState.L1), Commands.waitSeconds(3)).repeatedly();
   }
 }
