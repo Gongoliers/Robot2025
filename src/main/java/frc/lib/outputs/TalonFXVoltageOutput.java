@@ -26,9 +26,9 @@ public class TalonFXVoltageOutput implements Output<Voltage, MotorValues> {
     private final TalonFXValues outputValues;
 
     /**
-     * The invert state of the TalonFX, as seen from the front of the motor.
+     * The direction of the motor as seen from the front of the motor.
      */
-    private final InvertedValue inverted;
+    private final InvertedValue direction;
 
     /**
      * The control request used by the TalonFX.
@@ -39,19 +39,19 @@ public class TalonFXVoltageOutput implements Output<Voltage, MotorValues> {
      * Creates an output with a TalonFX that accepts voltages.
      *
      * @param motor  The TalonFX that accepts voltages.
-     * @param invert {@code true} if the TalonFX is inverted, {@code false} otherwise.
+     * @param direction The direction of the motor as seen from the front of the motor.
      */
-    public TalonFXVoltageOutput(TalonFX motor, boolean invert) {
+    public TalonFXVoltageOutput(TalonFX motor, InvertedValue direction) {
         this.motor = motor;
         this.outputValues = new TalonFXValues(this.motor);
-        this.inverted = invert ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+        this.direction = direction;
         this.control = new VoltageOut(0.0);
     }
 
     @Override
     public boolean configure() {
         TalonFXConfigurator configurator = this.motor.getConfigurator();
-        MotorOutputConfigs config = new MotorOutputConfigs().withInverted(this.inverted);
+        MotorOutputConfigs config = new MotorOutputConfigs().withInverted(this.direction);
         StatusCode statusCode = configurator.apply(config);
         return statusCode.isOK();
     }
