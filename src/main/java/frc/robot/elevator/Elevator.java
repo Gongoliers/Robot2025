@@ -24,7 +24,6 @@ import frc.lib.configs.MotionProfileConfig.MotionProfileBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.ClosedLoopPositionController;
 import frc.lib.controllers.Controller;
-import frc.lib.controllers.position.PositionController;
 import frc.lib.outputs.ElevatorSimOutput;
 import frc.lib.outputs.Output;
 import frc.lib.values.MotorValues;
@@ -37,7 +36,7 @@ public class Elevator extends Subsystem {
   private static Elevator instance = null;
 
   /** Elevator position controller */
-  private final PositionController positionController;
+  private final Controller<Angle, MotorValues> positionController;
 
   /** Elevator controller output */
   private final Output<Voltage, MotorValues> output;
@@ -49,8 +48,6 @@ public class Elevator extends Subsystem {
   private static final Per<DistanceUnit, AngleUnit> ROT_TO_METER = Meters.of(0.02).per(Rotation);
   private static final Per<LinearVelocityUnit, AngularVelocityUnit> RPS_TO_MPS = UnitsHelper.velocityConversionFactor(ROT_TO_METER);
   private static final Per<LinearAccelerationUnit, AngularAccelerationUnit> RPSPS_TO_MPSPS= UnitsHelper.accelerationConversionFactor(ROT_TO_METER);
-
-  private final Controller<Angle, MotorValues> positionController2;
 
   /** Target elevator state */
   private ElevatorState targetState;
@@ -109,8 +106,6 @@ public class Elevator extends Subsystem {
 
   /** Elevator subsystem constructor */
   private Elevator() {
-    positionController = ElevatorFactory.createElevatorPositionController(config);
-
     // NOTE: These values of kV and kA are placeholder data for the actual subsystem
     var kV_mps = MetersPerSecond.of(9.6).div(Volts.of(12));
     var kA_mpsps = MetersPerSecondPerSecond.of(228.13).div(Volts.of(12));
@@ -119,7 +114,7 @@ public class Elevator extends Subsystem {
     var kA_rpsps = UnitsHelper.kA_rpsps(kA_mpsps, ROT_TO_METER);
 
     output = new ElevatorSimOutput(UnitsHelper.inverseKv(kV_rps), UnitsHelper.inverseKa(kA_rpsps), DCMotor.getKrakenX60(2), true, UnitsHelper.inverseConversionFactor(ROT_TO_METER));
-    positionController2 = new ClosedLoopPositionController(output, Volts.of(0.25).per(Rotation), Volts.of(0.01).per(RotationsPerSecond), () -> Volts.of(0.516));
+    positionController = new ClosedLoopPositionController(output, Volts.of(0.25).per(Rotation), Volts.of(0.01).per(RotationsPerSecond), () -> Volts.of(0.516));
 
     currentState = ElevatorState.STOW;
     targetState = ElevatorState.STOW;
@@ -153,20 +148,15 @@ public class Elevator extends Subsystem {
     stateColumn.addDouble("Elevator acceleration (mpsps)", () -> positionControllerValues.acceleration.timesConversionFactor(RPSPS_TO_MPSPS).in(MetersPerSecondPerSecond));
     stateColumn.addDouble("Motor position (rot)", () -> positionControllerValues.position.in(Rotations));
     stateColumn.addDouble("Motor velocity (rps)", () -> positionControllerValues.velocity.in(RotationsPerSecond));
-    stateColumn.addDouble("Motor acceleration (rpsps)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond));;
+    stateColumn.addDouble("Motor acceleration (rpsps)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond));
     stateColumn.addDouble("Motor voltage",  () -> positionControllerValues.motorVoltage.in(Volts));
     stateColumn.addDouble("Stator current", () -> positionControllerValues.statorCurrent.in(Amps));
     stateColumn.addDouble("Supply current", () -> positionControllerValues.supplyCurrent.in(Amps));
   }
 
-//  @Override
-//  public void periodic() {
-//
-//  }
-
   @Override
   public void periodic() {
-    positionControllerValues = positionController2.getOutputValues();
+    positionControllerValues = positionController.getOutputValues();
 
     Distance position = positionControllerValues.position.timesConversionFactor(ROT_TO_METER);
 
@@ -182,7 +172,7 @@ public class Elevator extends Subsystem {
       // If near enough to stow position and you want to stow, disable the motors to prevent stalling
       output.update(Volts.of(0.01));
     } else {
-      positionController2.update(Meters.of(targetState.getPosMeters()).timesConversionFactor(Rotations.of(50).per(Meter)));
+      positionController.update(Meters.of(targetState.getPosMeters()).timesConversionFactor(Rotations.of(50).per(Meter)));
     }
   }
 
@@ -202,9 +192,7 @@ public class Elevator extends Subsystem {
    * @return a command that sets the target state of the elevator
    */
   public Command setTargetState(ElevatorState newTargetState) {
-    return Commands.runOnce(() -> {
-      targetState = newTargetState;
-    }, this);
+    return Commands.runOnce(() -> targetState = newTargetState, this);
   }
 
   /**
