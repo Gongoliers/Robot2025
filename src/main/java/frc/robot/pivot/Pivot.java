@@ -33,7 +33,7 @@ public class Pivot extends MultithreadedSubsystem {
   private final PositionController positionController;
 
   /** Pivot position controller values */
-  private PositionControllerValues positionControllerValues;
+  private PositionControllerValues positionControllerValues = new PositionControllerValues();
 
   /** Lock object used to maintain thread safety */
   private final Object lock = new Object();
@@ -166,6 +166,8 @@ public class Pivot extends MultithreadedSubsystem {
           Rotations.of(targetState.getPosRotations()), 
           RotationsPerSecond.of(0.0));
     }
+
+    positionController.periodic();
   }
 
   @Override

@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
 import frc.robot.elevator.Elevator;
+import frc.robot.elevator.ElevatorState;
+import frc.robot.pivot.Pivot;
 
 /** Robot container */
 public class RobotContainer {
@@ -28,6 +30,9 @@ public class RobotContainer {
   /** Elevator subsystem reference */
   private final Elevator elevator;
 
+  /** Pivot subsystem reference */
+  private final Pivot pivot;
+
   /** Initializes the robot container */
   private RobotContainer() {
     driverController = new CommandXboxController(0);
@@ -35,7 +40,9 @@ public class RobotContainer {
 
     elevator = Elevator.getInstance();
 
-    Telemetry.initializeTabs(elevator);
+    pivot = Pivot.getInstance();
+
+    Telemetry.initializeTabs(elevator, pivot);
 
     multithreader = Multithreader.getInstance();
     multithreader.start();
@@ -64,7 +71,9 @@ public class RobotContainer {
 
   /** Configures controller bindings */
   private void configureBindings() {
-
+    operatorController.a().onTrue(elevator.setTargetState(ElevatorState.STOW));
+    operatorController.b().onTrue(elevator.setTargetState(ElevatorState.L1));
+    operatorController.x().onTrue(elevator.setTargetState(ElevatorState.L2));
   }
 
   public Command getAutonomousCommand() {

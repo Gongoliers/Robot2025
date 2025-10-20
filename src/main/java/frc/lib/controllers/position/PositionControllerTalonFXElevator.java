@@ -178,7 +178,7 @@ public class PositionControllerTalonFXElevator implements PositionController {
       Angle motorPosition = position.getValue().plus(positionOffset);
 
       double feedbackVolts = feedback.calculate(motorPosition.in(Radians), setpointPosition.in(Radians));
-      double feedforwardVolts = feedforward.calculate(setpointPosition.in(Radians), setpointVelocity.in(RadiansPerSecond));
+      double feedforwardVolts = feedforward.calculate(setpointVelocity.in(RadiansPerSecond));
 
       leader.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
     }

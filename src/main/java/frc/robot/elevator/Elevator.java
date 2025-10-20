@@ -36,7 +36,7 @@ public class Elevator extends MultithreadedSubsystem {
   private final PositionController positionController;
 
   /** Elevator position controller values */
-  private PositionControllerValues positionControllerValues;
+  private PositionControllerValues positionControllerValues = new PositionControllerValues();
 
   /** Ratio of meters travelled by elevator per rotations made by position controller */
   private final double rotationsToMeters;
@@ -59,10 +59,10 @@ public class Elevator extends MultithreadedSubsystem {
   /** Mechanism config */
   private final MechanismConfig config = MechanismBuilder.defaults()
     .feedforwardControllerConfig(FeedforwardControllerBuilder.defaults()
-      .kV(0.0)
+      .kV(0.1)
       .kA(0.0)
-      .kG(0.0)
-      .kS(0.0)
+      .kG(0.539)
+      .kS(0.12)
       .build())
     .feedbackControllerConfig(FeedbackControllerBuilder.defaults()
       .kP(0.0)
@@ -75,8 +75,8 @@ public class Elevator extends MultithreadedSubsystem {
       .build())
     .motorConfig(MotorBuilder.defaults()
       .ccwPositive(false)
-      .rotorToSensorRatio(1.0)
-      .sensorToMechRatio(1.0)
+      .rotorToSensorRatio(5.0)
+      .sensorToMechRatio(5.0)
       .neutralBrake(true)
       .statorCurrentLimit(80.0)
       .supplyCurrentLimit(40.0)
@@ -100,7 +100,7 @@ public class Elevator extends MultithreadedSubsystem {
   private Elevator() {
     positionController = ElevatorFactory.createElevatorPositionController(config);
 
-    rotationsToMeters = 0.02/1;
+    rotationsToMeters = 0.031 * Math.PI * 3;
 
     currentState = ElevatorState.STOW;
     targetState = ElevatorState.STOW;
@@ -159,8 +159,9 @@ public class Elevator extends MultithreadedSubsystem {
       currentState = ElevatorState.MOVING;
     }
 
-    if (targetState == ElevatorState.STOW && MathUtil.isNear(0.0, position.in(Meters), 0.04)) {
+    if (targetState == ElevatorState.STOW && MathUtil.isNear(0.0, position.in(Meters), 0.01)) {
       // If near enough to stow position and you want to stow, disable the motors to prevent stalling
+      profiledSetpoint = new TrapezoidProfile.State(0.0, 0.0);
       positionController.setVoltage(Volts.of(0.01));
     } else {
       positionController.clearVoltage();
@@ -177,11 +178,14 @@ public class Elevator extends MultithreadedSubsystem {
             RotationsPerSecond.of(profiledSetpoint.velocity / rotationsToMeters));
       } else {
         // If reached target state, set setpont to hold at that state
+        profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters() / rotationsToMeters, 0.0);
         positionController.setSetpoint(
             Rotations.of(targetState.getPosMeters() / rotationsToMeters), 
             RotationsPerSecond.of(0));
       }
     }
+
+    positionController.periodic();
   }
 
   /**
