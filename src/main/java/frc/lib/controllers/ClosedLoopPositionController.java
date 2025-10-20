@@ -1,13 +1,18 @@
 package frc.lib.controllers;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.outputs.Output;
 import frc.lib.values.MotorValues;
 
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Volts;
+import java.util.function.Supplier;
+
+import static edu.wpi.first.units.Units.*;
 
 public class ClosedLoopPositionController implements Controller<Angle, MotorValues> {
 
@@ -15,9 +20,16 @@ public class ClosedLoopPositionController implements Controller<Angle, MotorValu
 
     private final PIDController pid;
 
-    public ClosedLoopPositionController(Output<Voltage, MotorValues> output, PIDController pid) {
+    private final Supplier<Voltage> feedforward;
+
+    public ClosedLoopPositionController(Output<Voltage, MotorValues> output, Per<VoltageUnit, AngleUnit> kP, Per<VoltageUnit, AngularVelocityUnit> kD, Supplier<Voltage> feedforward) {
+        this(output, new PIDController(kP.in(Volts.per(Rotation)), 0, kD.in(Volts.per(RotationsPerSecond))), feedforward);
+    }
+
+    public ClosedLoopPositionController(Output<Voltage, MotorValues> output, PIDController pid, Supplier<Voltage> feedforward) {
         this.output = output;
         this.pid = pid;
+        this.feedforward = feedforward;
     }
 
     @Override
@@ -29,7 +41,8 @@ public class ClosedLoopPositionController implements Controller<Angle, MotorValu
     public void update(Angle goal) {
         var measurement = getOutputValues().position.in(Rotations);
         var setpoint = goal.in(Rotations);
-        Voltage voltage = Volts.of(pid.calculate(measurement, setpoint));
-        this.output.update(voltage);
+        Voltage feedbackVoltage = Volts.of(pid.calculate(measurement, setpoint));
+        Voltage feedforwardVoltage = feedforward.get();
+        this.output.update(feedbackVoltage.plus(feedforwardVoltage));
     }
 }

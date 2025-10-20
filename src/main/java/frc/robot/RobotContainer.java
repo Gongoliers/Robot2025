@@ -64,6 +64,17 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-      return Commands.sequence(elevator.setTargetState(ElevatorState.L4), Commands.waitSeconds(3), elevator.setTargetState(ElevatorState.L1), Commands.waitSeconds(3)).repeatedly();
+      return Commands.sequence(
+              elevator.setTargetState(ElevatorState.L1),
+              Commands.waitSeconds(3),
+              elevator.setTargetState(ElevatorState.L2),
+              Commands.waitSeconds(3),
+              elevator.setTargetState(ElevatorState.L3),
+              Commands.waitSeconds(3),
+              elevator.setTargetState(ElevatorState.L4),
+              Commands.waitSeconds(3),
+              elevator.setTargetState(ElevatorState.HARDSTOP),
+              Commands.waitSeconds(3)
+      ).repeatedly();
   }
 }

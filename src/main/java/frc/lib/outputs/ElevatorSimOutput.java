@@ -19,8 +19,8 @@ public class ElevatorSimOutput implements Output<Voltage, MotorValues> {
 
     private Voltage voltage = Volts.zero();
 
-    public ElevatorSimOutput(Per<VoltageUnit, AngularVelocityUnit> kV, Per<VoltageUnit, AngularAccelerationUnit> kA, DCMotor motor, Per<AngleUnit, DistanceUnit> ratio) {
-        this(new ElevatorSim(kV.in(Volts.per(RotationsPerSecond)) * ratio.in(Rotations.per(Meter)), kA.in(Volts.per(RotationsPerSecondPerSecond)) * ratio.in(Rotations.per(Meter)), motor, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, false, 0), ratio);
+    public ElevatorSimOutput(Per<VoltageUnit, AngularVelocityUnit> kV, Per<VoltageUnit, AngularAccelerationUnit> kA, DCMotor motor, boolean simulateGravity, Per<AngleUnit, DistanceUnit> ratio) {
+        this(new ElevatorSim(kV.in(Volts.per(RotationsPerSecond)) * ratio.in(Rotations.per(Meter)), kA.in(Volts.per(RotationsPerSecondPerSecond)) * ratio.in(Rotations.per(Meter)), motor, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, simulateGravity, 0), ratio);
     }
 
     public ElevatorSimOutput(ElevatorSim sim, Per<AngleUnit, DistanceUnit> ratio) {
