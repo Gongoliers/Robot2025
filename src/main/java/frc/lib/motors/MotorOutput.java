@@ -1,72 +1,29 @@
 package frc.lib.motors;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
-import java.util.function.Supplier;
-
-import com.ctre.phoenix6.controls.ControlRequest;
-
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import frc.lib.configs.MechanismConfig;
 
 /** Simple interface that abstracts motor hardware (allowing us to sent a control request to a motor and get values back, no matter if it's one motor, two motors, or a simulated motor) */
 public interface MotorOutput {
-  
-  //TODO: not sure if it's better to handle values like we did before, with a values class in the subsystem that is changed by the controller, or maybe try something new like this unchangin object of suppliers that gets returned directly from the controller
-  /** Class that provides references to value suppliers from the real or simulated output motor(s) */
-  public static class MotorValues {
-    
-    /** Gets current position */
-    public Supplier<Angle> position = () -> Rotations.of(0.0);
 
-    /** Gets current velocity */
-    public Supplier<AngularVelocity> velocity = () -> RotationsPerSecond.of(0.0);
-
-    /** Gets current acceleration */
-    public Supplier<AngularAcceleration> acceleration = () -> RotationsPerSecondPerSecond.of(0.0);
-
-    /** Gets current armature voltage */
-    public Supplier<Voltage> motorVoltage = () -> Volts.of(0.0);
-
-    /** Gets current supply voltage */
-    public Supplier<Voltage> supplyVoltage = () -> Volts.of(0.0);
-
-    /** Gets current stator current */
-    public Supplier<Current> statorCurrent = () -> Amps.of(0.0);
-
-    /** Gets current supply current */
-    public Supplier<Current> supplyCurrent = () -> Amps.of(0.0);
-
-  }
-
-  //TODO: there is a discussion to be had here, I like the idea of allowing usage of different control requests where applicable, but some different control requests might require some extra configuration, like slot gains for PositionVoltage
+  //TODO: In the future, maybe find a way to allow for other kinds of phoenix specific control requests for things like PositionVoltage for swerve steer motors
   /**
-   * Sets the control request for motor output
+   * Sets the voltage of the motor output
    * 
-   * @param controlRequest new control request
+   * @param voltage new set voltage
    */
-  public void setControl(ControlRequest controlRequest);
+  public void setVoltage(Voltage voltage);
 
   /**
-   * Returns a values class with defined suppliers for different logged motor values
+   * Updates values stored in a MotorValues class
    * 
-   * @return a values class with defined suppliers for different logged motor values
+   * @param values values class to update
    */
-  public MotorValues getValues();
+  public void getUpdatedValues(MotorValues values);
   
   /**
    * Configures motor hardware
    * 
-   * @param config config to configure motor hardware with
    * @return true if configuration was successful
    */
-  public boolean configure(MechanismConfig config);
+  public boolean configure();
 }
