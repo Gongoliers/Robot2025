@@ -17,6 +17,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.CAN;
 import frc.lib.configs.MotorConfig;
@@ -76,7 +77,7 @@ public class MotorOutputTalonFX implements MotorOutput {
   }
 
   @Override
-  public void getUpdatedValues(MotorValues values) {
+  public void getUpdatedValues(MotorValues values, Time dt) {
     BaseStatusSignal.refreshAll(position, velocity, acceleration, motorVoltage, supplyVoltage, statorCurrent, supplyCurrent);
 
     values.position = position.getValue();
