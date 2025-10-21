@@ -1,5 +1,11 @@
 package frc.lib.motors;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.controls.ControlRequest;
@@ -19,25 +25,25 @@ public interface MotorOutput {
   public static class MotorValues {
     
     /** Gets current position */
-    public Supplier<Angle> position;
+    public Supplier<Angle> position = () -> Rotations.of(0.0);
 
     /** Gets current velocity */
-    public Supplier<AngularVelocity> velocity;
+    public Supplier<AngularVelocity> velocity = () -> RotationsPerSecond.of(0.0);
 
     /** Gets current acceleration */
-    public Supplier<AngularAcceleration> acceleration;
+    public Supplier<AngularAcceleration> acceleration = () -> RotationsPerSecondPerSecond.of(0.0);
 
     /** Gets current armature voltage */
-    public Supplier<Voltage> motorVoltage;
+    public Supplier<Voltage> motorVoltage = () -> Volts.of(0.0);
 
     /** Gets current supply voltage */
-    public Supplier<Voltage> supplyVoltage;
+    public Supplier<Voltage> supplyVoltage = () -> Volts.of(0.0);
 
     /** Gets current stator current */
-    public Supplier<Current> statorCurrent;
+    public Supplier<Current> statorCurrent = () -> Amps.of(0.0);
 
     /** Gets current supply current */
-    public Supplier<Current> supplyCurrent;
+    public Supplier<Current> supplyCurrent = () -> Amps.of(0.0);
 
   }
 
