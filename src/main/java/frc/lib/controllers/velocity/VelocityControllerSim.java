@@ -34,7 +34,12 @@ public class VelocityControllerSim implements VelocityController {
   public void getUpdatedVals(VelocityControllerValues values) {
     values.position.mut_replace(position);
     values.velocity.mut_replace(velocity);
-    values.motorVoltage.mut_replace((voltageSet) ? setVoltage : Volts.of(0.0));
+    
+    if (voltageSet) {
+      values.motorVoltage.mut_replace(setVoltage);
+    } else {
+      values.motorVoltage.mut_replace(0.0, Volts);
+    }
   }
 
   @Override
