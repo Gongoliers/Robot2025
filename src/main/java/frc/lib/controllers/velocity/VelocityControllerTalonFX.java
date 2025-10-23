@@ -113,12 +113,12 @@ public class VelocityControllerTalonFX implements VelocityController {
   public void getUpdatedVals(VelocityControllerValues values) {
     BaseStatusSignal.refreshAll(position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
 
-    values.position = position.getValue();
-    values.velocity = velocity.getValue();
-    values.acceleration = acceleration.getValue();
-    values.motorVoltage = motorVoltage.getValue();
-    values.statorCurrent = statorCurrent.getValue();
-    values.supplyCurrent = supplyCurrent.getValue();
+    values.position.mut_replace(position.getValue());
+    values.velocity.mut_replace(velocity.getValue());
+    values.acceleration.mut_replace(acceleration.getValue());
+    values.motorVoltage.mut_replace(motorVoltage.getValue());
+    values.statorCurrent.mut_replace(statorCurrent.getValue());
+    values.supplyCurrent.mut_replace(supplyCurrent.getValue());
   }
 
   @Override

@@ -6,10 +6,12 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularAcceleration;
+import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.units.measure.MutCurrent;
+import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Voltage;
 
 /** Interface that defines the base io functionality all velocity controllers will inherit */
@@ -19,22 +21,22 @@ public interface VelocityController {
   public static class VelocityControllerValues {
 
     /** Motor position */
-    public Angle position = Rotations.of(0.0);
+    public MutAngle position = Rotations.mutable(0.0);
 
     /** Motor velocity */
-    public AngularVelocity velocity = RotationsPerSecond.of(0.0);
+    public MutAngularVelocity velocity = RotationsPerSecond.mutable(0.0);
 
     /** Motor acceleration */
-    public AngularAcceleration acceleration = RotationsPerSecondPerSecond.of(0.0);
+    public MutAngularAcceleration acceleration = RotationsPerSecondPerSecond.mutable(0.0);
 
     /** Motor voltage in volts */
-    public Voltage motorVoltage = Volts.of(0.0);
+    public MutVoltage motorVoltage = Volts.mutable(0.0);
 
     /** Stator current in amps */
-    public Current statorCurrent = Amps.of(0.0);
+    public MutCurrent statorCurrent = Amps.mutable(0.0);
 
     /** Supply current in amps */
-    public Current supplyCurrent = Amps.of(0.0);
+    public MutCurrent supplyCurrent = Amps.mutable(0.0);
 
   }
 

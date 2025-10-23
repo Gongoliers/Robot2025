@@ -125,12 +125,12 @@ public class PositionControllerTalonFXPivot implements PositionController {
   public void getUpdatedVals(PositionControllerValues values) {
     BaseStatusSignal.refreshAll(position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
 
-    values.position = position.getValue().plus(positionOffset);
-    values.velocity = velocity.getValue();
-    values.acceleration = acceleration.getValue();
-    values.motorVoltage = motorVoltage.getValue();
-    values.statorCurrent = statorCurrent.getValue();
-    values.supplyCurrent = supplyCurrent.getValue();
+    values.position.mut_replace(position.getValue().plus(positionOffset));
+    values.velocity.mut_replace(velocity.getValue());
+    values.acceleration.mut_replace(acceleration.getValue());
+    values.motorVoltage.mut_replace(motorVoltage.getValue());
+    values.statorCurrent.mut_replace(statorCurrent.getValue());
+    values.supplyCurrent.mut_replace(supplyCurrent.getValue());
   }
 
   @Override
