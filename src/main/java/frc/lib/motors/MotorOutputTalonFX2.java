@@ -87,7 +87,7 @@ public class MotorOutputTalonFX2 implements MotorOutput {
   }
 
   @Override
-  public void getUpdatedValues(MotorValues values, Time dt) {
+  public void updateValues(MotorValues values, Time dt) {
     BaseStatusSignal.refreshAll(position, velocity, acceleration, motorVoltage, supplyVoltage, statorCurrent, supplyCurrent);
 
     values.position = position.getValue();

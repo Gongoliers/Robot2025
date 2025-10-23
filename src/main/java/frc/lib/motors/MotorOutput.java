@@ -20,7 +20,7 @@ public interface MotorOutput {
    * @param values values class to update
    * @param dt delta time to allow for sim calculation of values or values that require dt to be calculated
    */
-  public void getUpdatedValues(MotorValues values, Time dt);
+  public void updateValues(MotorValues values, Time dt);
   
   /**
    * Configures motor hardware

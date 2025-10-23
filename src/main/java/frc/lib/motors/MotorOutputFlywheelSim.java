@@ -26,9 +26,6 @@ public class MotorOutputFlywheelSim implements MotorOutput{
   /** Flywheel simulation */
   private final FlywheelSim sim;
 
-  /** System plant */
-  private final LinearSystem<N1, N1, N1> plant;
-
   /** DC motor sim */
   private final DCMotor motor;
 
@@ -57,19 +54,28 @@ public class MotorOutputFlywheelSim implements MotorOutput{
       
     // Set up sim
     this.motor = motor;
-    plant = LinearSystemId.createFlywheelSystem(motor, moi.in(KilogramSquareMeters), config.rotorToSensorRatio()*config.sensorToMechRatio());
+    LinearSystem<N1, N1, N1> plant = LinearSystemId.createFlywheelSystem(motor, moi.in(KilogramSquareMeters), config.rotorToSensorRatio()*config.sensorToMechRatio());
     sim = new FlywheelSim(plant, motor);
     this.kS = kS;
   }
 
   @Override
   public void setVoltage(Voltage voltage) {
-    double volts = voltage.in(Volts);
-    sim.setInputVoltage(volts - Math.copySign(MathUtil.clamp(Math.abs(volts), 0, kS), volts));
+    sim.setInputVoltage(calculateEffectiveVoltage(voltage.in(Volts)));
+  }
+
+  /**
+   * Calculates effective voltage applied to sim (voltage will stay locked at zero until voltage applied by setVoltage is greater than magnitude kS)
+   * 
+   * @param voltage voltage applied by setVoltage
+   * @return effective voltage applied to sim
+   */
+  private double calculateEffectiveVoltage(double voltage) {
+    return voltage - Math.copySign(MathUtil.clamp(Math.abs(voltage), 0, kS), voltage);
   }
 
   @Override
-  public void getUpdatedValues(MotorValues values, Time dt) {
+  public void updateValues(MotorValues values, Time dt) {
     sim.update(dt.in(Seconds));
     position = position.plus(sim.getAngularVelocity().times(dt));
 
