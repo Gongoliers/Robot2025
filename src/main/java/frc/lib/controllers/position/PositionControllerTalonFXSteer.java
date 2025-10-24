@@ -1,7 +1,11 @@
 package frc.lib.controllers.position;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -124,12 +128,12 @@ public class PositionControllerTalonFXSteer implements PositionController{
   public void getUpdatedVals(PositionControllerValues values) {
     BaseStatusSignal.refreshAll(position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
     
-    values.position.mut_replace(position.getValue());
-    values.velocity.mut_replace(velocity.getValue());
-    values.acceleration.mut_replace(acceleration.getValue());
-    values.motorVoltage.mut_replace(motorVoltage.getValue());
-    values.statorCurrent.mut_replace(statorCurrent.getValue());
-    values.supplyCurrent.mut_replace(supplyCurrent.getValue());
+    values.position.mut_replace(position.getValueAsDouble(), Rotations);
+    values.velocity.mut_replace(velocity.getValueAsDouble(), RotationsPerSecond);
+    values.acceleration.mut_replace(acceleration.getValueAsDouble(), RotationsPerSecondPerSecond);
+    values.motorVoltage.mut_replace(motorVoltage.getValueAsDouble(), Volts);
+    values.statorCurrent.mut_replace(statorCurrent.getValueAsDouble(), Amps);
+    values.supplyCurrent.mut_replace(supplyCurrent.getValueAsDouble(), Amps);
   }
 
   public void setPosition(Angle newPos) {

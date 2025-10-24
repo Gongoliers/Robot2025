@@ -1,5 +1,11 @@
 package frc.lib.motors;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -90,13 +96,13 @@ public class MotorOutputTalonFX2 implements MotorOutput {
   public void updateValues(MotorValues values, Time dt) {
     BaseStatusSignal.refreshAll(position, velocity, acceleration, motorVoltage, supplyVoltage, statorCurrent, supplyCurrent);
 
-    values.position.mut_replace(position.getValue());
-    values.velocity.mut_replace(velocity.getValue());
-    values.acceleration.mut_replace(acceleration.getValue());
-    values.motorVoltage.mut_replace(motorVoltage.getValue());
-    values.supplyVoltage.mut_replace(supplyVoltage.getValue());
-    values.statorCurrent.mut_replace(statorCurrent.getValue());
-    values.supplyCurrent.mut_replace(supplyCurrent.getValue());
+    values.position.mut_replace(position.getValueAsDouble(), Rotations);
+    values.velocity.mut_replace(velocity.getValueAsDouble(), RotationsPerSecond);
+    values.acceleration.mut_replace(acceleration.getValueAsDouble(), RotationsPerSecondPerSecond);
+    values.motorVoltage.mut_replace(motorVoltage.getValueAsDouble(), Volts);
+    values.supplyVoltage.mut_replace(supplyVoltage.getValueAsDouble(), Volts);
+    values.statorCurrent.mut_replace(statorCurrent.getValueAsDouble(), Amps);
+    values.supplyCurrent.mut_replace(supplyCurrent.getValueAsDouble(), Amps);
   }
 
   @Override
