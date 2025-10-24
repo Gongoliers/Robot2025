@@ -2,6 +2,7 @@ package frc.lib.motors;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -10,8 +11,8 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
@@ -30,7 +31,7 @@ public class MotorOutputFlywheelSim implements MotorOutput{
   private final DCMotor motor;
 
   /** Position of flywhell (found by integrating sim velocity) */
-  private Angle position;
+  private MutAngle position;
 
   /** Voltage to overcome static friction */
   private final double kS;
@@ -57,6 +58,7 @@ public class MotorOutputFlywheelSim implements MotorOutput{
     LinearSystem<N1, N1, N1> plant = LinearSystemId.createFlywheelSystem(motor, moi.in(KilogramSquareMeters), config.rotorToSensorRatio()*config.sensorToMechRatio());
     sim = new FlywheelSim(plant, motor);
     this.kS = kS;
+    this.position = Rotations.mutable(0.0);
   }
 
   @Override
@@ -77,15 +79,15 @@ public class MotorOutputFlywheelSim implements MotorOutput{
   @Override
   public void updateValues(MotorValues values, Time dt) {
     sim.update(dt.in(Seconds));
-    position = position.plus(sim.getAngularVelocity().times(dt));
+    position.mut_plus(sim.getAngularVelocity().times(dt));
 
-    values.position = position;
-    values.velocity = sim.getAngularVelocity();
-    values.acceleration = sim.getAngularAcceleration();
-    values.motorVoltage = Volts.of(sim.getInputVoltage());
-    values.supplyVoltage = Volts.of(sim.getInputVoltage());
-    values.statorCurrent = Amps.of(0.0); //TODO not sure how to actually calculate this
-    values.supplyCurrent = Amps.of(sim.getCurrentDrawAmps()); //TODO not sure if this represents supply or stator current
+    values.position.mut_replace(position);
+    values.velocity.mut_replace(sim.getAngularVelocity());
+    values.acceleration.mut_replace(sim.getAngularAcceleration());
+    values.motorVoltage.mut_replace(sim.getInputVoltage(), Volts);
+    values.supplyVoltage.mut_replace(sim.getInputVoltage(), Volts);
+    values.statorCurrent.mut_replace(0, Amps); //TODO not sure how to actually calculate this
+    values.supplyCurrent.mut_replace(sim.getCurrentDrawAmps(), Amps); //TODO not sure if this represents supply or stator current
   }
 
   @Override

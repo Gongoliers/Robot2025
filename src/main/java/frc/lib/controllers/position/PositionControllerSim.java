@@ -30,9 +30,14 @@ public class PositionControllerSim implements PositionController {
 
   @Override
   public void getUpdatedVals(PositionControllerValues values) {
-    values.position = position;
-    values.velocity = velocity;
-    values.motorVoltage = (voltageSet) ? setVoltage : Volts.of(0.0);
+    values.position.mut_replace(position);
+    values.velocity.mut_replace(velocity);
+    
+    if (voltageSet) {
+      values.motorVoltage.mut_replace(setVoltage);
+    } else {
+      values.motorVoltage.mut_replace(0.0, Volts);
+    }
   }
 
   @Override
