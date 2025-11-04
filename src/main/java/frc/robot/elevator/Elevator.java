@@ -105,7 +105,7 @@ public class Elevator extends MultithreadedSubsystem {
     currentState = ElevatorState.STOW;
     targetState = ElevatorState.STOW;
 
-    stateTolerance = Meters.of(0.02);
+    stateTolerance = Meters.of(0.01);
 
     motionProfile = config.motionProfileConfig().createTrapezoidProfile();
     profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0);
@@ -162,27 +162,28 @@ public class Elevator extends MultithreadedSubsystem {
     if (targetState == ElevatorState.STOW && MathUtil.isNear(0.0, position.in(Meters), 0.01)) {
       // If near enough to stow position and you want to stow, disable the motors to prevent stalling
       profiledSetpoint = new TrapezoidProfile.State(0.0, 0.0);
-      positionController.setVoltage(Volts.of(0.01));
+      positionController.setVoltage(Volts.of(0)); // will brake to reduce impact force though brake cannot hold up the elevator
+      currentState = ElevatorState.STOW;
     } else {
       positionController.clearVoltage();
+    }
 
-      if (currentState != targetState) {
-        // If not at target state yet, approach state with motion profile
-        profiledSetpoint = motionProfile.calculate(
-            RobotConstants.FAST_PERIODIC_DURATION, 
-            profiledSetpoint, 
-            new TrapezoidProfile.State(targetState.getPosMeters(), 0));
+    if (currentState != targetState) {
+      // If not at target state yet, approach state with motion profile
+      profiledSetpoint = motionProfile.calculate(
+          RobotConstants.FAST_PERIODIC_DURATION, 
+          profiledSetpoint, 
+          new TrapezoidProfile.State(targetState.getPosMeters(), 0));
 
-        positionController.setSetpoint(
-            Rotations.of(profiledSetpoint.position / rotationsToMeters), 
-            RotationsPerSecond.of(profiledSetpoint.velocity / rotationsToMeters));
-      } else {
-        // If reached target state, set setpont to hold at that state
-        profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters() / rotationsToMeters, 0.0);
-        positionController.setSetpoint(
-            Rotations.of(targetState.getPosMeters() / rotationsToMeters), 
-            RotationsPerSecond.of(0));
-      }
+      positionController.setSetpoint(
+          Rotations.of(profiledSetpoint.position / rotationsToMeters), 
+          RotationsPerSecond.of(profiledSetpoint.velocity / rotationsToMeters));
+    } else if (currentState != ElevatorState.STOW) {
+      // If reached target state, and that state isn't stowed (we have special behavior for that), set setpont to hold at that state
+      profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters() / rotationsToMeters, 0.0);
+      positionController.setSetpoint(
+          Rotations.of(targetState.getPosMeters() / rotationsToMeters), 
+          RotationsPerSecond.of(0));
     }
 
     positionController.periodic();
