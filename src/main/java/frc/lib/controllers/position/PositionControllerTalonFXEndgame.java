@@ -150,7 +150,7 @@ public class PositionControllerTalonFXEndgame implements PositionController {
 
   @Override
   public void setPosition(Angle newPos) {
-    positionOffset = newPos.minus(position.getValue().plus(positionOffset));
+    positionOffset = newPos.minus(position.getValue());
   }
 
   @Override

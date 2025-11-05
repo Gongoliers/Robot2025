@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import frc.lib.configs.MotorConfig;
 
 /** Motor output implementation for a simulated flywheel */
-public class MotorOutputFlywheelSim implements MotorOutput{
+public class MotorOutputFlywheelSim implements MotorOutput {
 
   /** Motor config used for configuration and some constants */
   private final MotorConfig config;
