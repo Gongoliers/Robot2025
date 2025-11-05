@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -74,6 +76,7 @@ public class RobotContainer {
     operatorController.a().onTrue(elevator.setTargetState(ElevatorState.STOW));
     operatorController.b().onTrue(elevator.setTargetState(ElevatorState.L1));
     operatorController.x().onTrue(elevator.setTargetState(ElevatorState.L2));
+    operatorController.y().onTrue(elevator.setPosition(Meters.of(0)));
   }
 
   public Command getAutonomousCommand() {
