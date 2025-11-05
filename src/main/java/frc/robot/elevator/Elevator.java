@@ -60,8 +60,8 @@ public class Elevator extends MultithreadedSubsystem {
   private final MechanismConfig config = MechanismBuilder.defaults()
     .feedforwardControllerConfig(FeedforwardControllerBuilder.defaults()
       .kV(0.1)
-      .kA(0.0)
-      .kG(0.539)
+      .kA(0.09)
+      .kG(0.575)
       .kS(0.12)
       .build())
     .feedbackControllerConfig(FeedbackControllerBuilder.defaults()
@@ -153,16 +153,16 @@ public class Elevator extends MultithreadedSubsystem {
 
     if (MathUtil.isNear(targetState.getPosMeters(), position.in(Meters), stateTolerance.in(Meters))) {
       // If close enough to target state, consider the eleevator to be at that state
-      currentState = targetState;
+      // currentState = targetState;
     } else {
       // If not, conisder hteelevator to be moving
       currentState = ElevatorState.MOVING;
     }
 
-    if (targetState == ElevatorState.STOW && MathUtil.isNear(0.0, position.in(Meters), 0.01)) {
+    if (targetState == ElevatorState.STOW && position.in(Meters) < 0.01) {
       // If near enough to stow position and you want to stow, disable the motors to prevent stalling
       profiledSetpoint = new TrapezoidProfile.State(0.0, 0.0);
-      positionController.setVoltage(Volts.of(0)); // will brake to reduce impact force though brake cannot hold up the elevator
+      positionController.setVoltage(Volts.of(0.1)); // will brake to reduce impact force though brake cannot hold up the elevator
       currentState = ElevatorState.STOW;
     } else {
       positionController.clearVoltage();
@@ -180,7 +180,7 @@ public class Elevator extends MultithreadedSubsystem {
           RotationsPerSecond.of(profiledSetpoint.velocity / rotationsToMeters));
     } else if (currentState != ElevatorState.STOW) {
       // If reached target state, and that state isn't stowed (we have special behavior for that), set setpont to hold at that state
-      profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters() / rotationsToMeters, 0.0);
+      profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0.0);
       positionController.setSetpoint(
           Rotations.of(targetState.getPosMeters() / rotationsToMeters), 
           RotationsPerSecond.of(0));
@@ -218,5 +218,11 @@ public class Elevator extends MultithreadedSubsystem {
    */
   public Command goToState(ElevatorState targetState) {
     return setTargetState(targetState).andThen(Commands.waitUntil(this::atTargetState));
+  }
+
+  public Command setPosition(Distance newPosition) {
+    return Commands.runOnce(() -> {
+      positionController.setPosition(Rotations.of(newPosition.in(Meters) / rotationsToMeters));
+    });
   }
 }
