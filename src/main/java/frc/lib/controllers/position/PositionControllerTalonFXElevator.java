@@ -21,6 +21,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.measure.Angle;
@@ -179,8 +180,10 @@ public class PositionControllerTalonFXElevator implements PositionController {
     } else {
       Angle motorPosition = position.getValue().plus(positionOffset);
 
-      double feedbackVolts = feedback.calculate(motorPosition.in(Radians), setpointPosition.in(Radians));
       double feedforwardVolts = feedforward.calculate(setpointVelocity.in(RadiansPerSecond));
+
+      // If velocity setpoint is not 0, add some feedback voltage from PID controller
+      double feedbackVolts = (MathUtil.isNear(0.0, setpointVelocity.in(RotationsPerSecond), 0.001)) ? feedback.calculate(motorPosition.in(Radians), setpointPosition.in(Radians)) : 0.0;
 
       leader.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));
     }
