@@ -150,7 +150,7 @@ public class Elevator extends MultithreadedSubsystem {
     voltageOut = Volts.mutable(0.0);
     feedbackController = config.feedbackControllerConfig().createPIDController();
     feedforwardController = config.feedforwardControllerConfig().createElevatorFeedforward();
-    PIDThreshold = MetersPerSecond.of(0.02);
+    PIDThreshold = MetersPerSecond.of(0.1);
     PIDSmoothing = 2;
   }
 
@@ -228,7 +228,13 @@ public class Elevator extends MultithreadedSubsystem {
       if (MathUtil.isNear(0.0, motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters, PIDThreshold.in(MetersPerSecond))) {
         // If target velocity is close enough to zero, meaning you are reacing the end of a trajectory, fade in some feedback voltage
         feedbackVolts = feedbackController.calculate(motorValues.position.in(Rotations) * rotationsToMeters, profiledSetpoint.position);
-        feedbackVolts *= Math.pow((Math.abs(motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters)/PIDThreshold.in(MetersPerSecond)) * -1 + 1, PIDSmoothing); // This is what does the fading in
+
+        // Calculation to fade in PID voltage smoothly based on velocity's closeness to 0
+        double t = Math.abs(motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters)/PIDThreshold.in(MetersPerSecond); // This gives the value of current velocity as a percentage of PIDThreshold
+        t = t * -1 + 1; // Inverting and adding 1 means now 0.0 refers to a velocity of PIDThreshold, and 1.0 refers to a velocity of 0; this could already be multiplied by PID voltage for a linear fade in
+        t = Math.pow(t, PIDSmoothing); // This smooths the linear interpolation based on PIDSmoothing (to understand this go into desmos, graph x^a, and vary a. a is PIDSmoothing, and x is the value of t before this calculation)
+
+        feedbackVolts *= t; // This is what does the fading in
       }
 
       voltageOut.mut_replace(feedforwardVolts + feedbackVolts, Volts);
