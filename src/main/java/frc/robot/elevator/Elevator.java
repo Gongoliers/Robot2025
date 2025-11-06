@@ -96,10 +96,10 @@ public class Elevator extends MultithreadedSubsystem {
   /** Mechanism config */
   private final MechanismConfig config = MechanismBuilder.defaults()
     .feedforwardControllerConfig(FeedforwardControllerBuilder.defaults()
-      .kV(0.1)
-      .kA(0.09)
-      .kG(0.575)
-      .kS(0.12)
+      .kV(2.1)
+      .kA(0.0)
+      .kG(0.57)
+      .kS(0.17)
       .build())
     .feedbackControllerConfig(FeedbackControllerBuilder.defaults()
       .kP(0.0)
@@ -173,7 +173,7 @@ public class Elevator extends MultithreadedSubsystem {
     ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
 
     stateColumn.addDouble("Elevator position (m)", () -> motorValues.position.in(Rotations) * rotationsToMeters + positionOffset.in(Meters));
-    stateColumn.addDouble("Elevator velocity (m/s)", () -> motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters + positionOffset.in(Meters));
+    stateColumn.addDouble("Elevator velocity (m/s)", () -> motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
     stateColumn.addDouble("Elevator acceleration (m/s/s)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters + positionOffset.in(Meters));
     stateColumn.addDouble("Motor position (rot)", () -> motorValues.position.in(Rotations));
     stateColumn.addDouble("Motor velocity (rot/s)", () -> motorValues.velocity.in(RotationsPerSecond));
@@ -204,11 +204,16 @@ public class Elevator extends MultithreadedSubsystem {
 
     if (targetState == ElevatorState.STOW && position.in(Meters) < 0.01) {
       // If near enough to stow position and you want to stow, disable the motors to prevent stalling
-      voltageOut.mut_replace(0.1, Volts);
+      voltageOut.mut_replace(0.25, Volts);
       voltageSet = true;
       currentState = ElevatorState.STOW;
     }
+    profiledSetpoint = motionProfile.calculate(
+        RobotConstants.FAST_PERIODIC_DURATION, 
+        profiledSetpoint, 
+        new TrapezoidProfile.State(targetState.getPosMeters(), 0));
 
+      /* 
     if (currentState != targetState) {
       // If not at target state yet, approach state with motion profile
       profiledSetpoint = motionProfile.calculate(
@@ -219,6 +224,7 @@ public class Elevator extends MultithreadedSubsystem {
       // If reached target state, set setpont to hold at that state
       profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0.0);
     }
+      */
 
     if (voltageSet == false) {
       // If no manual voltage set, calculate voltage using feedforward and feedback
