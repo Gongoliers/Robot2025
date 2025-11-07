@@ -1,11 +1,5 @@
 package frc.robot.pivot;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
@@ -15,7 +9,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.lib.MultithreadedSubsystem;
 import frc.lib.configs.FeedbackControllerConfig.FeedbackControllerBuilder;
-import frc.lib.configs.FeedforwardControllerConfig.FeedforwardControllerBuilder;
+import frc.lib.configs.FeedforwardControllerConfig;
 import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.MechanismConfig.MechanismBuilder;
 import frc.lib.configs.MotionProfileConfig.MotionProfileBuilder;
@@ -23,6 +17,8 @@ import frc.lib.configs.MotorConfig.MotorBuilder;
 import frc.lib.controllers.position.PositionController;
 import frc.lib.controllers.position.PositionController.PositionControllerValues;
 import frc.robot.RobotConstants;
+
+import static edu.wpi.first.units.Units.*;
 
 public class Pivot extends MultithreadedSubsystem {
 
@@ -55,12 +51,13 @@ public class Pivot extends MultithreadedSubsystem {
 
   /** Mechanism config */
   private final MechanismConfig config = MechanismBuilder.defaults()
-    .feedforwardControllerConfig(FeedforwardControllerBuilder.defaults()
-      .kV(0.0)
-      .kA(0.0)
-      .kG(0.0)
-      .kS(0.0)
-      .build())
+          .feedforwardControllerConfig(new FeedforwardControllerConfig<>(
+                  Volts.of(0.0), // kS
+                  Volts.of(0.0), // kG
+                  Volts.per(RotationsPerSecond).ofNative(0.0), // kV
+                  Volts.per(RotationsPerSecondPerSecond).ofNative(0.0), // kA
+                  Rotations) // what unit are all of the gains relative to?
+          )
     .feedbackControllerConfig(FeedbackControllerBuilder.defaults()
       .kP(0.0)
       .kI(0.0)
@@ -82,7 +79,7 @@ public class Pivot extends MultithreadedSubsystem {
 
   /**
    * Gets instance of pivot subsystem singleton
-   * 
+   *
    * @return instance of pivot subsystem singleton
    */
   public static Pivot getInstance() {
@@ -105,7 +102,7 @@ public class Pivot extends MultithreadedSubsystem {
     motionProfile = config.motionProfileConfig().createTrapezoidProfile();
     profiledSetpoint = new TrapezoidProfile.State(targetState.getPosRotations(), 0);
   }
-  
+
   @Override
   public void initializeTab() {
     // Get tab
@@ -153,7 +150,7 @@ public class Pivot extends MultithreadedSubsystem {
     if (currentState != targetState) {
       // If not at target state yet, approach state with motion profile
       profiledSetpoint = motionProfile.calculate(
-          RobotConstants.PERIODIC_DURATION, 
+              RobotConstants.PERIODIC_DURATION,
           profiledSetpoint,
           new TrapezoidProfile.State(targetState.getPosRotations(), 0));
 
@@ -163,7 +160,7 @@ public class Pivot extends MultithreadedSubsystem {
     } else {
       // If reached target state, set setpoint to hold at that state
       positionController.setSetpoint(
-          Rotations.of(targetState.getPosRotations()), 
+              Rotations.of(targetState.getPosRotations()),
           RotationsPerSecond.of(0.0));
     }
 
@@ -175,5 +172,5 @@ public class Pivot extends MultithreadedSubsystem {
     synchronized(lock) {
       positionController.getUpdatedVals(positionControllerValues);
     }
-  }  
+  }
 }

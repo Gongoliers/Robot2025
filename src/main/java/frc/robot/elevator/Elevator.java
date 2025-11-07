@@ -1,12 +1,5 @@
 package frc.robot.elevator;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Distance;
@@ -17,9 +10,9 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.MultithreadedSubsystem;
-import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.FeedbackControllerConfig.FeedbackControllerBuilder;
-import frc.lib.configs.FeedforwardControllerConfig.FeedforwardControllerBuilder;
+import frc.lib.configs.FeedforwardControllerConfig;
+import frc.lib.configs.MechanismConfig;
 import frc.lib.configs.MechanismConfig.MechanismBuilder;
 import frc.lib.configs.MotionProfileConfig.MotionProfileBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
@@ -27,202 +20,227 @@ import frc.lib.controllers.position.PositionController;
 import frc.lib.controllers.position.PositionController.PositionControllerValues;
 import frc.robot.RobotConstants;
 
+import static edu.wpi.first.units.Units.*;
+
 public class Elevator extends MultithreadedSubsystem {
 
-  /** Elevator subsystem singleton */
-  private static Elevator instance = null;
+    /**
+     * Elevator subsystem singleton
+     */
+    private static Elevator instance = null;
 
-  /** Elevator position controller */
-  private final PositionController positionController;
+    /**
+     * Elevator position controller
+     */
+    private final PositionController positionController;
 
-  /** Elevator position controller values */
-  private PositionControllerValues positionControllerValues = new PositionControllerValues();
+    /**
+     * Elevator position controller values
+     */
+    private PositionControllerValues positionControllerValues = new PositionControllerValues();
 
-  /** Ratio of meters travelled by elevator per rotations made by position controller */
-  private final double rotationsToMeters;
+    /**
+     * Ratio of meters travelled by elevator per rotations made by position controller
+     */
+    private final double rotationsToMeters;
 
-  /** Target elevator state */
-  private ElevatorState targetState;
+    /**
+     * Target elevator state
+     */
+    private ElevatorState targetState;
 
-  /** Current elevator state */
-  private ElevatorState currentState;
+    /**
+     * Current elevator state
+     */
+    private ElevatorState currentState;
 
-  /** Distance elevator should be from its target state before being considered in that state */
-  private final Distance stateTolerance;
+    /**
+     * Distance elevator should be from its target state before being considered in that state
+     */
+    private final Distance stateTolerance;
 
-  /** Trapezoid motion profile */
-  private final TrapezoidProfile motionProfile;
+    /**
+     * Trapezoid motion profile
+     */
+    private final TrapezoidProfile motionProfile;
 
-  /** Setpoint that follows trapezoid motion profile */
-  private TrapezoidProfile.State profiledSetpoint;
+    /**
+     * Setpoint that follows trapezoid motion profile
+     */
+    private TrapezoidProfile.State profiledSetpoint;
 
-  /** Mechanism config */
-  private final MechanismConfig config = MechanismBuilder.defaults()
-    .feedforwardControllerConfig(FeedforwardControllerBuilder.defaults()
-      .kV(0.1)
-      .kA(0.09)
-      .kG(0.575)
-      .kS(0.12)
-      .build())
-    .feedbackControllerConfig(FeedbackControllerBuilder.defaults()
-      .kP(0.0)
-      .kI(0.0)
-      .kD(0.0)
-      .build())
-    .motionProfileConfig(MotionProfileBuilder.defaults()
-      .maxVelocity(2)
-      .maxAcceleration(2)
-      .build())
-    .motorConfig(MotorBuilder.defaults()
-      .ccwPositive(false)
-      .rotorToSensorRatio(5.0)
-      .sensorToMechRatio(5.0)
-      .neutralBrake(true)
-      .statorCurrentLimit(80.0)
-      .supplyCurrentLimit(40.0)
-      .build())
-    .build();
+    /**
+     * Mechanism config
+     */
+    private final MechanismConfig config = MechanismBuilder.defaults()
+            .feedforwardControllerConfig(new FeedforwardControllerConfig<>(
+                    Volts.of(0.12), // kS
+                    Volts.of(0.575), // kG
+                    Volts.per(RotationsPerSecond).ofNative(0.1), // kV
+                    Volts.per(RotationsPerSecondPerSecond).ofNative(0.09), // kA
+                    Rotations) // what unit are all of the gains relative to?
+            )
+            .feedbackControllerConfig(FeedbackControllerBuilder.defaults()
+                    .kP(0.0)
+                    .kI(0.0)
+                    .kD(0.0)
+                    .build())
+            .motionProfileConfig(MotionProfileBuilder.defaults()
+                    .maxVelocity(2)
+                    .maxAcceleration(2)
+                    .build())
+            .motorConfig(MotorBuilder.defaults()
+                    .ccwPositive(false)
+                    .rotorToSensorRatio(5.0)
+                    .sensorToMechRatio(5.0)
+                    .neutralBrake(true)
+                    .statorCurrentLimit(80.0)
+                    .supplyCurrentLimit(40.0)
+                    .build())
+            .build();
 
-  /**
-   * Gets reference to instance of elevator subsystem singleton
-   * 
-   * @return reference to instance of elevator subystem singleton
-   */
-  public static Elevator getInstance() {
-    if (instance == null) {
-      instance = new Elevator();
+    /**
+     * Gets reference to instance of elevator subsystem singleton
+     *
+     * @return reference to instance of elevator subystem singleton
+     */
+    public static Elevator getInstance() {
+        if (instance == null) {
+            instance = new Elevator();
+        }
+
+        return instance;
     }
 
-    return instance;
-  }
+    /**
+     * Elevator subsystem constructor
+     */
+    private Elevator() {
+        positionController = ElevatorFactory.createElevatorPositionController(config);
 
-  /** Elevator subsystem constructor */
-  private Elevator() {
-    positionController = ElevatorFactory.createElevatorPositionController(config);
+        rotationsToMeters = 0.031 * Math.PI * 3;
 
-    rotationsToMeters = 0.031 * Math.PI * 3;
+        currentState = ElevatorState.STOW;
+        targetState = ElevatorState.STOW;
 
-    currentState = ElevatorState.STOW;
-    targetState = ElevatorState.STOW;
+        stateTolerance = Meters.of(0.01);
 
-    stateTolerance = Meters.of(0.01);
-
-    motionProfile = config.motionProfileConfig().createTrapezoidProfile();
-    profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0);
-  }
-
-  @Override
-  public void initializeTab() {
-    // Get shuffleboard tab
-    ShuffleboardTab tab = Shuffleboard.getTab("Elevator");
-
-    // State info
-    tab.addString("Target state", () -> targetState.name());
-    tab.addBoolean("At target state", () -> targetState == currentState);
-
-    // Setpoint column
-    ShuffleboardLayout setpointColumn = tab.getLayout("Setpoint", BuiltInLayouts.kList);
-
-    setpointColumn.addDouble("Setpoint position (m)", () -> profiledSetpoint.position);
-    setpointColumn.addDouble("Setpoint velocity (m/s)", () -> profiledSetpoint.velocity);
-
-    // Current state column
-    ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
-
-    stateColumn.addDouble("Elevator position (m)", () -> positionControllerValues.position.in(Rotations) * rotationsToMeters);
-    stateColumn.addDouble("Elevator velocity (m/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
-    stateColumn.addDouble("Elevator acceleration (m/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters);
-    stateColumn.addDouble("Motor position (rot)", () -> positionControllerValues.position.in(Rotations));
-    stateColumn.addDouble("Motor velocity (rot/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond));
-    stateColumn.addDouble("Motor acceleration (rot/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond));
-    stateColumn.addDouble("Motor voltage",  () -> positionControllerValues.motorVoltage.in(Volts));
-    stateColumn.addDouble("Stator current", () -> positionControllerValues.statorCurrent.in(Amps));
-    stateColumn.addDouble("Supply current", () -> positionControllerValues.supplyCurrent.in(Amps));
-  }
-  
-  @Override
-  public void periodic() {
-
-  }
-
-  @Override
-  public void fastPeriodic() {
-    positionController.getUpdatedVals(positionControllerValues);
-
-    Distance position = Meters.of(positionControllerValues.position.in(Rotations) * rotationsToMeters);
-
-    if (MathUtil.isNear(targetState.getPosMeters(), position.in(Meters), stateTolerance.in(Meters))) {
-      // If close enough to target state, consider the eleevator to be at that state
-      // currentState = targetState;
-    } else {
-      // If not, conisder hteelevator to be moving
-      currentState = ElevatorState.MOVING;
+        motionProfile = config.motionProfileConfig().createTrapezoidProfile();
+        profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0);
     }
 
-    if (targetState == ElevatorState.STOW && position.in(Meters) < 0.01) {
-      // If near enough to stow position and you want to stow, disable the motors to prevent stalling
-      profiledSetpoint = new TrapezoidProfile.State(0.0, 0.0);
-      positionController.setVoltage(Volts.of(0.1)); // will brake to reduce impact force though brake cannot hold up the elevator
-      currentState = ElevatorState.STOW;
-    } else {
-      positionController.clearVoltage();
+    @Override
+    public void initializeTab() {
+        // Get shuffleboard tab
+        ShuffleboardTab tab = Shuffleboard.getTab("Elevator");
+
+        // State info
+        tab.addString("Target state", () -> targetState.name());
+        tab.addBoolean("At target state", () -> targetState == currentState);
+
+        // Setpoint column
+        ShuffleboardLayout setpointColumn = tab.getLayout("Setpoint", BuiltInLayouts.kList);
+
+        setpointColumn.addDouble("Setpoint position (m)", () -> profiledSetpoint.position);
+        setpointColumn.addDouble("Setpoint velocity (m/s)", () -> profiledSetpoint.velocity);
+
+        // Current state column
+        ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
+
+        stateColumn.addDouble("Elevator position (m)", () -> positionControllerValues.position.in(Rotations) * rotationsToMeters);
+        stateColumn.addDouble("Elevator velocity (m/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
+        stateColumn.addDouble("Elevator acceleration (m/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters);
+        stateColumn.addDouble("Motor position (rot)", () -> positionControllerValues.position.in(Rotations));
+        stateColumn.addDouble("Motor velocity (rot/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond));
+        stateColumn.addDouble("Motor acceleration (rot/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond));
+        stateColumn.addDouble("Motor voltage", () -> positionControllerValues.motorVoltage.in(Volts));
+        stateColumn.addDouble("Stator current", () -> positionControllerValues.statorCurrent.in(Amps));
+        stateColumn.addDouble("Supply current", () -> positionControllerValues.supplyCurrent.in(Amps));
     }
 
-    if (currentState != targetState) {
-      // If not at target state yet, approach state with motion profile
-      profiledSetpoint = motionProfile.calculate(
-          RobotConstants.FAST_PERIODIC_DURATION, 
-          profiledSetpoint, 
-          new TrapezoidProfile.State(targetState.getPosMeters(), 0));
+    @Override
+    public void periodic() {
 
-      positionController.setSetpoint(
-          Rotations.of(profiledSetpoint.position / rotationsToMeters), 
-          RotationsPerSecond.of(profiledSetpoint.velocity / rotationsToMeters));
-    } else if (currentState != ElevatorState.STOW) {
-      // If reached target state, and that state isn't stowed (we have special behavior for that), set setpont to hold at that state
-      profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0.0);
-      positionController.setSetpoint(
-          Rotations.of(targetState.getPosMeters() / rotationsToMeters), 
-          RotationsPerSecond.of(0));
     }
 
-    positionController.periodic();
-  }
+    @Override
+    public void fastPeriodic() {
+        positionController.getUpdatedVals(positionControllerValues);
 
-  /**
-   * Returns true if elevator is at its target state
-   * 
-   * @return true if elevator is at its target state
-   */
-  public boolean atTargetState() {
-    return currentState == targetState;
-  }
+        Distance position = Meters.of(positionControllerValues.position.in(Rotations) * rotationsToMeters);
 
-  /**
-   * Returns a command that sets the target state of the elevator
-   * 
-   * @param newTargetState new target state
-   * @return a command that sets the target state of the elevator
-   */
-  public Command setTargetState(ElevatorState newTargetState) {
-    return Commands.runOnce(() -> {
-      targetState = newTargetState;
-    }, this);
-  }
-  
-  /**
-   * Returns a command that sets the target state of the elevator and waits until it reaches that state
-   * 
-   * @param targetState target elevator state
-   * @return a command that sets the target state of the elevator and waits until it reaches that state
-   */
-  public Command goToState(ElevatorState targetState) {
-    return setTargetState(targetState).andThen(Commands.waitUntil(this::atTargetState));
-  }
+        if (MathUtil.isNear(targetState.getPosMeters(), position.in(Meters), stateTolerance.in(Meters))) {
+            // If close enough to target state, consider the eleevator to be at that state
+            // currentState = targetState;
+        } else {
+            // If not, conisder hteelevator to be moving
+            currentState = ElevatorState.MOVING;
+        }
 
-  public Command setPosition(Distance newPosition) {
-    return Commands.runOnce(() -> {
-      positionController.setPosition(Rotations.of(newPosition.in(Meters) / rotationsToMeters));
-    });
-  }
+        if (targetState == ElevatorState.STOW && position.in(Meters) < 0.01) {
+            // If near enough to stow position and you want to stow, disable the motors to prevent stalling
+            profiledSetpoint = new TrapezoidProfile.State(0.0, 0.0);
+            positionController.setVoltage(Volts.of(0.1)); // will brake to reduce impact force though brake cannot hold up the elevator
+            currentState = ElevatorState.STOW;
+        } else {
+            positionController.clearVoltage();
+        }
+
+        if (currentState != targetState) {
+            // If not at target state yet, approach state with motion profile
+            profiledSetpoint = motionProfile.calculate(
+                    RobotConstants.FAST_PERIODIC_DURATION,
+                    profiledSetpoint,
+                    new TrapezoidProfile.State(targetState.getPosMeters(), 0));
+
+            positionController.setSetpoint(
+                    Rotations.of(profiledSetpoint.position / rotationsToMeters),
+                    RotationsPerSecond.of(profiledSetpoint.velocity / rotationsToMeters));
+        } else if (currentState != ElevatorState.STOW) {
+            // If reached target state, and that state isn't stowed (we have special behavior for that), set setpont to hold at that state
+            profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0.0);
+            positionController.setSetpoint(
+                    Rotations.of(targetState.getPosMeters() / rotationsToMeters),
+                    RotationsPerSecond.of(0));
+        }
+
+        positionController.periodic();
+    }
+
+    /**
+     * Returns true if elevator is at its target state
+     *
+     * @return true if elevator is at its target state
+     */
+    public boolean atTargetState() {
+        return currentState == targetState;
+    }
+
+    /**
+     * Returns a command that sets the target state of the elevator
+     *
+     * @param newTargetState new target state
+     * @return a command that sets the target state of the elevator
+     */
+    public Command setTargetState(ElevatorState newTargetState) {
+        return Commands.runOnce(() -> {
+            targetState = newTargetState;
+        }, this);
+    }
+
+    /**
+     * Returns a command that sets the target state of the elevator and waits until it reaches that state
+     *
+     * @param targetState target elevator state
+     * @return a command that sets the target state of the elevator and waits until it reaches that state
+     */
+    public Command goToState(ElevatorState targetState) {
+        return setTargetState(targetState).andThen(Commands.waitUntil(this::atTargetState));
+    }
+
+    public Command setPosition(Distance newPosition) {
+        return Commands.runOnce(() -> {
+            positionController.setPosition(Rotations.of(newPosition.in(Meters) / rotationsToMeters));
+        });
+    }
 }
