@@ -2,9 +2,10 @@ package frc.lib.configs;
 
 import frc.lib.configs.AbsoluteEncoderConfig.AbsoluteEncoderBuilder;
 import frc.lib.configs.FeedbackControllerConfig.FeedbackControllerBuilder;
-import frc.lib.configs.FeedforwardControllerConfig.FeedforwardControllerBuilder;
 import frc.lib.configs.MotionProfileConfig.MotionProfileBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
+
+import static edu.wpi.first.units.Units.Rotations;
 
 /** 
  * Mechanism config
@@ -52,7 +53,7 @@ public record MechanismConfig(
       return new MechanismBuilder(
         AbsoluteEncoderBuilder.defaults().build(),
         FeedbackControllerBuilder.defaults().build(),
-        FeedforwardControllerBuilder.defaults().build(),
+              new FeedforwardControllerConfig<>(Rotations),
         MotionProfileBuilder.defaults().build(),
         MotorBuilder.defaults().build());
     }

@@ -26,9 +26,12 @@ public record FeedforwardControllerConfig<U extends Unit, U_PER_SEC extends PerU
         U_PER_SEC VelocityUnit,
         U_PER_SEC_PER_SEC AccelerationUnit) {
 
+    public FeedforwardControllerConfig(U Unit) {
+        this(Volts.of(0), Volts.of(0), Volts.per((U_PER_SEC) Unit.per(Second)).ofNative(0), Volts.per((U_PER_SEC_PER_SEC) (Unit.per(Second)).per(Second)).ofNative(0), Unit);
+    }
 
-    public FeedforwardControllerConfig(Voltage kS, Voltage kG, Measure<PerUnit<VoltageUnit, U_PER_SEC>> kV, Measure<PerUnit<VoltageUnit, U_PER_SEC_PER_SEC>> kA, U unit) {
-        this(kS, kG, kV, kA, unit, (U_PER_SEC) unit.per(Second), (U_PER_SEC_PER_SEC) unit.per(Second).per(Second));
+    public FeedforwardControllerConfig(Voltage kS, Voltage kG, Measure<PerUnit<VoltageUnit, U_PER_SEC>> kV, Measure<PerUnit<VoltageUnit, U_PER_SEC_PER_SEC>> kA, U Unit) {
+        this(kS, kG, kV, kA, Unit, (U_PER_SEC) Unit.per(Second), (U_PER_SEC_PER_SEC) Unit.per(Second).per(Second));
     }
 
 
@@ -39,8 +42,8 @@ public record FeedforwardControllerConfig<U extends Unit, U_PER_SEC extends PerU
      * @param kV voltage to overcome friction or drag that reduces velocity
      * @param kA voltage to overcome inertia or other resistive forces that reduce acceleration
      */
-    public FeedforwardControllerConfig(Voltage kS, Measure<PerUnit<VoltageUnit, U_PER_SEC>> kV, Measure<PerUnit<VoltageUnit, U_PER_SEC_PER_SEC>> kA, U unit) {
-        this(kS, Volts.of(0), kV, kA, unit);
+    public FeedforwardControllerConfig(Voltage kS, Measure<PerUnit<VoltageUnit, U_PER_SEC>> kV, Measure<PerUnit<VoltageUnit, U_PER_SEC_PER_SEC>> kA, U Unit) {
+        this(kS, Volts.of(0), kV, kA, Unit);
     }
 
     /**
