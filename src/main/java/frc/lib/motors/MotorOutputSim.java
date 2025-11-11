@@ -1,5 +1,8 @@
 package frc.lib.motors;
 
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Time;
@@ -11,10 +14,15 @@ import static edu.wpi.first.units.Units.*;
 
 public class MotorOutputSim extends DCMotorSim implements MotorOutput {
 
-    private final double kS;
+    private final Voltage kS;
 
-    public MotorOutputSim(double kV, double kA, DCMotor motor, double kS) {
-        super(LinearSystemId.identifyPositionSystem(kV, kA), motor);
+    /**
+     * @param system  The system to simulate, created by {@link LinearSystemId}.
+     * @param gearbox The type of and number of motors in the system.
+     * @param kS      The voltage loss due to static friction.
+     */
+    public MotorOutputSim(LinearSystem<N2, N1, N2> system, DCMotor gearbox, Voltage kS) {
+        super(system, gearbox);
         this.kS = kS;
     }
 
@@ -25,10 +33,11 @@ public class MotorOutputSim extends DCMotorSim implements MotorOutput {
     }
 
     private double calculateEffectiveVoltage(double voltage) {
-        if (Math.abs(voltage) < this.kS) {
+        double kS = this.kS.in(Volts);
+        if (Math.abs(voltage) < kS) {
             return 0;
         }
-        double opposingVoltage = Math.copySign(this.kS, -voltage);
+        double opposingVoltage = Math.copySign(kS, -voltage);
         return voltage + opposingVoltage;
     }
 
