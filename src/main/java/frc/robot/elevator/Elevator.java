@@ -167,17 +167,17 @@ public class Elevator extends MultithreadedSubsystem {
     ShuffleboardLayout setpointColumn = tab.getLayout("Setpoint", BuiltInLayouts.kList);
 
     setpointColumn.addDouble("Setpoint position (m)", () -> profiledSetpoint.position);
-    setpointColumn.addDouble("Setpoint velocity (m/s)", () -> profiledSetpoint.velocity);
+    setpointColumn.addDouble("Setpoint velocity (mps)", () -> profiledSetpoint.velocity);
 
     // Current state column
     ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
 
     stateColumn.addDouble("Elevator position (m)", () -> motorValues.position.in(Rotations) * rotationsToMeters + positionOffset.in(Meters));
-    stateColumn.addDouble("Elevator velocity (m/s)", () -> motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
-    stateColumn.addDouble("Elevator acceleration (m/s/s)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters + positionOffset.in(Meters));
+    stateColumn.addDouble("Elevator velocity (mps)", () -> motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
+    stateColumn.addDouble("Elevator acceleration (mpsps)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters + positionOffset.in(Meters));
     stateColumn.addDouble("Motor position (rot)", () -> motorValues.position.in(Rotations));
-    stateColumn.addDouble("Motor velocity (rot/s)", () -> motorValues.velocity.in(RotationsPerSecond));
-    stateColumn.addDouble("Motor acceleration (rot/s/s)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond));
+    stateColumn.addDouble("Motor velocity (rotps)", () -> motorValues.velocity.in(RotationsPerSecond));
+    stateColumn.addDouble("Motor acceleration (rotpsps)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond));
     stateColumn.addDouble("Motor voltage",  () -> motorValues.motorVoltage.in(Volts));
     stateColumn.addDouble("Stator current", () -> motorValues.statorCurrent.in(Amps));
     stateColumn.addDouble("Supply current", () -> motorValues.supplyCurrent.in(Amps));
