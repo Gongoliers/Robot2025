@@ -1,5 +1,6 @@
 package frc.lib.motors;
 
+import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotController;
@@ -17,6 +18,8 @@ public class MotorOutputSim implements MotorOutput {
 
     private final Supplier<Voltage> kG;
 
+    private final MutVoltage voltage;
+
     /**
      * @param sim The motor system to simulate.
      * @param kS  The voltage loss due to static friction.
@@ -26,6 +29,7 @@ public class MotorOutputSim implements MotorOutput {
         this.sim = sim;
         this.kS = kS;
         this.kG = kG;
+        this.voltage = Volts.mutable(0);
     }
 
     /**
@@ -54,8 +58,10 @@ public class MotorOutputSim implements MotorOutput {
 
     @Override
     public void setVoltage(Voltage voltage) {
+        this.voltage.mut_replace(voltage);
         double volts = voltage.in(Volts);
-        sim.setInputVoltage(volts - calculateVoltageLoss(volts));
+        double effectiveVoltage = volts - calculateVoltageLoss(volts);
+        sim.setInputVoltage(effectiveVoltage);
     }
 
     private double calculateVoltageLoss(double voltage) {
@@ -71,7 +77,7 @@ public class MotorOutputSim implements MotorOutput {
     public void updateValues(MotorValues values, Time dt) {
         sim.update(dt.in(Seconds));
 
-        double motorVoltage = sim.getInputVoltage();
+        double motorVoltage = voltage.in(Volts);
         double supplyVoltage = RobotController.getBatteryVoltage();
         double dutyCycle = motorVoltage / supplyVoltage;
         double statorCurrent = sim.getCurrentDrawAmps();
@@ -86,7 +92,7 @@ public class MotorOutputSim implements MotorOutput {
                 sim.getAngularAccelerationRadPerSecSq(),
                 RadiansPerSecondPerSecond
         );
-        values.motorVoltage.mut_replace(motorVoltage, Volts);
+        values.motorVoltage.mut_replace(voltage);
         values.supplyVoltage.mut_replace(supplyVoltage, Volts);
         values.statorCurrent.mut_replace(statorCurrent, Amps);
         values.supplyCurrent.mut_replace(supplyCurrent, Amps);
