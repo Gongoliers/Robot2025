@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -51,9 +50,10 @@ public class RobotContainer {
     private final double kA = 0.09;
     private final DCMotor gearbox = DCMotor.getKrakenX60(2);
 
+    private final MotorValues values = new MotorValues();
+
     private final MotorOutputSim sim;
 
-    private final ElevatorFeedforward feedforward;
 
   /** Initializes the robot container */
   private RobotContainer() {
@@ -65,8 +65,7 @@ public class RobotContainer {
     pivot = Pivot.getInstance();
 
       var motor = new DCMotorSim(LinearSystemId.identifyPositionSystem(kV, kA), gearbox);
-      sim = new MotorOutputSim(motor, Volts.of(kS), Volts.of(kG));
-      feedforward = new ElevatorFeedforward(kS, kG, kV, kA);
+      sim = new MotorOutputSim(motor, Volts.of(kS), () -> Volts.of(Math.cos(values.position.in(Radians)) * kG));
 
     Telemetry.initializeTabs(elevator, pivot);
 
@@ -104,11 +103,10 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-      var goalSpeed = RadiansPerSecond.of(10);
-      MotorValues values = new MotorValues();
-
       return Commands.run(() -> {
-          sim.setVoltage(Volts.of(feedforward.calculate(goalSpeed.in(RadiansPerSecond))));
+          // Calculate feedforward voltage to compensate for gravity
+          double ff = Math.cos(values.position.in(Radians)) * kG;
+          sim.setVoltage(Volts.of(ff));
           sim.updateValues(values, Seconds.of(0.02));
           SmartDashboard.putNumber("Simulated Position", values.position.in(Radians));
           SmartDashboard.putNumber("Simulated Speed", values.velocity.in(RadiansPerSecond));
