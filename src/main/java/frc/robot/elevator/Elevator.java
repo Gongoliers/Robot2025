@@ -74,7 +74,7 @@ public class Elevator extends MultithreadedSubsystem {
   private TrapezoidProfile.State profiledSetpoint;
 
   /** If true, a voltage is manually set, otherwise, false */
-  private boolean voltageSet;
+  private boolean manualVoltageSet;
 
   // Motor control related
 
@@ -205,17 +205,17 @@ public class Elevator extends MultithreadedSubsystem {
     if (targetState == ElevatorState.STOW && position.in(Meters) < 0.01) {
       // If near enough to stow position and you want to stow, disable the motors to prevent stalling
       voltageOut.mut_replace(0.25, Volts);
-      voltageSet = true;
+      manualVoltageSet = true;
       currentState = ElevatorState.STOW;
     }
+
     profiledSetpoint = motionProfile.calculate(
         RobotConstants.FAST_PERIODIC_DURATION, 
         profiledSetpoint, 
         new TrapezoidProfile.State(targetState.getPosMeters(), 0));
 
-      /* 
     if (currentState != targetState) {
-      // If not at target state yet, approach state with motion profile
+      // If not at target state yet, make setpoint approach state with motion profile
       profiledSetpoint = motionProfile.calculate(
           RobotConstants.FAST_PERIODIC_DURATION, 
           profiledSetpoint, 
@@ -224,9 +224,8 @@ public class Elevator extends MultithreadedSubsystem {
       // If reached target state, set setpont to hold at that state
       profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0.0);
     }
-      */
 
-    if (voltageSet == false) {
+    if (manualVoltageSet == false) {
       // If no manual voltage set, calculate voltage using feedforward and feedback
       double feedforwardVolts = feedforwardController.calculate(profiledSetpoint.velocity);
       double feedbackVolts = 0.0;
@@ -245,8 +244,8 @@ public class Elevator extends MultithreadedSubsystem {
 
       voltageOut.mut_replace(feedforwardVolts + feedbackVolts, Volts);
     } else {
-      // Otherwise, dont change voltageOut at all, and reset voltageSet
-      voltageSet = false;
+      // Otherwise, dont change voltageOut from whatever set it earlier, and reset manualVOltageSet for the next loop
+      manualVoltageSet = false;
     }
 
     // Set motor output voltage
