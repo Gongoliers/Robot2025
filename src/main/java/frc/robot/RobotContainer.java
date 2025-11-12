@@ -64,8 +64,9 @@ public class RobotContainer {
 
     pivot = Pivot.getInstance();
 
+      values.position.mut_replace(0.5, Rotations);
       var motor = new DCMotorSim(LinearSystemId.identifyPositionSystem(kV, kA), gearbox);
-      sim = new MotorOutputSim(motor, Volts.of(kS), () -> Volts.of(Math.cos(values.position.in(Radians)) * kG));
+      sim = new MotorOutputSim(motor, Volts.zero(), () -> Volts.of(Math.cos(values.position.in(Radians)) * kG));
 
     Telemetry.initializeTabs(elevator, pivot);
 
@@ -104,12 +105,15 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
       return Commands.run(() -> {
-          // Calculate feedforward voltage to compensate for gravity
+          // Use feedback control to rest the arm at 0 radians
+          double error = 0 - values.position.in(Radians);
+          double fb = 0.1 * error;
           double ff = Math.cos(values.position.in(Radians)) * kG;
-          sim.setVoltage(Volts.of(ff));
+          sim.setVoltage(Volts.of(ff + fb));
           sim.updateValues(values, Seconds.of(0.02));
           SmartDashboard.putNumber("Simulated Position", values.position.in(Radians));
           SmartDashboard.putNumber("Simulated Speed", values.velocity.in(RadiansPerSecond));
+          SmartDashboard.putNumber("Motor Voltage", values.motorVoltage.in(Volts));
     });
   }
 }
