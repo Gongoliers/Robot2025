@@ -4,21 +4,15 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
-import frc.lib.motors.MotorOutputSim;
-import frc.lib.motors.MotorValues;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
 import frc.robot.pivot.Pivot;
-
-import static edu.wpi.first.units.Units.*;
 
 /** Robot container */
 public class RobotContainer {
@@ -41,20 +35,6 @@ public class RobotContainer {
   /** Pivot subsystem reference */
   private final Pivot pivot;
 
-    /**
-     * System identification constants, for simulation.
-     */
-    private final double kS = 0.12;
-    private final double kG = 0.575;
-    private final double kV = 0.1;
-    private final double kA = 0.09;
-    private final DCMotor gearbox = DCMotor.getKrakenX60(2);
-
-    private final MotorValues values = new MotorValues();
-
-    private final MotorOutputSim sim;
-
-
   /** Initializes the robot container */
   private RobotContainer() {
     driverController = new CommandXboxController(0);
@@ -63,10 +43,6 @@ public class RobotContainer {
     elevator = Elevator.getInstance();
 
     pivot = Pivot.getInstance();
-
-      values.position.mut_replace(0.5, Rotations);
-      var motor = new DCMotorSim(LinearSystemId.identifyPositionSystem(kV, kA), gearbox);
-      sim = new MotorOutputSim(motor, Volts.zero(), () -> Volts.of(Math.cos(values.position.in(Radians)) * kG));
 
     Telemetry.initializeTabs(elevator, pivot);
 
@@ -104,16 +80,10 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-      return Commands.run(() -> {
-          // Use feedback control to rest the arm at 0 radians
-          double error = 0 - values.position.in(Radians);
-          double fb = 0.1 * error;
-          double ff = Math.cos(values.position.in(Radians)) * kG;
-          sim.setVoltage(Volts.of(ff + fb));
-          sim.updateValues(values, Seconds.of(0.02));
-          SmartDashboard.putNumber("Simulated Position", values.position.in(Radians));
-          SmartDashboard.putNumber("Simulated Speed", values.velocity.in(RadiansPerSecond));
-          SmartDashboard.putNumber("Motor Voltage", values.motorVoltage.in(Volts));
-    });
+    if (RobotConstants.ENABLED_SUBSYSTEMS.contains(RobotConstants.Subsystem.AUTO)) {
+      ;
+    }
+
+    return Commands.print("Auto disabled");
   }
 }
