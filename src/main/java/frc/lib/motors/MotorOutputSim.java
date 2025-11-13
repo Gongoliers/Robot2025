@@ -8,87 +8,43 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class MotorOutputSim implements MotorOutput {
 
     private final DCMotorSim sim;
 
-    private final Voltage kS;
-
-    private final Supplier<Voltage> kG;
-
     private final MutVoltage voltage;
 
+    private final Function<Voltage, Voltage> modifier;
+
     /**
-     * Creates a simulated motor system with a constant static friction voltage loss and a possibly
-     * variable gravity voltage loss.
+     * Creates a simulated motor system with a voltage modifier.
      *
-     * @param sim The motor system to simulate.
-     * @param kS The voltage loss due to static friction.
-     * @param kG The voltage loss due to gravity.
+     * @param sim      The motor system to simulate.
+     * @param modifier The function that modifies the voltage.
      */
-    public MotorOutputSim(DCMotorSim sim, Voltage kS, Supplier<Voltage> kG) {
+    public MotorOutputSim(DCMotorSim sim, Function<Voltage, Voltage> modifier) {
         this.sim = sim;
-        this.kS = kS;
-        this.kG = kG;
         this.voltage = Volts.mutable(0);
+        this.modifier = modifier;
     }
 
     /**
-     * Creates a simulated motor system with a constant static friction voltage loss and a constant
-     * gravity voltage loss.
-     *
-     * @param sim The motor system to simulate.
-     * @param kS The voltage loss due to static friction.
-     * @param kG The voltage loss due to gravity.
-     */
-    public MotorOutputSim(DCMotorSim sim, Voltage kS, Voltage kG) {
-        this(sim, kS, () -> kG);
-    }
-
-    /**
-     * Creates a simulated motor system with a constant static friction voltage loss and no gravity
-     * voltage loss.
-     *
-     * @param sim The motor system to simulate.
-     * @param kS The voltage loss due to static friction.
-     */
-    public MotorOutputSim(DCMotorSim sim, Voltage kS) {
-        this(sim, kS, Volts.zero());
-    }
-
-    /**
-     * Creates a simulated motor system with no static friction voltage loss and no gravity voltage
-     * loss.
+     * Creates a simulated motor system without a voltage modifier.
      *
      * @param sim The motor system to simulate.
      */
     public MotorOutputSim(DCMotorSim sim) {
-        this(sim, Volts.zero());
+        this(sim, v -> v);
     }
 
     @Override
     public void setVoltage(Voltage voltage) {
         this.voltage.mut_replace(voltage);
-        double volts = voltage.in(Volts);
-        double effectiveVoltage = volts - calculateVoltageLoss(volts);
+        double effectiveVoltage = modifier.apply(voltage).in(Volts);
         sim.setInputVoltage(effectiveVoltage);
-    }
-
-    /**
-     * Calculates the voltage losses due to static friction and gravity.
-     *
-     * @param voltage The voltage being applied to the system, prior to any losses.
-     * @return The voltage loss due to static friction and gravity.
-     */
-    private double calculateVoltageLoss(double voltage) {
-        double kS = this.kS.in(Volts);
-        double kG = this.kG.get().in(Volts);
-        if (Math.abs(voltage) < kS) {
-            return kG;
-        }
-        return Math.copySign(kS, voltage) + kG;
     }
 
     @Override
