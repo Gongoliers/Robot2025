@@ -16,8 +16,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
-import edu.wpi.first.units.measure.Velocity;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -31,8 +29,6 @@ import frc.lib.configs.FeedforwardControllerConfig.FeedforwardControllerBuilder;
 import frc.lib.configs.MechanismConfig.MechanismBuilder;
 import frc.lib.configs.MotionProfileConfig.MotionProfileBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
-import frc.lib.controllers.position.PositionController;
-import frc.lib.controllers.position.PositionController.PositionControllerValues;
 import frc.lib.motors.MotorOutput;
 import frc.lib.motors.MotorValues;
 import frc.robot.RobotConstants;
@@ -80,6 +76,12 @@ public class Elevator extends MultithreadedSubsystem {
 
   /** Voltage to set motor output */
   private MutVoltage voltageOut;
+
+  /** Calculated voltage to follow motion profile with feedforward */
+  private double feedforwardVolts = 0.0;
+
+  /** Calculated voltage to correct for position error using PID */
+  private double feedbackVolts = 0.0;
 
   /** PID controller for feedback control */
   private PIDController feedbackController;
@@ -181,6 +183,9 @@ public class Elevator extends MultithreadedSubsystem {
     stateColumn.addDouble("Motor voltage",  () -> motorValues.motorVoltage.in(Volts));
     stateColumn.addDouble("Stator current", () -> motorValues.statorCurrent.in(Amps));
     stateColumn.addDouble("Supply current", () -> motorValues.supplyCurrent.in(Amps));
+    stateColumn.addBoolean("Manual voltage set", () -> manualVoltageSet);
+    stateColumn.addDouble("Feedforward voltage", () -> feedforwardVolts);
+    stateColumn.addDouble("Feedback voltage", () -> feedbackVolts);
   }
   
   @Override
@@ -207,6 +212,9 @@ public class Elevator extends MultithreadedSubsystem {
       voltageOut.mut_replace(0.25, Volts);
       manualVoltageSet = true;
       currentState = ElevatorState.STOW;
+    } else {
+      // If not manually disabling the motors, disable manual voltage control
+      manualVoltageSet = false;
     }
 
     profiledSetpoint = motionProfile.calculate(
@@ -227,8 +235,8 @@ public class Elevator extends MultithreadedSubsystem {
 
     if (manualVoltageSet == false) {
       // If no manual voltage set, calculate voltage using feedforward and feedback
-      double feedforwardVolts = feedforwardController.calculate(profiledSetpoint.velocity);
-      double feedbackVolts = 0.0;
+      feedforwardVolts = feedforwardController.calculate(profiledSetpoint.velocity);
+      feedbackVolts = 0.0;
       
       if (MathUtil.isNear(0.0, motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters, PIDThreshold.in(MetersPerSecond))) {
         // If target velocity is close enough to zero, meaning you are reacing the end of a trajectory, fade in some feedback voltage
@@ -243,9 +251,6 @@ public class Elevator extends MultithreadedSubsystem {
       }
 
       voltageOut.mut_replace(feedforwardVolts + feedbackVolts, Volts);
-    } else {
-      // Otherwise, dont change voltageOut from whatever set it earlier, and reset manualVOltageSet for the next loop
-      manualVoltageSet = false;
     }
 
     // Set motor output voltage
