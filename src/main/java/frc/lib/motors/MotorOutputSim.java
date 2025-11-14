@@ -1,14 +1,12 @@
 package frc.lib.motors;
 
-import static edu.wpi.first.units.Units.*;
-
-import edu.wpi.first.units.measure.MutVoltage;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
+
+import static edu.wpi.first.units.Units.*;
 
 public class MotorOutputSim implements MotorOutput {
 
@@ -16,7 +14,9 @@ public class MotorOutputSim implements MotorOutput {
 
     private final Voltage kS;
 
-    private final Supplier<Voltage> kG;
+    private final Function<Angle, Voltage> kG;
+
+    private final MutAngle position;
 
     private final MutVoltage voltage;
 
@@ -26,12 +26,13 @@ public class MotorOutputSim implements MotorOutput {
      *
      * @param sim The motor system to simulate.
      * @param kS The voltage loss due to static friction.
-     * @param kG The voltage loss due to gravity.
+     * @param kG The voltage loss due to gravity, dependent on motor position.
      */
-    public MotorOutputSim(DCMotorSim sim, Voltage kS, Supplier<Voltage> kG) {
+    public MotorOutputSim(DCMotorSim sim, Voltage kS, Function<Angle, Voltage> kG) {
         this.sim = sim;
         this.kS = kS;
         this.kG = kG;
+        this.position = Radians.mutable(0);
         this.voltage = Volts.mutable(0);
     }
 
@@ -41,10 +42,10 @@ public class MotorOutputSim implements MotorOutput {
      *
      * @param sim The motor system to simulate.
      * @param kS The voltage loss due to static friction.
-     * @param kG The voltage loss due to gravity.
+     * @param kG The voltage loss due to gravity, independent of motor position.
      */
     public MotorOutputSim(DCMotorSim sim, Voltage kS, Voltage kG) {
-        this(sim, kS, () -> kG);
+        this(sim, kS, position -> kG);
     }
 
     /**
@@ -84,7 +85,7 @@ public class MotorOutputSim implements MotorOutput {
      */
     private double calculateVoltageLoss(double voltage) {
         double kS = this.kS.in(Volts);
-        double kG = this.kG.get().in(Volts);
+        double kG = this.kG.apply(position).in(Volts);
         if (Math.abs(voltage) < kS) {
             return kG;
         }
@@ -94,6 +95,7 @@ public class MotorOutputSim implements MotorOutput {
     @Override
     public void updateValues(MotorValues values, Time dt) {
         sim.update(dt.in(Seconds));
+        this.position.mut_replace(sim.getAngularPositionRad(), Radians);
 
         double motorVoltage = voltage.in(Volts);
         double supplyVoltage = RobotController.getBatteryVoltage();
@@ -101,7 +103,7 @@ public class MotorOutputSim implements MotorOutput {
         double statorCurrent = sim.getCurrentDrawAmps();
         double supplyCurrent = statorCurrent * dutyCycle;
 
-        values.position.mut_replace(sim.getAngularPositionRad(), Radian);
+        values.position.mut_replace(position);
         values.velocity.mut_replace(sim.getAngularVelocityRadPerSec(), RadiansPerSecond);
         values.acceleration.mut_replace(
                 sim.getAngularAccelerationRadPerSecSq(), RadiansPerSecondPerSecond);
