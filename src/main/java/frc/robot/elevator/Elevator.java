@@ -98,19 +98,19 @@ public class Elevator extends MultithreadedSubsystem {
   /** Mechanism config */
   private final MechanismConfig config = MechanismBuilder.defaults()
     .feedforwardControllerConfig(FeedforwardControllerBuilder.defaults()
-      .kV(2.1)
-      .kA(0.0)
+      .kV(2.0)
+      .kA(0.2)
       .kG(0.57)
-      .kS(0.17)
+      .kS(0.155)
       .build())
     .feedbackControllerConfig(FeedbackControllerBuilder.defaults()
-      .kP(0.0)
+      .kP(32)
       .kI(0.0)
       .kD(0.0)
       .build())
     .motionProfileConfig(MotionProfileBuilder.defaults()
       .maxVelocity(2)
-      .maxAcceleration(2)
+      .maxAcceleration(4)
       .build())
     .motorConfig(MotorBuilder.defaults()
       .ccwPositive(false)
@@ -144,7 +144,7 @@ public class Elevator extends MultithreadedSubsystem {
     currentState = ElevatorState.STOW;
     targetState = ElevatorState.STOW;
 
-    stateTolerance = Meters.of(0.01);
+    stateTolerance = Meters.of(0.02);
 
     motionProfile = config.motionProfileConfig().createTrapezoidProfile();
     profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0);
@@ -217,11 +217,6 @@ public class Elevator extends MultithreadedSubsystem {
       manualVoltageSet = false;
     }
 
-    profiledSetpoint = motionProfile.calculate(
-        RobotConstants.FAST_PERIODIC_DURATION, 
-        profiledSetpoint, 
-        new TrapezoidProfile.State(targetState.getPosMeters(), 0));
-
     if (currentState != targetState) {
       // If not at target state yet, make setpoint approach state with motion profile
       profiledSetpoint = motionProfile.calculate(
@@ -238,9 +233,9 @@ public class Elevator extends MultithreadedSubsystem {
       feedforwardVolts = feedforwardController.calculate(profiledSetpoint.velocity);
       feedbackVolts = 0.0;
       
-      if (MathUtil.isNear(0.0, motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters, PIDThreshold.in(MetersPerSecond))) {
+      if (MathUtil.isNear(0.0, motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters, PIDThreshold.in(MetersPerSecond)) && currentState == targetState) {
         // If target velocity is close enough to zero, meaning you are reacing the end of a trajectory, fade in some feedback voltage
-        feedbackVolts = feedbackController.calculate(motorValues.position.in(Rotations) * rotationsToMeters, profiledSetpoint.position);
+        feedbackVolts = feedbackController.calculate(position.in(Meters), profiledSetpoint.position);
 
         // Calculation to fade in PID voltage smoothly based on velocity's closeness to 0
         double t = Math.abs(motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters)/PIDThreshold.in(MetersPerSecond); // This gives the value of current velocity as a percentage of PIDThreshold
