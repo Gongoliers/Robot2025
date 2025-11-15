@@ -76,7 +76,7 @@ public class RobotContainer {
     operatorController.a().onTrue(elevator.setTargetState(ElevatorState.STOW));
     operatorController.b().onTrue(elevator.setTargetState(ElevatorState.L1));
     operatorController.x().onTrue(elevator.setTargetState(ElevatorState.L2));
-    operatorController.y().onTrue(elevator.setPosition(Meters.of(0)));
+    operatorController.y().onTrue(elevator.setElevatorPosition(Meters.of(0)));
   }
 
   public Command getAutonomousCommand() {

@@ -2,14 +2,20 @@ package frc.robot.elevator;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -23,8 +29,8 @@ import frc.lib.configs.FeedforwardControllerConfig.FeedforwardControllerBuilder;
 import frc.lib.configs.MechanismConfig.MechanismBuilder;
 import frc.lib.configs.MotionProfileConfig.MotionProfileBuilder;
 import frc.lib.configs.MotorConfig.MotorBuilder;
-import frc.lib.controllers.position.PositionController;
-import frc.lib.controllers.position.PositionController.PositionControllerValues;
+import frc.lib.motors.MotorOutput;
+import frc.lib.motors.MotorValues;
 import frc.robot.RobotConstants;
 
 public class Elevator extends MultithreadedSubsystem {
@@ -32,14 +38,21 @@ public class Elevator extends MultithreadedSubsystem {
   /** Elevator subsystem singleton */
   private static Elevator instance = null;
 
-  /** Elevator position controller */
-  private final PositionController positionController;
+  // Motor output related
 
-  /** Elevator position controller values */
-  private PositionControllerValues positionControllerValues = new PositionControllerValues();
+  /** Elevator motor output */
+  private final MotorOutput motorOutput;
 
-  /** Ratio of meters travelled by elevator per rotations made by position controller */
+  /** Elevator motor output values */
+  private MotorValues motorValues = new MotorValues();
+
+  /** Elevator position offset to allow elevator position to be rezeroed */
+  private Distance positionOffset = Meters.of(0.0);
+
+  /** Ratio of meters travelled by elevator per rotations made by motor output */
   private final double rotationsToMeters;
+
+  // State related
 
   /** Target elevator state */
   private ElevatorState targetState;
@@ -56,22 +69,48 @@ public class Elevator extends MultithreadedSubsystem {
   /** Setpoint that follows trapezoid motion profile */
   private TrapezoidProfile.State profiledSetpoint;
 
+  /** If true, a voltage is manually set, otherwise, false */
+  private boolean manualVoltageSet;
+
+  // Motor control related
+
+  /** Voltage to set motor output */
+  private MutVoltage voltageOut;
+
+  /** Calculated voltage to follow motion profile with feedforward */
+  private double feedforwardVolts = 0.0;
+
+  /** Calculated voltage to correct for position error using PID */
+  private double feedbackVolts = 0.0;
+
+  /** PID controller for feedback control */
+  private PIDController feedbackController;
+  
+  /** Feedforward controller for feedforward control */
+  private ElevatorFeedforward feedforwardController;
+
+  /** Determines how close to zero target velocity (target velocity being the velcoity calculated by the motion profile) before PID starts assisting with final positioning */
+  private LinearVelocity PIDThreshold;
+
+  /** Determines how smoothly feedback voltage begins assisting (0 -> instant, (0, 1) -> snappy, 1 -> linear, (1, inf), smooth) (this is an exponential interpolation, smoothing is the exponent used) */
+  private double PIDSmoothing;
+
   /** Mechanism config */
   private final MechanismConfig config = MechanismBuilder.defaults()
     .feedforwardControllerConfig(FeedforwardControllerBuilder.defaults()
-      .kV(0.1)
-      .kA(0.09)
-      .kG(0.575)
-      .kS(0.12)
+      .kV(2.0)
+      .kA(0.2)
+      .kG(0.57)
+      .kS(0.155)
       .build())
     .feedbackControllerConfig(FeedbackControllerBuilder.defaults()
-      .kP(0.0)
+      .kP(32)
       .kI(0.0)
       .kD(0.0)
       .build())
     .motionProfileConfig(MotionProfileBuilder.defaults()
       .maxVelocity(2)
-      .maxAcceleration(2)
+      .maxAcceleration(4)
       .build())
     .motorConfig(MotorBuilder.defaults()
       .ccwPositive(false)
@@ -98,17 +137,23 @@ public class Elevator extends MultithreadedSubsystem {
 
   /** Elevator subsystem constructor */
   private Elevator() {
-    positionController = ElevatorFactory.createElevatorPositionController(config);
+    motorOutput = ElevatorFactory.createMotorOutput(config);
 
     rotationsToMeters = 0.031 * Math.PI * 3;
 
     currentState = ElevatorState.STOW;
     targetState = ElevatorState.STOW;
 
-    stateTolerance = Meters.of(0.01);
+    stateTolerance = Meters.of(0.02);
 
     motionProfile = config.motionProfileConfig().createTrapezoidProfile();
     profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0);
+
+    voltageOut = Volts.mutable(0.0);
+    feedbackController = config.feedbackControllerConfig().createPIDController();
+    feedforwardController = config.feedforwardControllerConfig().createElevatorFeedforward();
+    PIDThreshold = MetersPerSecond.of(0.1);
+    PIDSmoothing = 2;
   }
 
   @Override
@@ -124,20 +169,23 @@ public class Elevator extends MultithreadedSubsystem {
     ShuffleboardLayout setpointColumn = tab.getLayout("Setpoint", BuiltInLayouts.kList);
 
     setpointColumn.addDouble("Setpoint position (m)", () -> profiledSetpoint.position);
-    setpointColumn.addDouble("Setpoint velocity (m/s)", () -> profiledSetpoint.velocity);
+    setpointColumn.addDouble("Setpoint velocity (mps)", () -> profiledSetpoint.velocity);
 
     // Current state column
     ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
 
-    stateColumn.addDouble("Elevator position (m)", () -> positionControllerValues.position.in(Rotations) * rotationsToMeters);
-    stateColumn.addDouble("Elevator velocity (m/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
-    stateColumn.addDouble("Elevator acceleration (m/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters);
-    stateColumn.addDouble("Motor position (rot)", () -> positionControllerValues.position.in(Rotations));
-    stateColumn.addDouble("Motor velocity (rot/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond));
-    stateColumn.addDouble("Motor acceleration (rot/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond));
-    stateColumn.addDouble("Motor voltage",  () -> positionControllerValues.motorVoltage.in(Volts));
-    stateColumn.addDouble("Stator current", () -> positionControllerValues.statorCurrent.in(Amps));
-    stateColumn.addDouble("Supply current", () -> positionControllerValues.supplyCurrent.in(Amps));
+    stateColumn.addDouble("Elevator position (m)", () -> motorValues.position.in(Rotations) * rotationsToMeters + positionOffset.in(Meters));
+    stateColumn.addDouble("Elevator velocity (mps)", () -> motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
+    stateColumn.addDouble("Elevator acceleration (mpsps)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters + positionOffset.in(Meters));
+    stateColumn.addDouble("Motor position (rot)", () -> motorValues.position.in(Rotations));
+    stateColumn.addDouble("Motor velocity (rotps)", () -> motorValues.velocity.in(RotationsPerSecond));
+    stateColumn.addDouble("Motor acceleration (rotpsps)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond));
+    stateColumn.addDouble("Motor voltage",  () -> motorValues.motorVoltage.in(Volts));
+    stateColumn.addDouble("Stator current", () -> motorValues.statorCurrent.in(Amps));
+    stateColumn.addDouble("Supply current", () -> motorValues.supplyCurrent.in(Amps));
+    stateColumn.addBoolean("Manual voltage set", () -> manualVoltageSet);
+    stateColumn.addDouble("Feedforward voltage", () -> feedforwardVolts);
+    stateColumn.addDouble("Feedback voltage", () -> feedbackVolts);
   }
   
   @Override
@@ -147,13 +195,13 @@ public class Elevator extends MultithreadedSubsystem {
 
   @Override
   public void fastPeriodic() {
-    positionController.getUpdatedVals(positionControllerValues);
+    motorOutput.updateValues(motorValues, Seconds.of(RobotConstants.FAST_PERIODIC_DURATION));
 
-    Distance position = Meters.of(positionControllerValues.position.in(Rotations) * rotationsToMeters);
+    Distance position = Meters.of(motorValues.position.in(Rotations) * rotationsToMeters).plus(positionOffset);
 
     if (MathUtil.isNear(targetState.getPosMeters(), position.in(Meters), stateTolerance.in(Meters))) {
       // If close enough to target state, consider the eleevator to be at that state
-      // currentState = targetState;
+      currentState = targetState;
     } else {
       // If not, conisder hteelevator to be moving
       currentState = ElevatorState.MOVING;
@@ -161,32 +209,56 @@ public class Elevator extends MultithreadedSubsystem {
 
     if (targetState == ElevatorState.STOW && position.in(Meters) < 0.01) {
       // If near enough to stow position and you want to stow, disable the motors to prevent stalling
-      profiledSetpoint = new TrapezoidProfile.State(0.0, 0.0);
-      positionController.setVoltage(Volts.of(0.1)); // will brake to reduce impact force though brake cannot hold up the elevator
+      voltageOut.mut_replace(0.25, Volts);
+      manualVoltageSet = true;
       currentState = ElevatorState.STOW;
     } else {
-      positionController.clearVoltage();
+      // If not manually disabling the motors, disable manual voltage control
+      manualVoltageSet = false;
     }
 
     if (currentState != targetState) {
-      // If not at target state yet, approach state with motion profile
+      // If not at target state yet, make setpoint approach state with motion profile
       profiledSetpoint = motionProfile.calculate(
           RobotConstants.FAST_PERIODIC_DURATION, 
           profiledSetpoint, 
           new TrapezoidProfile.State(targetState.getPosMeters(), 0));
-
-      positionController.setSetpoint(
-          Rotations.of(profiledSetpoint.position / rotationsToMeters), 
-          RotationsPerSecond.of(profiledSetpoint.velocity / rotationsToMeters));
-    } else if (currentState != ElevatorState.STOW) {
-      // If reached target state, and that state isn't stowed (we have special behavior for that), set setpont to hold at that state
+    } else {
+      // If reached target state, set setpont to hold at that state
       profiledSetpoint = new TrapezoidProfile.State(targetState.getPosMeters(), 0.0);
-      positionController.setSetpoint(
-          Rotations.of(targetState.getPosMeters() / rotationsToMeters), 
-          RotationsPerSecond.of(0));
     }
 
-    positionController.periodic();
+    if (manualVoltageSet == false) {
+      // If no manual voltage set, calculate voltage using feedforward and feedback
+      feedforwardVolts = feedforwardController.calculate(profiledSetpoint.velocity);
+      feedbackVolts = 0.0;
+      
+      if (MathUtil.isNear(0.0, motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters, PIDThreshold.in(MetersPerSecond)) && currentState == targetState) {
+        // If target velocity is close enough to zero, meaning you are reacing the end of a trajectory, fade in some feedback voltage
+        feedbackVolts = feedbackController.calculate(position.in(Meters), profiledSetpoint.position);
+
+        // Calculation to fade in PID voltage smoothly based on velocity's closeness to 0
+        double t = Math.abs(motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters)/PIDThreshold.in(MetersPerSecond); // This gives the value of current velocity as a percentage of PIDThreshold
+        t = t * -1 + 1; // Inverting and adding 1 means now 0.0 refers to a velocity of PIDThreshold, and 1.0 refers to a velocity of 0; this could already be multiplied by PID voltage for a linear fade in
+        t = Math.pow(t, PIDSmoothing); // This smooths the linear interpolation based on PIDSmoothing (to understand this go into desmos, graph x^a, and vary a. a is PIDSmoothing, and x is the value of t before this calculation)
+
+        feedbackVolts *= t; // This is what does the fading in
+      }
+
+      voltageOut.mut_replace(feedforwardVolts + feedbackVolts, Volts);
+    }
+
+    // Set motor output voltage
+    motorOutput.setVoltage(voltageOut);
+  }
+
+  /**
+   * Set position of the elevator for rezeroing
+   * 
+   * @param newPos new position of the elevator
+   */
+  private void setPosition(Distance newPos) {
+    positionOffset = newPos.minus(Meters.of(motorValues.position.in(Rotations) * rotationsToMeters));
   }
 
   /**
@@ -220,9 +292,9 @@ public class Elevator extends MultithreadedSubsystem {
     return setTargetState(targetState).andThen(Commands.waitUntil(this::atTargetState));
   }
 
-  public Command setPosition(Distance newPosition) {
+  public Command setElevatorPosition(Distance newPosition) {
     return Commands.runOnce(() -> {
-      positionController.setPosition(Rotations.of(newPosition.in(Meters) / rotationsToMeters));
+      setPosition(newPosition);
     });
   }
 }
