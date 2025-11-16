@@ -2,6 +2,13 @@ package frc.lib.motors;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.PerUnit;
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -17,6 +24,22 @@ public class MotorOutputSim implements MotorOutput {
      */
     public MotorOutputSim(DCMotorSim sim) {
         this.sim = sim;
+    }
+
+    public MotorOutputSim(
+        Measure<PerUnit<VoltageUnit, AngularVelocityUnit>> kV,
+        Measure<PerUnit<VoltageUnit, AngularAccelerationUnit>> kA,
+        DCMotor gearbox
+    ) {
+        this(
+            new DCMotorSim(
+                LinearSystemId.createDCMotorSystem(
+                    kV.in(Volts.per(RadiansPerSecond)),
+                    kA.in(Volts.per(RadiansPerSecondPerSecond))
+                ),
+                gearbox
+            )
+        );
     }
 
     @Override

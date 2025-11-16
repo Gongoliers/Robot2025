@@ -1,5 +1,7 @@
 package frc.robot.elevator;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -36,14 +38,18 @@ public class ElevatorFactory {
             );
         }
 
-        var plant = LinearSystemId.identifyPositionSystem(
-            config.feedforwardControllerConfig().kV(),
-            config.feedforwardControllerConfig().kA()
+        var motor = new MotorOutputSim(
+            Volts.per(RadiansPerSecond).ofNative(
+                config.feedforwardControllerConfig().kV()
+            ),
+            Volts.per(RadiansPerSecondPerSecond).ofNative(
+                config.feedforwardControllerConfig().kA()
+            ),
+            DCMotor.getKrakenX60(2)
         );
-        var sim = new DCMotorSim(plant, DCMotor.getKrakenX60(2));
 
         return new LossyMotorOutputSim(
-            new MotorOutputSim(sim),
+            motor,
             Volts.of(config.feedforwardControllerConfig().kS()),
             Volts.of(config.feedforwardControllerConfig().kG())
         );
