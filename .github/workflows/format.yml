@@ -1,0 +1,15 @@
+on: [push]
+jobs:
+  spotless:
+    runs-on: ubuntu-22.04
+    container: node:20-slim
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 17
+      - run: chmod +x gradlew
+      - run: ./gradlew spotlessCheck

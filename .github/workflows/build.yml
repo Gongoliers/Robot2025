@@ -1,0 +1,14 @@
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    container: wpilib/roborio-cross-ubuntu:2025-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: git config --global --add safe.directory $GITHUB_WORKSPACE
+      - run: chmod +x gradlew
+      - run: ./gradlew build -x spotlessCheck
