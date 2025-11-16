@@ -2,9 +2,9 @@ package frc.lib.configs;
 
 import edu.wpi.first.math.controller.PIDController;
 
-/** 
+/**
  * Feedback controller config
- * 
+ *
  * @param kP proportional voltage
  * @param kI integral voltage
  * @param kD derivative voltage
@@ -13,16 +13,11 @@ import edu.wpi.first.math.controller.PIDController;
  * @param rateTolerance velocity tolerance
  */
 public record FeedbackControllerConfig(
-    double kP,
-    double kI,
-    double kD,
-    boolean continuous,
-    double tolerance,
-    double rateTolerance) {
+    double kP, double kI, double kD, boolean continuous, double tolerance, double rateTolerance) {
 
   /**
    * Creates a new PID controller using this config
-   * 
+   *
    * @return a new PID controller using this config
    */
   public PIDController createPIDController() {
@@ -45,7 +40,7 @@ public record FeedbackControllerConfig(
     private boolean continuous;
     private double tolerance;
     private double rateTolerance;
-    
+
     private FeedbackControllerBuilder(
         double kP,
         double kI,
@@ -61,35 +56,29 @@ public record FeedbackControllerConfig(
       this.rateTolerance = rateTolerance;
     }
 
-    /** 
+    /**
      * Returns a builder with default values
-     * 
+     *
      * @return a builder with default values
      */
     public static FeedbackControllerBuilder defaults() {
-      return new FeedbackControllerBuilder(
-        0.0, 
-        0.0, 
-        0.0, 
-        false, 
-        0.0, 
-        0.0);
+      return new FeedbackControllerBuilder(0.0, 0.0, 0.0, false, 0.0, 0.0);
     }
 
-    /** 
+    /**
      * Returns a builder with values copied from the input config
-     * 
+     *
      * @param config config to be copied
      * @return a builder with values copied from the input config
      */
     public static FeedbackControllerBuilder edit(FeedbackControllerConfig config) {
       return new FeedbackControllerBuilder(
-        config.kP(), 
-        config.kI(), 
-        config.kD(), 
-        config.continuous(), 
-        config.tolerance(), 
-        config.rateTolerance());
+          config.kP(),
+          config.kI(),
+          config.kD(),
+          config.continuous(),
+          config.tolerance(),
+          config.rateTolerance());
     }
 
     public FeedbackControllerBuilder kP(double kP) {
@@ -124,17 +113,12 @@ public record FeedbackControllerConfig(
 
     /**
      * Returns the builder as a config with private immutable values
-     * 
+     *
      * @return the builder as a config with private immutable values
      */
     public FeedbackControllerConfig build() {
       return new FeedbackControllerConfig(
-        this.kP, 
-        this.kI, 
-        this.kD, 
-        this.continuous, 
-        this.tolerance, 
-        this.rateTolerance);
+          this.kP, this.kI, this.kD, this.continuous, this.tolerance, this.rateTolerance);
     }
   }
 }

@@ -55,7 +55,7 @@ public class RobotContainer {
 
   /**
    * Returns the robot container
-   * 
+   *
    * @return the robot container
    */
   public static RobotContainer getInstance() {
@@ -67,9 +67,7 @@ public class RobotContainer {
   }
 
   /** Configures subsystem default commands for teleop */
-  public void configureDefaultCommands() {
-    
-  }
+  public void configureDefaultCommands() {}
 
   /** Configures controller bindings */
   private void configureBindings() {

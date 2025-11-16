@@ -5,8 +5,8 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -20,12 +20,12 @@ public class Robot extends TimedRobot {
 
   /**
    * Returns true if on red alliance
-   * 
+   *
    * @return true if on red alliance
    */
   public static boolean isRedAlliance() {
     return DriverStation.getAlliance().isPresent()
-      && DriverStation.getAlliance().get() == Alliance.Red;
+        && DriverStation.getAlliance().get() == Alliance.Red;
   }
 
   @Override
@@ -50,7 +50,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     autonomousCommand = robotContainer.getAutonomousCommand();
-    
+
     if (autonomousCommand != null) {
       autonomousCommand.schedule();
     }

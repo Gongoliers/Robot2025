@@ -16,7 +16,7 @@ import edu.wpi.first.units.measure.Voltage;
 
 /** Interface that defines the base io functionality all velocity controllers will inherit */
 public interface VelocityController {
-  
+
   /** Class that holds logged data from the position controller */
   public static class VelocityControllerValues {
 
@@ -37,7 +37,6 @@ public interface VelocityController {
 
     /** Supply current in amps */
     public MutCurrent supplyCurrent = Amps.mutable(0.0);
-
   }
 
   /** Configures the velocity controller */
@@ -45,21 +44,21 @@ public interface VelocityController {
 
   /**
    * Gets velocity controller's updated values and updates values class accordingly
-   * 
+   *
    * @param values values class to update
    */
   public void getUpdatedVals(VelocityControllerValues values);
 
   /**
    * Sets setpoint of velocity controller
-   * 
+   *
    * @param velocity target velocity
    */
   public void setSetpoint(AngularVelocity velocity);
 
   /**
    * Sets a manual voltage for the position controller
-   * 
+   *
    * @param volts manual voltage to set
    */
   public void setVoltage(Voltage volts);

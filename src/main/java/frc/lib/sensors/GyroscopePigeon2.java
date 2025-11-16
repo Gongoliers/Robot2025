@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
-
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.lib.CAN;
@@ -14,15 +13,14 @@ import frc.lib.configs.appliers.Pigeon2ConfigApplier;
 
 /** Pigeon 2 gyroscope */
 public class GyroscopePigeon2 implements Gyroscope {
-  
+
   private Pigeon2 gyroscope;
 
   private final StatusSignal<Angle> roll, pitch, yaw;
   private final StatusSignal<AngularVelocity> rollVelocity, pitchVelocity, yawVelocity;
 
-  public GyroscopePigeon2(
-      CAN gyroscopeCAN) {
-    
+  public GyroscopePigeon2(CAN gyroscopeCAN) {
+
     gyroscope = new Pigeon2(gyroscopeCAN.id(), gyroscopeCAN.bus());
 
     roll = gyroscope.getRoll();
@@ -45,7 +43,7 @@ public class GyroscopePigeon2 implements Gyroscope {
   @Override
   public void getUpdatedVals(GyroscopeValues values) {
     BaseStatusSignal.refreshAll(roll, pitch, yaw, rollVelocity, pitchVelocity, yawVelocity);
-    
+
     values.roll = Degrees.of(roll.getValueAsDouble());
     values.pitch = Degrees.of(pitch.getValueAsDouble());
     values.yaw = Degrees.of(yaw.getValueAsDouble());

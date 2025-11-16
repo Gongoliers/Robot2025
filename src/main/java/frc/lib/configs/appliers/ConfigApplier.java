@@ -1,13 +1,12 @@
 package frc.lib.configs.appliers;
 
+import com.ctre.phoenix6.StatusCode;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.StatusCode;
-
 /** Applies configs */
 public class ConfigApplier {
-  
+
   /**
    * Attempts to apply a config. Returns true if successful.
    *
@@ -19,7 +18,7 @@ public class ConfigApplier {
    */
   protected static <Result> boolean attempt(
       Supplier<Result> applier, Function<Result, Boolean> isSuccess, int retries) {
-    
+
     for (int i = 0; i < retries; i++) {
       Result result = applier.get();
 

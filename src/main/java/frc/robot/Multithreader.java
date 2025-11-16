@@ -1,25 +1,24 @@
 package frc.robot;
 
+import frc.lib.Multithreaded;
 import java.util.HashSet;
 import java.util.Set;
 
-import frc.lib.Multithreaded;
-
 /** Class that handles calling fastPeriodic methods in multithreaded classes */
 public class Multithreader extends Thread {
-  
+
   /** Multithreader instance */
   private static Multithreader instance = null;
 
   /** Target interval between calls of fastPeriodic in nanoseconds */
-  private final long nanoTime = (long) (RobotConstants.FAST_PERIODIC_DURATION*1000000000);
+  private final long nanoTime = (long) (RobotConstants.FAST_PERIODIC_DURATION * 1000000000);
 
   /** Set of objects with fastPeriodic method to be called */
   private Set<Multithreaded> multithreadeds = new HashSet<Multithreaded>();
 
-  /** 
-   * Gets multithreader instance 
-   * 
+  /**
+   * Gets multithreader instance
+   *
    * @return multithreader instance
    */
   public static Multithreader getInstance() {
@@ -36,8 +35,9 @@ public class Multithreader extends Thread {
   }
 
   /**
-   * Register a multithreaded class to have their fastPeriodic function called each periodic duration
-   * 
+   * Register a multithreaded class to have their fastPeriodic function called each periodic
+   * duration
+   *
    * @param multithreaded multithreaded class to register
    */
   public void registerMultithreaded(Multithreaded multithreaded) {
@@ -51,7 +51,8 @@ public class Multithreader extends Thread {
 
       fastPeriodic();
 
-      // Pause the thread just long enough for every loop of the thread to last exactly as long as expected
+      // Pause the thread just long enough for every loop of the thread to last exactly as long as
+      // expected
       long sleepTime = nanoTime - System.nanoTime() + startTime;
 
       if (sleepTime > 0) {
@@ -62,7 +63,8 @@ public class Multithreader extends Thread {
           break;
         }
       } else {
-        // If thread takes longer to execute tasks than expected, don't pause, and log how much it has overrun by
+        // If thread takes longer to execute tasks than expected, don't pause, and log how much it
+        // has overrun by
         System.out.println("SpeedThread overran by " + (-sleepTime / 1000000) + "ms");
       }
     }

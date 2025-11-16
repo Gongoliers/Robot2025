@@ -10,7 +10,7 @@ import edu.wpi.first.units.measure.Voltage;
 
 /** Simulated position controller */
 public class PositionControllerSim implements PositionController {
-    
+
   private Angle position;
   private AngularVelocity velocity;
 
@@ -32,7 +32,7 @@ public class PositionControllerSim implements PositionController {
   public void getUpdatedVals(PositionControllerValues values) {
     values.position.mut_replace(position);
     values.velocity.mut_replace(velocity);
-    
+
     if (voltageSet) {
       values.motorVoltage.mut_replace(setVoltage);
     } else {
@@ -65,7 +65,7 @@ public class PositionControllerSim implements PositionController {
   @Override
   public void periodic() {
     if (voltageSet) {
-      position = position.plus(Rotations.of(setVoltage.in(Volts)*2));
+      position = position.plus(Rotations.of(setVoltage.in(Volts) * 2));
     }
   }
 }

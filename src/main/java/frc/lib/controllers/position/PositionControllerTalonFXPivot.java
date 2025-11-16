@@ -19,7 +19,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.measure.Angle;
@@ -71,10 +70,8 @@ public class PositionControllerTalonFXPivot implements PositionController {
   /** If there is a manually set voltage, this is the voltage */
   private Voltage setVoltage;
 
-  public PositionControllerTalonFXPivot(
-      MechanismConfig config,
-      CAN motorCAN) {
-    
+  public PositionControllerTalonFXPivot(MechanismConfig config, CAN motorCAN) {
+
     // Set config
     this.config = config;
 
@@ -89,7 +86,8 @@ public class PositionControllerTalonFXPivot implements PositionController {
     statorCurrent = motor.getStatorCurrent();
     supplyCurrent = motor.getSupplyCurrent();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(100, position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        100, position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
     motor.optimizeBusUtilization();
 
     // Set up feedback and feedforward
@@ -110,23 +108,34 @@ public class PositionControllerTalonFXPivot implements PositionController {
   public void configure() {
     TalonFXConfigurator motorConfigurator = motor.getConfigurator();
 
-    TalonFXConfiguration motorConfiguration = new TalonFXConfiguration()
-      .withCurrentLimits(new CurrentLimitsConfigs()
-        .withStatorCurrentLimit(config.motorConfig().statorCurrentLimit())
-        .withSupplyCurrentLimit(config.motorConfig().supplyCurrentLimit()))
-      .withMotorOutput(new MotorOutputConfigs()
-        .withInverted(config.motorConfig().ccwPositive() ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive)
-        .withNeutralMode(config.motorConfig().neutralBrake() ? NeutralModeValue.Brake : NeutralModeValue.Coast))
-      .withFeedback(new FeedbackConfigs()
-        .withRotorToSensorRatio(config.motorConfig().rotorToSensorRatio())
-        .withSensorToMechanismRatio(config.motorConfig().sensorToMechRatio()));
+    TalonFXConfiguration motorConfiguration =
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(config.motorConfig().statorCurrentLimit())
+                    .withSupplyCurrentLimit(config.motorConfig().supplyCurrentLimit()))
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withInverted(
+                        config.motorConfig().ccwPositive()
+                            ? InvertedValue.CounterClockwise_Positive
+                            : InvertedValue.Clockwise_Positive)
+                    .withNeutralMode(
+                        config.motorConfig().neutralBrake()
+                            ? NeutralModeValue.Brake
+                            : NeutralModeValue.Coast))
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withRotorToSensorRatio(config.motorConfig().rotorToSensorRatio())
+                    .withSensorToMechanismRatio(config.motorConfig().sensorToMechRatio()));
 
     motorConfigurator.apply(motorConfiguration);
   }
 
   @Override
   public void getUpdatedVals(PositionControllerValues values) {
-    BaseStatusSignal.refreshAll(position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
+    BaseStatusSignal.refreshAll(
+        position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
 
     values.position.mut_replace(position.getValueAsDouble(), Rotations).mut_plus(positionOffset);
     values.velocity.mut_replace(velocity.getValueAsDouble(), RotationsPerSecond);
@@ -165,8 +174,11 @@ public class PositionControllerTalonFXPivot implements PositionController {
     } else {
       Angle motorPosition = position.getValue().plus(positionOffset);
 
-      double feedbackVolts = feedback.calculate(motorPosition.in(Radians), setpointPosition.in(Radians));
-      double feedforwardVolts = feedforward.calculate(setpointPosition.in(Radians), setpointVelocity.in(RadiansPerSecond));
+      double feedbackVolts =
+          feedback.calculate(motorPosition.in(Radians), setpointPosition.in(Radians));
+      double feedforwardVolts =
+          feedforward.calculate(
+              setpointPosition.in(Radians), setpointVelocity.in(RadiansPerSecond));
 
       motor.setControl(voltage.withOutput(Volts.of(feedforwardVolts + feedbackVolts)));
     }
