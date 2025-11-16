@@ -26,6 +26,13 @@ public class MotorOutputSim implements MotorOutput {
         this.sim = sim;
     }
 
+    /**
+     * Creates a simulated motor system.
+     *
+     * @param kV The coefficient relating voltage to velocity.
+     * @param kA The coefficient relating voltage to acceleration.
+     * @param gearbox The type and number of motors in the system.
+     */
     public MotorOutputSim(
         Measure<PerUnit<VoltageUnit, AngularVelocityUnit>> kV,
         Measure<PerUnit<VoltageUnit, AngularAccelerationUnit>> kA,

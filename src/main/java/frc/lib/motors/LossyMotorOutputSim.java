@@ -97,7 +97,7 @@ public class LossyMotorOutputSim implements MotorOutput {
     @Override
     public void updateValues(MotorValues values, Time dt) {
         sim.updateValues(values, dt);
-        // Update our position so our calculated kG will be accurate
+        // Update the position so the calculated kG will be accurate
         this.position.mut_replace(values.position);
         // Override the motor voltage with the actual requested voltage
         values.motorVoltage.mut_replace(motorVoltage);
