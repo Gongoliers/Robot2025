@@ -46,9 +46,6 @@ public class Elevator extends MultithreadedSubsystem {
   /** Elevator motor output values */
   private MotorValues motorValues = new MotorValues();
 
-  /** Elevator position offset to allow elevator position to be rezeroed */
-  private Distance positionOffset = Meters.of(0.0);
-
   /** Ratio of meters travelled by elevator per rotations made by motor output */
   private final double rotationsToMeters;
 
@@ -174,9 +171,9 @@ public class Elevator extends MultithreadedSubsystem {
     // Current state column
     ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
 
-    stateColumn.addDouble("Elevator position (m)", () -> motorValues.position.in(Rotations) * rotationsToMeters + positionOffset.in(Meters));
+    stateColumn.addDouble("Elevator position (m)", () -> motorValues.position.in(Rotations) * rotationsToMeters);
     stateColumn.addDouble("Elevator velocity (mps)", () -> motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
-    stateColumn.addDouble("Elevator acceleration (mpsps)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters + positionOffset.in(Meters));
+    stateColumn.addDouble("Elevator acceleration (mpsps)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters);
     stateColumn.addDouble("Motor position (rot)", () -> motorValues.position.in(Rotations));
     stateColumn.addDouble("Motor velocity (rotps)", () -> motorValues.velocity.in(RotationsPerSecond));
     stateColumn.addDouble("Motor acceleration (rotpsps)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond));
@@ -197,7 +194,7 @@ public class Elevator extends MultithreadedSubsystem {
   public void fastPeriodic() {
     motorOutput.updateValues(motorValues, Seconds.of(RobotConstants.FAST_PERIODIC_DURATION));
 
-    Distance position = Meters.of(motorValues.position.in(Rotations) * rotationsToMeters).plus(positionOffset);
+    Distance position = Meters.of(motorValues.position.in(Rotations) * rotationsToMeters);
 
     if (MathUtil.isNear(targetState.getPosMeters(), position.in(Meters), stateTolerance.in(Meters))) {
       // If close enough to target state, consider the eleevator to be at that state
@@ -258,7 +255,7 @@ public class Elevator extends MultithreadedSubsystem {
    * @param newPos new position of the elevator
    */
   private void setPosition(Distance newPos) {
-    positionOffset = newPos.minus(Meters.of(motorValues.position.in(Rotations) * rotationsToMeters));
+    motorOutput.setPosition(newPos.in(Meters) / rotationsToMeters);
   }
 
   /**
