@@ -255,7 +255,7 @@ public class Elevator extends MultithreadedSubsystem {
    * @param newPos new position of the elevator
    */
   private void setPosition(Distance newPos) {
-    motorOutput.setPosition(newPos.in(Meters) / rotationsToMeters);
+    motorOutput.setPosition(Rotations.of(newPos.in(Meters) / rotationsToMeters));
   }
 
   /**
