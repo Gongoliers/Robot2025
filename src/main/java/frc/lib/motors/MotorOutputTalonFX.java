@@ -23,6 +23,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.CAN;
@@ -36,6 +37,9 @@ public class MotorOutputTalonFX implements MotorOutput {
 
   /** TalonFX hardware */
   private final TalonFX motor;
+
+  /** Position offset */
+  private final MutAngle positionOffset;
 
   // Status signals
   private final StatusSignal<Angle> position;
@@ -65,6 +69,8 @@ public class MotorOutputTalonFX implements MotorOutput {
     // create hardware and status signals
     motor = new TalonFX(motorCAN.id(), motorCAN.bus());
 
+    positionOffset = Rotations.mutable(0.0);
+
     position = motor.getPosition();
     velocity = motor.getVelocity();
     acceleration = motor.getAcceleration();
@@ -83,10 +89,16 @@ public class MotorOutputTalonFX implements MotorOutput {
   }
 
   @Override
+  public void setPosition(Angle newPosition) {
+    BaseStatusSignal.refreshAll(position);
+    positionOffset.mut_replace(newPosition.minus(position.getValue()));
+  }
+
+  @Override
   public void updateValues(MotorValues values, Time dt) {
     BaseStatusSignal.refreshAll(position, velocity, acceleration, motorVoltage, supplyVoltage, statorCurrent, supplyCurrent);
 
-    values.position.mut_replace(position.getValueAsDouble(), Rotations);
+    values.position.mut_replace(position.getValueAsDouble() + positionOffset.in(Rotations), Rotations);
     values.velocity.mut_replace(velocity.getValueAsDouble(), RotationsPerSecond);
     values.acceleration.mut_replace(acceleration.getValueAsDouble(), RotationsPerSecondPerSecond);
     values.motorVoltage.mut_replace(motorVoltage.getValueAsDouble(), Volts);

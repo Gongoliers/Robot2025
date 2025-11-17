@@ -96,6 +96,11 @@ public class LossyMotorOutputSim implements MotorOutput {
     }
 
     @Override
+    public void setPosition(Angle newPosition) {
+      sim.setPosition(newPosition);
+    }
+
+    @Override
     public void updateValues(MotorValues values, Time dt) {
         sim.updateValues(values, dt);
         // Update the position so the calculated kG will be accurate
