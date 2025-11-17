@@ -17,6 +17,8 @@ public class MotorOutputSim implements MotorOutput {
 
     private final DCMotorSim sim;
 
+    private final MutAngle positionOffset;
+
     /**
      * Creates a simulated motor system.
      *
@@ -24,6 +26,8 @@ public class MotorOutputSim implements MotorOutput {
      */
     public MotorOutputSim(DCMotorSim sim) {
         this.sim = sim;
+
+        positionOffset = Rotations.mutable(0.0);
     }
 
     /**
@@ -55,10 +59,15 @@ public class MotorOutputSim implements MotorOutput {
     }
 
     @Override
+    public void setPosition(Angle newPosition){
+      positionOffset.mut_replace(newPosition.minus(Radians.of(sim.getAngularPositionRad())));
+    }
+
+    @Override
     public void updateValues(MotorValues values, Time dt) {
         sim.update(dt.in(Seconds));
 
-        values.position.mut_replace(sim.getAngularPositionRad(), Radians);
+        values.position.mut_replace(sim.getAngularPositionRad() + positionOffset.in(Radians), Radians);
         values.velocity.mut_replace(
             sim.getAngularVelocityRadPerSec(),
             RadiansPerSecond
