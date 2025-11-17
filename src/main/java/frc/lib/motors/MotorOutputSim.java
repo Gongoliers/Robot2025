@@ -15,73 +15,63 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 public class MotorOutputSim implements MotorOutput {
 
-    private final DCMotorSim sim;
+  private final DCMotorSim sim;
 
-    /**
-     * Creates a simulated motor system.
-     *
-     * @param sim The motor system to simulate.
-     */
-    public MotorOutputSim(DCMotorSim sim) {
-        this.sim = sim;
-    }
+  /**
+   * Creates a simulated motor system.
+   *
+   * @param sim The motor system to simulate.
+   */
+  public MotorOutputSim(DCMotorSim sim) {
+    this.sim = sim;
+  }
 
-    /**
-     * Creates a simulated motor system.
-     *
-     * @param kV The coefficient relating voltage to velocity.
-     * @param kA The coefficient relating voltage to acceleration.
-     * @param gearbox The type and number of motors in the system.
-     */
-    public MotorOutputSim(
-        Measure<PerUnit<VoltageUnit, AngularVelocityUnit>> kV,
-        Measure<PerUnit<VoltageUnit, AngularAccelerationUnit>> kA,
-        DCMotor gearbox
-    ) {
-        this(
-            new DCMotorSim(
-                LinearSystemId.createDCMotorSystem(
-                    kV.in(Volts.per(RadiansPerSecond)),
-                    kA.in(Volts.per(RadiansPerSecondPerSecond))
-                ),
-                gearbox
-            )
-        );
-    }
+  /**
+   * Creates a simulated motor system.
+   *
+   * @param kV The coefficient relating voltage to velocity.
+   * @param kA The coefficient relating voltage to acceleration.
+   * @param gearbox The type and number of motors in the system.
+   */
+  public MotorOutputSim(
+      Measure<PerUnit<VoltageUnit, AngularVelocityUnit>> kV,
+      Measure<PerUnit<VoltageUnit, AngularAccelerationUnit>> kA,
+      DCMotor gearbox) {
+    this(
+        new DCMotorSim(
+            LinearSystemId.createDCMotorSystem(
+                kV.in(Volts.per(RadiansPerSecond)), kA.in(Volts.per(RadiansPerSecondPerSecond))),
+            gearbox));
+  }
 
-    @Override
-    public void setVoltage(Voltage voltage) {
-        sim.setInputVoltage(voltage.in(Volts));
-    }
+  @Override
+  public void setVoltage(Voltage voltage) {
+    sim.setInputVoltage(voltage.in(Volts));
+  }
 
-    @Override
-    public void updateValues(MotorValues values, Time dt) {
-        sim.update(dt.in(Seconds));
+  @Override
+  public void updateValues(MotorValues values, Time dt) {
+    sim.update(dt.in(Seconds));
 
-        values.position.mut_replace(sim.getAngularPositionRad(), Radians);
-        values.velocity.mut_replace(
-            sim.getAngularVelocityRadPerSec(),
-            RadiansPerSecond
-        );
-        values.acceleration.mut_replace(
-            sim.getAngularAccelerationRadPerSecSq(),
-            RadiansPerSecondPerSecond
-        );
+    values.position.mut_replace(sim.getAngularPositionRad(), Radians);
+    values.velocity.mut_replace(sim.getAngularVelocityRadPerSec(), RadiansPerSecond);
+    values.acceleration.mut_replace(
+        sim.getAngularAccelerationRadPerSecSq(), RadiansPerSecondPerSecond);
 
-        double motorVoltage = sim.getInputVoltage();
-        double supplyVoltage = RobotController.getBatteryVoltage();
-        double dutyCycle = motorVoltage / supplyVoltage;
-        double statorCurrent = sim.getCurrentDrawAmps();
-        double supplyCurrent = statorCurrent * dutyCycle;
+    double motorVoltage = sim.getInputVoltage();
+    double supplyVoltage = RobotController.getBatteryVoltage();
+    double dutyCycle = motorVoltage / supplyVoltage;
+    double statorCurrent = sim.getCurrentDrawAmps();
+    double supplyCurrent = statorCurrent * dutyCycle;
 
-        values.motorVoltage.mut_replace(motorVoltage, Volts);
-        values.supplyVoltage.mut_replace(supplyVoltage, Volts);
-        values.statorCurrent.mut_replace(statorCurrent, Amps);
-        values.supplyCurrent.mut_replace(supplyCurrent, Amps);
-    }
+    values.motorVoltage.mut_replace(motorVoltage, Volts);
+    values.supplyVoltage.mut_replace(supplyVoltage, Volts);
+    values.statorCurrent.mut_replace(statorCurrent, Amps);
+    values.supplyCurrent.mut_replace(supplyCurrent, Amps);
+  }
 
-    @Override
-    public boolean configure() {
-        return true;
-    }
+  @Override
+  public boolean configure() {
+    return true;
+  }
 }
