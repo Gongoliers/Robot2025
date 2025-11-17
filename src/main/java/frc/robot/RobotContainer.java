@@ -6,10 +6,16 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
+import frc.lib.swerves.IdealSwerveSim;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
 import frc.robot.pivot.Pivot;
@@ -80,10 +86,14 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    if (RobotConstants.ENABLED_SUBSYSTEMS.contains(RobotConstants.Subsystem.AUTO)) {
-      ;
-    }
+    IdealSwerveSim swerve = new IdealSwerveSim();
+    SwerveRequest request = new SwerveRequest.FieldCentricFacingAngle().withVelocityX(0.1).withTargetDirection(Rotation2d.k180deg);
+    Field2d field = new Field2d();
+    SmartDashboard.putData(field);
 
-    return Commands.print("Auto disabled");
+    return Commands.run(() -> {
+        swerve.setControl(request);
+        field.setRobotPose(swerve.getState().Pose);
+    });
   }
 }
