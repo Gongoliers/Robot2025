@@ -1,6 +1,7 @@
 package frc.robot.elevator;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -20,6 +21,11 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.MultithreadedSubsystem;
@@ -92,6 +98,17 @@ public class Elevator extends MultithreadedSubsystem {
   /** Determines how smoothly feedback voltage begins assisting (0 -> instant, (0, 1) -> snappy, 1 -> linear, (1, inf), smooth) (this is an exponential interpolation, smoothing is the exponent used) */
   private double PIDSmoothing;
 
+  // Mechanism visualization for logging
+
+  /** Mechanism2d widget */
+  Mechanism2d mechanism;
+
+  /** Root of Mechanism2d visualization */
+  MechanismRoot2d mechanismRoot;
+
+  /** Elevator height visualization */
+  MechanismLigament2d mechanismElevator;
+
   /** Mechanism config */
   private final MechanismConfig config = MechanismBuilder.defaults()
     .feedforwardControllerConfig(FeedforwardControllerBuilder.defaults()
@@ -151,6 +168,13 @@ public class Elevator extends MultithreadedSubsystem {
     feedforwardController = config.feedforwardControllerConfig().createElevatorFeedforward();
     PIDThreshold = MetersPerSecond.of(0.1);
     PIDSmoothing = 2;
+
+    // Set up Mechanism2d visualization
+    mechanism = new Mechanism2d(80, 80);
+    mechanismRoot = mechanism.getRoot("root", 40, 10);
+    mechanismElevator =
+      mechanismRoot.append(
+        new MechanismLigament2d("Base", 0, 90, 4, new Color8Bit(255, 255, 255)));
   }
 
   @Override
@@ -161,6 +185,7 @@ public class Elevator extends MultithreadedSubsystem {
     // State info
     tab.addString("Target state", () -> targetState.name());
     tab.addBoolean("At target state", () -> targetState == currentState);
+    SmartDashboard.putData("Elevator mechanism visualization", mechanism);
 
     // Setpoint column
     ShuffleboardLayout setpointColumn = tab.getLayout("Setpoint", BuiltInLayouts.kList);
@@ -195,6 +220,8 @@ public class Elevator extends MultithreadedSubsystem {
     motorOutput.updateValues(motorValues, Seconds.of(RobotConstants.FAST_PERIODIC_DURATION));
 
     Distance position = Meters.of(motorValues.position.in(Rotations) * rotationsToMeters);
+
+    updateMechanismVisualization(position);
 
     if (MathUtil.isNear(targetState.getPosMeters(), position.in(Meters), stateTolerance.in(Meters))) {
       // If close enough to target state, consider the eleevator to be at that state
@@ -256,6 +283,15 @@ public class Elevator extends MultithreadedSubsystem {
    */
   private void setPosition(Distance newPos) {
     motorOutput.setPosition(Rotations.of(newPos.in(Meters) / rotationsToMeters));
+  }
+
+  /**
+   * Updates the Mechanism2d visualization of the elevator
+   * 
+   * @param elevatorPosition current elevator position
+   */
+  private void updateMechanismVisualization(Distance elevatorPosition) {
+    mechanismElevator.setLength(elevatorPosition.in(Inches));
   }
 
   /**
