@@ -2,6 +2,7 @@ package frc.lib.motors;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutVoltage;
@@ -73,7 +74,7 @@ public class LossyMotorOutputSim implements MotorOutput {
         this.motorVoltage.mut_replace(voltage);
         double volts = voltage.in(Volts);
         effectiveMotorVoltage.mut_replace(
-            volts - calculateVoltageLoss(volts),
+            calculateEffectiveVoltage(volts),
             Volts
         );
         // Override the requested voltage with the effective voltage
@@ -81,18 +82,22 @@ public class LossyMotorOutputSim implements MotorOutput {
     }
 
     /**
-     * Calculates the voltage losses due to static friction and gravity.
+     * Calculates effective voltage applied to motor that produces movement (voltage not used to overcome gravity or static friction)
      *
      * @param voltage The voltage being applied to the system, prior to any losses.
-     * @return The voltage loss due to static friction and gravity.
+     * @return Effective voltage applied to the motor that produces movement
      */
-    private double calculateVoltageLoss(double voltage) {
+    private double calculateEffectiveVoltage(double voltage) {
         double kS = this.kS.in(Volts);
         double kG = this.kG.apply(position).in(Volts);
-        if (Math.abs(voltage) < kS) {
-            return kG;
+        double voltageOut = voltage - kG;
+        if (Math.abs(voltageOut) < kS) {
+            voltageOut = 0;
+        } else {
+            voltageOut -= Math.copySign(kS, voltageOut);
         }
-        return Math.copySign(kS, voltage) + kG;
+
+        return voltageOut;
     }
 
     @Override
