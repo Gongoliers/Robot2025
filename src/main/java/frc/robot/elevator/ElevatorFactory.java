@@ -2,6 +2,7 @@ package frc.robot.elevator;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -49,7 +50,9 @@ public class ElevatorFactory {
         return new LossyMotorOutputSim(
             motor,
             Volts.of(config.feedforwardControllerConfig().kS()),
-            Volts.of(config.feedforwardControllerConfig().kG())
+            (motorPosition) -> {
+                return (motorPosition.in(Rotations) > 0) ? Volts.of(config.feedforwardControllerConfig().kG()) : Volts.of(0.0);
+            }
         );
     }
 }
