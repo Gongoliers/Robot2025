@@ -5,6 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -77,18 +78,18 @@ public class RobotContainer {
 
     /** Configures controller bindings */
     private void configureBindings() {
-        operatorController
-            .a()
-            .onTrue(elevator.setTargetState(ElevatorState.STOW));
-        operatorController
-            .b()
-            .onTrue(elevator.setTargetState(ElevatorState.L1));
-        operatorController
-            .x()
-            .onTrue(elevator.setTargetState(ElevatorState.L2));
-        operatorController
-            .y()
-            .onTrue(elevator.setElevatorPosition(Meters.of(0)));
+//        operatorController
+//            .a()
+//            .onTrue(elevator.setTargetState(ElevatorState.STOW));
+//        operatorController
+//            .b()
+//            .onTrue(elevator.setTargetState(ElevatorState.L1));
+//        operatorController
+//            .x()
+//            .onTrue(elevator.setTargetState(ElevatorState.L2));
+//        operatorController
+//            .y()
+//            .onTrue(elevator.setElevatorPosition(Meters.of(0)));
 
         driverController
             .a()
@@ -106,15 +107,12 @@ public class RobotContainer {
         driverController
             .y()
             .whileTrue(roller.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+        driverController.leftTrigger().whileTrue(roller.runVoltage(Volts.of(-6)));
+        driverController.rightTrigger().whileTrue(roller.runVoltage(Volts.of(6)));
     }
 
     public Command getAutonomousCommand() {
-        if (
-            RobotConstants.ENABLED_SUBSYSTEMS.contains(
-                RobotConstants.Subsystem.AUTO
-            )
-        ) {}
-
         return Commands.print("Auto disabled");
     }
 }
