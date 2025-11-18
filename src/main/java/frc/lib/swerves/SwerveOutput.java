@@ -3,7 +3,7 @@ package frc.lib.swerves;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-public interface Swerve {
+public interface SwerveOutput {
 
     void setControl(SwerveRequest request);
 

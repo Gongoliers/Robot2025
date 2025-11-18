@@ -8,7 +8,7 @@ import edu.wpi.first.units.measure.Time;
 
 import static edu.wpi.first.units.Units.Seconds;
 
-public class IdealSwerveSim implements Swerve {
+public class IdealSwerveSim implements SwerveOutput {
 
     private final Time DT = Seconds.of(0.02);
 

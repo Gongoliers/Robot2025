@@ -4,21 +4,20 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
-import frc.lib.swerves.IdealSwerveSim;
+import frc.robot.drive.DriveFactory;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
 import frc.robot.pivot.Pivot;
+import frc.robot.drive.Drive;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -43,6 +42,8 @@ public class RobotContainer {
   /** Pivot subsystem reference */
   private final Pivot pivot;
 
+  private final Drive drive;
+
   /** Initializes the robot container */
   private RobotContainer() {
     driverController = new CommandXboxController(0);
@@ -52,7 +53,10 @@ public class RobotContainer {
 
     pivot = Pivot.getInstance();
 
-    Telemetry.initializeTabs(elevator, pivot);
+    drive = new Drive(DriveFactory.createSwerve());
+    drive.setDefaultCommand(getAutonomousCommand());
+
+    Telemetry.initializeTabs(elevator, pivot, drive);
 
     multithreader = Multithreader.getInstance();
     multithreader.start();
@@ -89,8 +93,8 @@ public class RobotContainer {
 
   public Translation2d mixedVelocity(Translation2d driverVelocity, Pose2d current, Pose2d target) {
     final double KP = 4;
-    final Distance MAX_DISTANCE = Meters.of(1);
-    final Distance MIN_DISTANCE = Feet.of(1);
+    final Distance MAX_DISTANCE = Meters.of(2);
+    final Distance MIN_DISTANCE = Meters.of(0.5);
 
     Translation2d error = new Translation2d(target.getX() - current.getX(), target.getY() - current.getY());
     Rotation2d direction = error.getAngle();
@@ -101,17 +105,14 @@ public class RobotContainer {
         return driverVelocity;
     }
 
-    double velocity = KP * distance;
-    double x = velocity * direction.getCos();
-    double y = velocity * direction.getSin();
-    Translation2d proportionalVelocity = new Translation2d(x, y);
+    double velocity = Math.min(driverVelocity.getNorm(), KP * distance);
+    Translation2d proportionalVelocity = new Translation2d(velocity, direction);
 
     if (distance < MIN_DISTANCE.in(Meters)) {
         return proportionalVelocity;
     }
 
     double t = distance / MAX_DISTANCE.in(Meters);
-    SmartDashboard.putNumber("t", t);
     Translation2d scaledDriverVelocity = driverVelocity.times(t);
     Translation2d scaledProportionalVelocity = proportionalVelocity.times(1 - t);
 
@@ -119,18 +120,23 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    IdealSwerveSim swerve = new IdealSwerveSim();
-    SwerveRequest.FieldCentricFacingAngle request = new SwerveRequest.FieldCentricFacingAngle();
-    Field2d field = new Field2d();
-    SmartDashboard.putData(field);
     Pose2d target = new Pose2d(Inches.of(144).in(Meters), Inches.of(153.5).in(Meters), Rotation2d.kZero);
-    Translation2d driverVelocity = new Translation2d(MetersPerSecond.of(3).in(MetersPerSecond), MetersPerSecond.of(3).in(MetersPerSecond));
 
-    return Commands.run(() -> {
-        var pose = swerve.getState().Pose;
-        field.setRobotPose(pose);
-        var velocity = mixedVelocity(driverVelocity, pose, target);
-        swerve.setControl(request.withVelocityX(velocity.getX()).withVelocityY(velocity.getY()));
-    });
+    return drive.driveFacing(() -> {
+        var pose = drive.getPose();
+        var velocity = new Translation2d(driverController.getLeftX(), -driverController.getLeftY()).times(4);
+
+        boolean slow = driverController.getLeftTriggerAxis() > 0.5;
+        boolean assist = driverController.getRightTriggerAxis() > 0.5;
+
+        if (slow) {
+            velocity = velocity.times(0.5);
+        }
+        if (assist) {
+            velocity = mixedVelocity(velocity, pose, target);
+        }
+
+        return ChassisSpeeds.fromFieldRelativeSpeeds(velocity.getX(), velocity.getY(), 0, pose.getRotation());
+    }, target::getRotation);
   }
 }
