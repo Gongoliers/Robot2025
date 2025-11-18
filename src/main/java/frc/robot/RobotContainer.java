@@ -9,81 +9,112 @@ import static edu.wpi.first.units.Units.Meters;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.Telemetry;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
 import frc.robot.pivot.Pivot;
+import frc.robot.roller.Roller;
 
 /** Robot container */
 public class RobotContainer {
 
-  /** Robot container singleton */
-  private static RobotContainer instance = null;
+    /** Robot container singleton */
+    private static RobotContainer instance = null;
 
-  /** Driver controller */
-  private final CommandXboxController driverController;
+    /** Driver controller */
+    private final CommandXboxController driverController;
 
-  /** Operator controller */
-  private final CommandXboxController operatorController;
+    /** Operator controller */
+    private final CommandXboxController operatorController;
 
-  /** Multithreader */
-  private final Multithreader multithreader;
+    /** Multithreader */
+    private final Multithreader multithreader;
 
-  /** Elevator subsystem reference */
-  private final Elevator elevator;
+    /** Elevator subsystem reference */
+    private final Elevator elevator;
 
-  /** Pivot subsystem reference */
-  private final Pivot pivot;
+    /** Pivot subsystem reference */
+    private final Pivot pivot;
 
-  /** Initializes the robot container */
-  private RobotContainer() {
-    driverController = new CommandXboxController(0);
-    operatorController = new CommandXboxController(1);
+    private final Roller roller;
 
-    elevator = Elevator.getInstance();
+    /** Initializes the robot container */
+    private RobotContainer() {
+        driverController = new CommandXboxController(0);
+        operatorController = new CommandXboxController(1);
 
-    pivot = Pivot.getInstance();
+        elevator = Elevator.getInstance();
 
-    Telemetry.initializeTabs(elevator, pivot);
+        pivot = Pivot.getInstance();
 
-    multithreader = Multithreader.getInstance();
-    multithreader.start();
+        roller = new Roller();
 
-    configureDefaultCommands();
-    configureBindings();
-  }
+        Telemetry.initializeTabs(elevator, pivot, roller);
 
-  /**
-   * Returns the robot container
-   * 
-   * @return the robot container
-   */
-  public static RobotContainer getInstance() {
-    if (instance == null) {
-      instance = new RobotContainer();
+        multithreader = Multithreader.getInstance();
+        multithreader.start();
+
+        configureDefaultCommands();
+        configureBindings();
     }
 
-    return instance;
-  }
+    /**
+     * Returns the robot container
+     *
+     * @return the robot container
+     */
+    public static RobotContainer getInstance() {
+        if (instance == null) {
+            instance = new RobotContainer();
+        }
 
-  /** Configures subsystem default commands for teleop */
-  public void configureDefaultCommands() {
-    
-  }
-
-  /** Configures controller bindings */
-  private void configureBindings() {
-    operatorController.a().onTrue(elevator.setTargetState(ElevatorState.STOW));
-    operatorController.b().onTrue(elevator.setTargetState(ElevatorState.L1));
-    operatorController.x().onTrue(elevator.setTargetState(ElevatorState.L2));
-    operatorController.y().onTrue(elevator.setElevatorPosition(Meters.of(0)));
-  }
-
-  public Command getAutonomousCommand() {
-    if (RobotConstants.ENABLED_SUBSYSTEMS.contains(RobotConstants.Subsystem.AUTO)) {
-      ;
+        return instance;
     }
 
-    return Commands.print("Auto disabled");
-  }
+    /** Configures subsystem default commands for teleop */
+    public void configureDefaultCommands() {}
+
+    /** Configures controller bindings */
+    private void configureBindings() {
+        operatorController
+            .a()
+            .onTrue(elevator.setTargetState(ElevatorState.STOW));
+        operatorController
+            .b()
+            .onTrue(elevator.setTargetState(ElevatorState.L1));
+        operatorController
+            .x()
+            .onTrue(elevator.setTargetState(ElevatorState.L2));
+        operatorController
+            .y()
+            .onTrue(elevator.setElevatorPosition(Meters.of(0)));
+
+        driverController
+            .a()
+            .whileTrue(
+                roller.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+            );
+        driverController
+            .b()
+            .whileTrue(
+                roller.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+            );
+        driverController
+            .x()
+            .whileTrue(roller.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        driverController
+            .y()
+            .whileTrue(roller.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    }
+
+    public Command getAutonomousCommand() {
+        if (
+            RobotConstants.ENABLED_SUBSYSTEMS.contains(
+                RobotConstants.Subsystem.AUTO
+            )
+        ) {}
+
+        return Commands.print("Auto disabled");
+    }
 }
