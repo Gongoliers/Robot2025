@@ -53,7 +53,7 @@ public class Elevator extends MultithreadedSubsystem {
   private MotorValues motorValues = new MotorValues();
 
   /** Ratio of meters travelled by elevator per rotations made by motor output */
-  private final double rotationsToMeters;
+  private final double metersPerRotation;
 
   // State related
 
@@ -112,13 +112,13 @@ public class Elevator extends MultithreadedSubsystem {
   /** Mechanism config */
   private final MechanismConfig config = MechanismBuilder.defaults()
     .feedforwardControllerConfig(FeedforwardControllerBuilder.defaults()
-      .kV(2.0)
-      .kA(0.2)
+      .kV(0.5843)
+      .kA(0.05843)
       .kG(0.57)
       .kS(0.155)
       .build())
     .feedbackControllerConfig(FeedbackControllerBuilder.defaults()
-      .kP(32)
+      .kP(10)
       .kI(0.0)
       .kD(0.0)
       .build())
@@ -153,7 +153,7 @@ public class Elevator extends MultithreadedSubsystem {
   private Elevator() {
     motorOutput = ElevatorFactory.createMotorOutput(config);
 
-    rotationsToMeters = 0.031 * Math.PI * 3;
+    metersPerRotation = 0.031 * Math.PI * 3;
 
     currentState = ElevatorState.STOW;
     targetState = ElevatorState.STOW;
@@ -196,9 +196,9 @@ public class Elevator extends MultithreadedSubsystem {
     // Current state column
     ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
 
-    stateColumn.addDouble("Elevator position (m)", () -> motorValues.position.in(Rotations) * rotationsToMeters);
-    stateColumn.addDouble("Elevator velocity (mps)", () -> motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters);
-    stateColumn.addDouble("Elevator acceleration (mpsps)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond) * rotationsToMeters);
+    stateColumn.addDouble("Elevator position (m)", () -> motorValues.position.in(Rotations) * metersPerRotation);
+    stateColumn.addDouble("Elevator velocity (mps)", () -> motorValues.velocity.in(RotationsPerSecond) * metersPerRotation);
+    stateColumn.addDouble("Elevator acceleration (mpsps)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond) * metersPerRotation);
     stateColumn.addDouble("Motor position (rot)", () -> motorValues.position.in(Rotations));
     stateColumn.addDouble("Motor velocity (rotps)", () -> motorValues.velocity.in(RotationsPerSecond));
     stateColumn.addDouble("Motor acceleration (rotpsps)", () -> motorValues.acceleration.in(RotationsPerSecondPerSecond));
@@ -219,7 +219,7 @@ public class Elevator extends MultithreadedSubsystem {
   public void fastPeriodic() {
     motorOutput.updateValues(motorValues, Seconds.of(RobotConstants.FAST_PERIODIC_DURATION));
 
-    Distance position = Meters.of(motorValues.position.in(Rotations) * rotationsToMeters);
+    Distance position = Meters.of(motorValues.position.in(Rotations) * metersPerRotation);
 
     updateMechanismVisualization(position);
 
@@ -254,15 +254,15 @@ public class Elevator extends MultithreadedSubsystem {
 
     if (manualVoltageSet == false) {
       // If no manual voltage set, calculate voltage using feedforward and feedback
-      feedforwardVolts = feedforwardController.calculate(profiledSetpoint.velocity);
+      feedforwardVolts = feedforwardController.calculate(profiledSetpoint.velocity / metersPerRotation);
       feedbackVolts = 0.0;
       
-      if (MathUtil.isNear(0.0, motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters, PIDThreshold.in(MetersPerSecond)) && currentState == targetState) {
+      if (MathUtil.isNear(0.0, motorValues.velocity.in(RotationsPerSecond) * metersPerRotation, PIDThreshold.in(MetersPerSecond)) && currentState == targetState) {
         // If target velocity is close enough to zero, meaning you are reacing the end of a trajectory, fade in some feedback voltage
-        feedbackVolts = feedbackController.calculate(position.in(Meters), profiledSetpoint.position);
+        feedbackVolts = feedbackController.calculate(position.in(Meters) / metersPerRotation, profiledSetpoint.position / metersPerRotation);
 
         // Calculation to fade in PID voltage smoothly based on velocity's closeness to 0
-        double t = Math.abs(motorValues.velocity.in(RotationsPerSecond) * rotationsToMeters)/PIDThreshold.in(MetersPerSecond); // This gives the value of current velocity as a percentage of PIDThreshold
+        double t = Math.abs(motorValues.velocity.in(RotationsPerSecond) * metersPerRotation)/PIDThreshold.in(MetersPerSecond); // This gives the value of current velocity as a percentage of PIDThreshold
         t = t * -1 + 1; // Inverting and adding 1 means now 0.0 refers to a velocity of PIDThreshold, and 1.0 refers to a velocity of 0; this could already be multiplied by PID voltage for a linear fade in
         t = Math.pow(t, PIDSmoothing); // This smooths the linear interpolation based on PIDSmoothing (to understand this go into desmos, graph x^a, and vary a. a is PIDSmoothing, and x is the value of t before this calculation)
 
@@ -282,7 +282,7 @@ public class Elevator extends MultithreadedSubsystem {
    * @param newPos new position of the elevator
    */
   private void setPosition(Distance newPos) {
-    motorOutput.setPosition(Rotations.of(newPos.in(Meters) / rotationsToMeters));
+    motorOutput.setPosition(Rotations.of(newPos.in(Meters) / metersPerRotation));
   }
 
   /**
