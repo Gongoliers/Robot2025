@@ -124,7 +124,7 @@ public class Elevator extends MultithreadedSubsystem {
       .build())
     .motionProfileConfig(MotionProfileBuilder.defaults()
       .maxVelocity(2)
-      .maxAcceleration(4)
+      .maxAcceleration(6)
       .build())
     .motorConfig(MotorBuilder.defaults()
       .ccwPositive(false)
