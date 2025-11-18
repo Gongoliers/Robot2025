@@ -112,13 +112,13 @@ public class Elevator extends MultithreadedSubsystem {
   /** Mechanism config */
   private final MechanismConfig config = MechanismBuilder.defaults()
     .feedforwardControllerConfig(FeedforwardControllerBuilder.defaults()
-      .kV(2.0)
-      .kA(0.2)
+      .kV(0.5843)
+      .kA(0.05843)
       .kG(0.57)
       .kS(0.155)
       .build())
     .feedbackControllerConfig(FeedbackControllerBuilder.defaults()
-      .kP(32)
+      .kP(10)
       .kI(0.0)
       .kD(0.0)
       .build())
@@ -254,12 +254,12 @@ public class Elevator extends MultithreadedSubsystem {
 
     if (manualVoltageSet == false) {
       // If no manual voltage set, calculate voltage using feedforward and feedback
-      feedforwardVolts = feedforwardController.calculate(profiledSetpoint.velocity);
+      feedforwardVolts = feedforwardController.calculate(profiledSetpoint.velocity / metersPerRotation);
       feedbackVolts = 0.0;
       
       if (MathUtil.isNear(0.0, motorValues.velocity.in(RotationsPerSecond) * metersPerRotation, PIDThreshold.in(MetersPerSecond)) && currentState == targetState) {
         // If target velocity is close enough to zero, meaning you are reacing the end of a trajectory, fade in some feedback voltage
-        feedbackVolts = feedbackController.calculate(position.in(Meters), profiledSetpoint.position);
+        feedbackVolts = feedbackController.calculate(position.in(Meters) / metersPerRotation, profiledSetpoint.position / metersPerRotation);
 
         // Calculation to fade in PID voltage smoothly based on velocity's closeness to 0
         double t = Math.abs(motorValues.velocity.in(RotationsPerSecond) * metersPerRotation)/PIDThreshold.in(MetersPerSecond); // This gives the value of current velocity as a percentage of PIDThreshold
