@@ -1,8 +1,8 @@
 package frc.robot.elevator;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -38,10 +38,10 @@ public class ElevatorFactory {
         }
 
         var motor = new MotorOutputSim(
-            Volts.per(RadiansPerSecond).ofNative(
+            Volts.per(RotationsPerSecond).ofNative(
                 config.feedforwardControllerConfig().kV()
             ),
-            Volts.per(RadiansPerSecondPerSecond).ofNative(
+            Volts.per(RotationsPerSecondPerSecond).ofNative(
                 config.feedforwardControllerConfig().kA()
             ),
             DCMotor.getKrakenX60(2)
