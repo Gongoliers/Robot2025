@@ -10,9 +10,9 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.Subsystem;
 import frc.lib.swerves.SwerveOutput;
-
 import java.util.function.Supplier;
 
 public class Drive extends Subsystem {
@@ -34,38 +34,34 @@ public class Drive extends Subsystem {
         ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
 
         tab.add(field);
-        tab.addDoubleArray(
-                "States",
-                () -> {
-                    SwerveModuleState[] states = state.ModuleStates;
-                    double[] doubles = new double[8];
+        tab.addDoubleArray("States", () -> {
+            SwerveModuleState[] states = state.ModuleStates;
+            double[] doubles = new double[8];
 
-                    if (states != null) {
-                        for (int i = 0; i < 4; i++) {
-                            SwerveModuleState state = states[i];
-                            doubles[2 * i] = state.angle.getDegrees();
-                            doubles[2 * i + 1] = state.speedMetersPerSecond;
-                        }
-                    }
+            if (states != null) {
+                for (int i = 0; i < 4; i++) {
+                    SwerveModuleState state = states[i];
+                    doubles[2 * i] = state.angle.getDegrees();
+                    doubles[2 * i + 1] = state.speedMetersPerSecond;
+                }
+            }
 
-                    return doubles;
-                });
-        tab.addDoubleArray(
-                "Targets",
-                () -> {
-                    SwerveModuleState[] states = state.ModuleTargets;
-                    double[] doubles = new double[8];
+            return doubles;
+        });
+        tab.addDoubleArray("Targets", () -> {
+            SwerveModuleState[] states = state.ModuleTargets;
+            double[] doubles = new double[8];
 
-                    if (states != null) {
-                        for (int i = 0; i < 4; i++) {
-                            SwerveModuleState state = states[i];
-                            doubles[2 * i] = state.angle.getDegrees();
-                            doubles[2 * i + 1] = state.speedMetersPerSecond;
-                        }
-                    }
+            if (states != null) {
+                for (int i = 0; i < 4; i++) {
+                    SwerveModuleState state = states[i];
+                    doubles[2 * i] = state.angle.getDegrees();
+                    doubles[2 * i + 1] = state.speedMetersPerSecond;
+                }
+            }
 
-                    return doubles;
-                });
+            return doubles;
+        });
     }
 
     @Override
@@ -78,24 +74,66 @@ public class Drive extends Subsystem {
         return state.Pose;
     }
 
+    /**
+     * Runs the SysId Quasistatic test in the given direction for the routine
+     * specified by {@link #m_sysIdRoutineToApply}.
+     *
+     * @param direction Direction of the SysId Quasistatic test
+     * @return Command to run
+     */
+    public Command sysIdQuasistatic(
+        SysIdRoutine routine,
+        SysIdRoutine.Direction direction
+    ) {
+        return routine.quasistatic(direction);
+    }
+
+    /**
+     * Runs the SysId Dynamic test in the given direction for the routine
+     * specified by {@link #m_sysIdRoutineToApply}.
+     *
+     * @param direction Direction of the SysId Dynamic test
+     * @return Command to run
+     */
+    public Command sysIdDynamic(
+        SysIdRoutine routine,
+        SysIdRoutine.Direction direction
+    ) {
+        return routine.dynamic(direction);
+    }
+
     public Command drive(Supplier<ChassisSpeeds> fieldSpeedsSupplier) {
         // TODO Make factory for requests
         SwerveRequest.FieldCentric request = new SwerveRequest.FieldCentric();
 
         return run(() -> {
             ChassisSpeeds fieldSpeeds = fieldSpeedsSupplier.get();
-            swerve.setControl(request.withVelocityX(fieldSpeeds.vxMetersPerSecond).withVelocityY(fieldSpeeds.vyMetersPerSecond).withRotationalRate(fieldSpeeds.omegaRadiansPerSecond));
+            swerve.setControl(
+                request
+                    .withVelocityX(fieldSpeeds.vxMetersPerSecond)
+                    .withVelocityY(fieldSpeeds.vyMetersPerSecond)
+                    .withRotationalRate(fieldSpeeds.omegaRadiansPerSecond)
+            );
         });
     }
 
-    public Command driveFacing(Supplier<ChassisSpeeds> fieldSpeedsSupplier, Supplier<Rotation2d> directionSupplier) {
+    public Command driveFacing(
+        Supplier<ChassisSpeeds> fieldSpeedsSupplier,
+        Supplier<Rotation2d> directionSupplier
+    ) {
         // TODO Make factory for requests
-        SwerveRequest.FieldCentricFacingAngle request = new SwerveRequest.FieldCentricFacingAngle();
+        SwerveRequest.FieldCentricFacingAngle request =
+            new SwerveRequest.FieldCentricFacingAngle();
 
         return run(() -> {
             ChassisSpeeds fieldSpeeds = fieldSpeedsSupplier.get();
             Rotation2d direction = directionSupplier.get();
-            swerve.setControl(request.withVelocityX(fieldSpeeds.vxMetersPerSecond).withVelocityY(fieldSpeeds.vyMetersPerSecond).withTargetDirection(direction));
+            swerve.setControl(
+                request
+                    .withVelocityX(fieldSpeeds.vxMetersPerSecond)
+                    .withVelocityY(fieldSpeeds.vyMetersPerSecond)
+                    .withTargetDirection(direction)
+            );
         });
     }
 }
