@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -37,10 +38,10 @@ public class RobotContainer {
   private final Multithreader multithreader;
 
   /** Elevator subsystem reference */
-  private final Elevator elevator;
+  // private final Elevator elevator;
 
   /** Pivot subsystem reference */
-  private final Pivot pivot;
+  // private final Pivot pivot;
 
   private final Drive drive;
 
@@ -49,14 +50,14 @@ public class RobotContainer {
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
 
-    elevator = Elevator.getInstance();
+    // elevator = Elevator.getInstance();
 
-    pivot = Pivot.getInstance();
+    // pivot = Pivot.getInstance();
 
     drive = new Drive(DriveFactory.createSwerve());
     drive.setDefaultCommand(getAutonomousCommand());
 
-    Telemetry.initializeTabs(elevator, pivot, drive);
+    Telemetry.initializeTabs(drive);
 
     multithreader = Multithreader.getInstance();
     multithreader.start();
@@ -85,14 +86,10 @@ public class RobotContainer {
 
   /** Configures controller bindings */
   private void configureBindings() {
-    operatorController.a().onTrue(elevator.setTargetState(ElevatorState.STOW));
-    operatorController.b().onTrue(elevator.setTargetState(ElevatorState.L1));
-    operatorController.x().onTrue(elevator.setTargetState(ElevatorState.L2));
-    operatorController.y().onTrue(elevator.setElevatorPosition(Meters.of(0)));
   }
 
   public Translation2d mixedVelocity(Translation2d driverVelocity, Pose2d current, Pose2d target) {
-    final double KP = 4;
+    final double KP = 2;
     final Distance MAX_DISTANCE = Meters.of(2);
     final Distance MIN_DISTANCE = Meters.of(0.5);
 
@@ -120,11 +117,15 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    Pose2d target = new Pose2d(Inches.of(144).in(Meters), Inches.of(153.5).in(Meters), Rotation2d.kZero);
+    Pose2d target = new Pose2d(Meters.of(3.286).in(Meters), Meters.of(1.34 ).in(Meters), Rotation2d.kZero);
 
     return drive.driveFacing(() -> {
         var pose = drive.getPose();
-        var velocity = new Translation2d(driverController.getLeftX(), -driverController.getLeftY()).times(4);
+
+        var x = MathUtil.applyDeadband(-driverController.getLeftY(), 0.1);
+        var y = MathUtil.applyDeadband(-driverController.getLeftX(), 0.1);
+
+        var velocity = new Translation2d(x, y);
 
         boolean slow = driverController.getLeftTriggerAxis() > 0.5;
         boolean assist = driverController.getRightTriggerAxis() > 0.5;
