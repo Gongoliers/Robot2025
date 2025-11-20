@@ -9,18 +9,16 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
-import frc.robot.drive.DriveFactory;
-import frc.robot.elevator.Elevator;
-import frc.robot.elevator.ElevatorState;
-import frc.robot.pivot.Pivot;
 import frc.robot.drive.Drive;
+import frc.robot.drive.DriveFactory;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Meters;
 
 /** Robot container */
 public class RobotContainer {
@@ -118,6 +116,8 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     Pose2d target = new Pose2d(Meters.of(3.286).in(Meters), Meters.of(1.34 ).in(Meters), Rotation2d.kZero);
+      SmartDashboard.putNumber("Target X", Units.metersToFeet(target.getX()));
+      SmartDashboard.putNumber("Target Y", Units.metersToFeet(target.getY()));
 
     return drive.driveFacing(() -> {
         var pose = drive.getPose();
@@ -130,12 +130,17 @@ public class RobotContainer {
         boolean slow = driverController.getLeftTriggerAxis() > 0.5;
         boolean assist = driverController.getRightTriggerAxis() > 0.5;
 
+        SmartDashboard.putBoolean("Slow?", slow);
+        SmartDashboard.putBoolean("Assist?", assist);
+
         if (slow) {
             velocity = velocity.times(0.5);
         }
         if (assist) {
             velocity = mixedVelocity(velocity, pose, target);
         }
+
+        SmartDashboard.putNumber("Velocity", velocity.getNorm());
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(velocity.getX(), velocity.getY(), 0, pose.getRotation());
     }, target::getRotation);
