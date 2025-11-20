@@ -1,5 +1,7 @@
 package frc.lib.motors;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.*;
@@ -12,8 +14,6 @@ import edu.wpi.first.units.measure.*;
 import frc.lib.CAN;
 import frc.lib.configs.MotorConfig;
 
-import static edu.wpi.first.units.Units.*;
-
 /** Motor output implementation for a single TalonFX controlled motor */
 public class MotorOutputTalonFX implements MotorOutput {
 
@@ -23,10 +23,8 @@ public class MotorOutputTalonFX implements MotorOutput {
   /** TalonFX hardware */
   private final TalonFX motor;
 
-    /**
-     * Position offset
-     */
-    private final MutAngle positionOffset;
+  /** Position offset */
+  private final MutAngle positionOffset;
 
   // Status signals
   private final StatusSignal<Angle> position;
@@ -54,7 +52,7 @@ public class MotorOutputTalonFX implements MotorOutput {
     // create hardware and status signals
     motor = new TalonFX(motorCAN.id(), motorCAN.bus());
 
-      positionOffset = Rotations.mutable(0.0);
+    positionOffset = Rotations.mutable(0.0);
 
     position = motor.getPosition();
     velocity = motor.getVelocity();
@@ -81,10 +79,10 @@ public class MotorOutputTalonFX implements MotorOutput {
     motor.setControl(this.voltage.withOutput(voltage));
   }
 
-    @Override
-    public void setPosition(Angle newPosition) {
-        BaseStatusSignal.refreshAll(position);
-        positionOffset.mut_replace(newPosition.minus(position.getValue()));
+  @Override
+  public void setPosition(Angle newPosition) {
+    BaseStatusSignal.refreshAll(position);
+    positionOffset.mut_replace(newPosition.minus(position.getValue()));
   }
 
   @Override
@@ -98,8 +96,8 @@ public class MotorOutputTalonFX implements MotorOutput {
         statorCurrent,
         supplyCurrent);
 
-      values.position.mut_replace(
-              position.getValueAsDouble() + positionOffset.in(Rotations), Rotations);
+    values.position.mut_replace(
+        position.getValueAsDouble() + positionOffset.in(Rotations), Rotations);
     values.velocity.mut_replace(velocity.getValueAsDouble(), RotationsPerSecond);
     values.acceleration.mut_replace(acceleration.getValueAsDouble(), RotationsPerSecondPerSecond);
     values.motorVoltage.mut_replace(motorVoltage.getValueAsDouble(), Volts);

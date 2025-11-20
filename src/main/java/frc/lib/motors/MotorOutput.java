@@ -19,12 +19,12 @@ public interface MotorOutput {
    */
   public void setVoltage(Voltage voltage);
 
-    /**
-     * Sets the position of the motor output by setting an offset always added to output position
-     *
-     * @param newPostiion new position
-     */
-    public void setPosition(Angle newPostiion);
+  /**
+   * Sets the position of the motor output by setting an offset always added to output position
+   *
+   * @param newPostiion new position
+   */
+  public void setPosition(Angle newPostiion);
 
   /**
    * Updates values stored in a MotorValues class and updates sim (if there is a sim)

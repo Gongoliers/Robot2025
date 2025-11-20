@@ -1,5 +1,7 @@
 package frc.lib.motors;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.*;
@@ -13,8 +15,6 @@ import edu.wpi.first.units.measure.*;
 import frc.lib.CAN;
 import frc.lib.configs.MotorConfig;
 
-import static edu.wpi.first.units.Units.*;
-
 /** Motor output implementation for two TalonFX controlled motors */
 public class MotorOutputTalonFX2 implements MotorOutput {
 
@@ -27,9 +27,7 @@ public class MotorOutputTalonFX2 implements MotorOutput {
   /** Follower motor */
   private final TalonFX follower;
 
-  /**
-   * Position offset
-   */
+  /** Position offset */
   private final MutAngle positionOffset;
 
   // Status signals
@@ -108,7 +106,7 @@ public class MotorOutputTalonFX2 implements MotorOutput {
         supplyCurrent);
 
     values.position.mut_replace(
-            position.getValueAsDouble() + positionOffset.in(Rotations), Rotations);
+        position.getValueAsDouble() + positionOffset.in(Rotations), Rotations);
     values.velocity.mut_replace(velocity.getValueAsDouble(), RotationsPerSecond);
     values.acceleration.mut_replace(acceleration.getValueAsDouble(), RotationsPerSecondPerSecond);
     values.motorVoltage.mut_replace(motorVoltage.getValueAsDouble(), Volts);
