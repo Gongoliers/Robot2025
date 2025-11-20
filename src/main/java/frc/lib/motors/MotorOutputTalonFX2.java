@@ -27,10 +27,10 @@ public class MotorOutputTalonFX2 implements MotorOutput {
   /** Follower motor */
   private final TalonFX follower;
 
-    /**
-     * Position offset
-     */
-    private final MutAngle positionOffset;
+  /**
+   * Position offset
+   */
+  private final MutAngle positionOffset;
 
   // Status signals
   private final StatusSignal<Angle> position;
@@ -63,7 +63,7 @@ public class MotorOutputTalonFX2 implements MotorOutput {
 
     follower.setControl(new Follower(leaderCAN.id(), invertFollower));
 
-      positionOffset = Rotations.mutable(0.0);
+    positionOffset = Rotations.mutable(0.0);
 
     position = leader.getPosition();
     velocity = leader.getVelocity();
@@ -90,10 +90,10 @@ public class MotorOutputTalonFX2 implements MotorOutput {
     leader.setControl(this.voltage.withOutput(voltage));
   }
 
-    @Override
-    public void setPosition(Angle newPosition) {
-        BaseStatusSignal.refreshAll(position);
-        positionOffset.mut_replace(newPosition.minus(position.getValue()));
+  @Override
+  public void setPosition(Angle newPosition) {
+    BaseStatusSignal.refreshAll(position);
+    positionOffset.mut_replace(newPosition.minus(position.getValue()));
   }
 
   @Override
@@ -107,7 +107,8 @@ public class MotorOutputTalonFX2 implements MotorOutput {
         statorCurrent,
         supplyCurrent);
 
-      values.position.mut_replace(position.getValueAsDouble() + positionOffset.in(Rotations), Rotations);
+    values.position.mut_replace(
+            position.getValueAsDouble() + positionOffset.in(Rotations), Rotations);
     values.velocity.mut_replace(velocity.getValueAsDouble(), RotationsPerSecond);
     values.acceleration.mut_replace(acceleration.getValueAsDouble(), RotationsPerSecondPerSecond);
     values.motorVoltage.mut_replace(motorVoltage.getValueAsDouble(), Volts);

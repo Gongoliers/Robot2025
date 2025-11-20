@@ -5,7 +5,7 @@ public enum ElevatorState {
   L1(0.15),
   HARDSTOP(0.15),
   L2(0.25),
-    L3(0.4),
+  L3(0.4),
   L4(1.57),
   ALGAE1(0.45),
   ALGAE2(0.85),

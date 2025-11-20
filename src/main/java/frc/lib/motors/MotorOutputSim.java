@@ -39,17 +39,12 @@ public class MotorOutputSim implements MotorOutput {
     public MotorOutputSim(
             Measure<PerUnit<VoltageUnit, AngularVelocityUnit>> kV,
             Measure<PerUnit<VoltageUnit, AngularAccelerationUnit>> kA,
-            DCMotor gearbox
-    ) {
+            DCMotor gearbox) {
         this(
                 new DCMotorSim(
                         LinearSystemId.createDCMotorSystem(
-                                kV.in(Volts.per(RadiansPerSecond)),
-                                kA.in(Volts.per(RadiansPerSecondPerSecond))
-                        ),
-                        gearbox
-                )
-        );
+                                kV.in(Volts.per(RadiansPerSecond)), kA.in(Volts.per(RadiansPerSecondPerSecond))),
+                        gearbox));
     }
 
     @Override
@@ -67,14 +62,9 @@ public class MotorOutputSim implements MotorOutput {
         sim.update(dt.in(Seconds));
 
         values.position.mut_replace(sim.getAngularPositionRad() + positionOffset.in(Radians), Radians);
-        values.velocity.mut_replace(
-                sim.getAngularVelocityRadPerSec(),
-                RadiansPerSecond
-        );
+        values.velocity.mut_replace(sim.getAngularVelocityRadPerSec(), RadiansPerSecond);
         values.acceleration.mut_replace(
-                sim.getAngularAccelerationRadPerSecSq(),
-                RadiansPerSecondPerSecond
-        );
+                sim.getAngularAccelerationRadPerSecSq(), RadiansPerSecondPerSecond);
 
         double motorVoltage = sim.getInputVoltage();
         double supplyVoltage = RobotController.getBatteryVoltage();
@@ -90,6 +80,6 @@ public class MotorOutputSim implements MotorOutput {
 
     @Override
     public boolean configure() {
-        return true;
-    }
+    return true;
+  }
 }

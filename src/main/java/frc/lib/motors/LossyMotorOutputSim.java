@@ -32,11 +32,7 @@ public class LossyMotorOutputSim implements MotorOutput {
      * @param kS  The voltage loss due to static friction.
      * @param kG  The voltage loss due to gravity, dependent on motor position.
      */
-    public LossyMotorOutputSim(
-            MotorOutputSim sim,
-            Voltage kS,
-            Function<Angle, Voltage> kG
-    ) {
+    public LossyMotorOutputSim(MotorOutputSim sim, Voltage kS, Function<Angle, Voltage> kG) {
         this.sim = sim;
         this.kS = kS;
         this.kG = kG;
@@ -72,16 +68,14 @@ public class LossyMotorOutputSim implements MotorOutput {
     public void setVoltage(Voltage voltage) {
         this.motorVoltage.mut_replace(voltage);
         double volts = voltage.in(Volts);
-        effectiveMotorVoltage.mut_replace(
-                calculateEffectiveVoltage(volts),
-                Volts
-        );
+        effectiveMotorVoltage.mut_replace(calculateEffectiveVoltage(volts), Volts);
         // Override the requested voltage with the effective voltage
         sim.setVoltage(effectiveMotorVoltage);
     }
 
     /**
-     * Calculates effective voltage applied to motor that produces movement (voltage not used to overcome gravity or static friction)
+     * Calculates effective voltage applied to motor that produces movement (voltage not used to
+     * overcome gravity or static friction)
      *
      * @param voltage The voltage being applied to the system, prior to any losses.
      * @return Effective voltage applied to the motor that produces movement
@@ -115,6 +109,6 @@ public class LossyMotorOutputSim implements MotorOutput {
 
     @Override
     public boolean configure() {
-        return sim.configure();
-    }
+    return sim.configure();
+  }
 }
