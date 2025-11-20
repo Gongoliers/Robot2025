@@ -96,6 +96,7 @@ public class RobotContainer {
   private void configureBindings() {
       // NOTE I deleted the operator binds for testing
       Pose2d target = new Pose2d(Meters.of(3.286), Meters.of(1.34), Rotation2d.kZero);
+      drive.getField().getObject("target").setPose(target);
       driverController.rightTrigger().whileTrue(drive.driveToward(this::getDriverChassisSpeeds, () -> target));
   }
 

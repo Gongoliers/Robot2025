@@ -4,6 +4,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.Subsystem;
@@ -103,6 +105,8 @@ public class Drive extends Subsystem {
         return state.Pose;
     }
 
+    public Field2d getField() { return field; }
+
     public SysIdRoutine createDriveRoutine() {
         return DriveFactory.createDriveRoutine(swerve, this);
     }
@@ -166,6 +170,11 @@ public class Drive extends Subsystem {
 
     public Command driveToward(Supplier<ChassisSpeeds> fieldSpeedsSupplier, Supplier<Pose2d> targetPoseSupplier) {
         final Per<LinearVelocityUnit, DistanceUnit> GAIN = MetersPerSecond.of(4).per(Meter);
+        final Distance MIN_DISTANCE = Meters.of(0.5);
+        final Distance MAX_DISTANCE = Meters.of(3);
+
+        SmartDashboard.putNumber("Min Distance (m)", MIN_DISTANCE.in(Meters));
+        SmartDashboard.putNumber("Max Distance (m)", MAX_DISTANCE.in(Meters));
 
         // TODO Make utility class with closures for mutations
        return driveFacing(() -> {
@@ -175,12 +184,27 @@ public class Drive extends Subsystem {
 
            Translation2d error = targetPose.getTranslation().minus(pose.getTranslation());
            Distance distance = Meters.of(error.getNorm());
+           SmartDashboard.putNumber("Distance (m)", distance.in(Meters));
            Rotation2d direction = error.getAngle();
 
-           LinearVelocity assist = distance.timesConversionFactor(GAIN);
-           ChassisSpeeds assistSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(assist.times(direction.getCos()), assist.times(direction.getSin()), RotationsPerSecond.zero(), pose.getRotation());
+           Translation2d min_direction = new Translation2d(MIN_DISTANCE.in(Meters), direction);
+           field.getObject("min").setPose(new Pose2d(targetPose.getTranslation().minus(min_direction), direction));
+           Translation2d max_direction = new Translation2d(MAX_DISTANCE.in(Meters), direction);
+           field.getObject("max").setPose(new Pose2d(targetPose.getTranslation().minus(max_direction), direction));
 
-            return fieldSpeeds.plus(assistSpeeds);
+           if (distance.gt(MAX_DISTANCE)) {
+               return fieldSpeeds;
+           }
+
+           LinearVelocity assistAmount = distance.timesConversionFactor(GAIN);
+           ChassisSpeeds assistSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(assistAmount.times(direction.getCos()), assistAmount.times(direction.getSin()), RotationsPerSecond.zero(), pose.getRotation());
+
+           if (distance.lt(MIN_DISTANCE)) {
+               return assistSpeeds;
+           }
+
+           // TODO In the in-between range, maybe clamp the velocity to prevent a sudden spike
+           return fieldSpeeds.plus(assistSpeeds);
        }, () -> targetPoseSupplier.get().getRotation());
     }
 }
