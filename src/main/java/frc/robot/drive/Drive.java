@@ -4,8 +4,15 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.DistanceUnit;
+import edu.wpi.first.units.LinearVelocityUnit;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Per;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -16,6 +23,8 @@ import frc.lib.Subsystem;
 import frc.lib.swerves.SwerveOutput;
 
 import java.util.function.Supplier;
+
+import static edu.wpi.first.units.Units.*;
 
 public class Drive extends Subsystem {
 
@@ -153,5 +162,25 @@ public class Drive extends Subsystem {
                     .withTargetDirection(direction)
             );
         });
+    }
+
+    public Command driveToward(Supplier<ChassisSpeeds> fieldSpeedsSupplier, Supplier<Pose2d> targetPoseSupplier) {
+        final Per<LinearVelocityUnit, DistanceUnit> GAIN = MetersPerSecond.of(4).per(Meter);
+
+        // TODO Make utility class with closures for mutations
+       return driveFacing(() -> {
+           ChassisSpeeds fieldSpeeds = fieldSpeedsSupplier.get();
+           Pose2d pose = getPose();
+           Pose2d targetPose = targetPoseSupplier.get();
+
+           Translation2d error = targetPose.getTranslation().minus(pose.getTranslation());
+           Distance distance = Meters.of(error.getNorm());
+           Rotation2d direction = error.getAngle();
+
+           LinearVelocity assist = distance.timesConversionFactor(GAIN);
+           ChassisSpeeds assistSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(assist.times(direction.getCos()), assist.times(direction.getSin()), RotationsPerSecond.zero(), pose.getRotation());
+
+            return fieldSpeeds.plus(assistSpeeds);
+       }, () -> targetPoseSupplier.get().getRotation());
     }
 }
