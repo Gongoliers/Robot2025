@@ -1,20 +1,28 @@
 package frc.robot.drive;
 
-import static edu.wpi.first.units.Units.*;
-
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.Subsystem;
+import frc.lib.swerves.PhoenixSwerve;
 import frc.lib.swerves.SwerveOutput;
+
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 
 public class DriveFactory {
 
     public static SwerveOutput createSwerve() {
-        return TunerConstants.createDrivetrain();
+        return new PhoenixSwerve(
+                TunerConstants.DrivetrainConstants,
+                TunerConstants.FrontLeft,
+                TunerConstants.FrontRight,
+                TunerConstants.BackLeft,
+                TunerConstants.BackRight
+        );
     }
 
-    public static SysIdRoutine createDriveRoutine(
+    protected static SysIdRoutine createDriveRoutine(
         SwerveOutput swerve,
         Subsystem subsystem
     ) {
@@ -44,7 +52,7 @@ public class DriveFactory {
         );
     }
 
-    public static SysIdRoutine createSteerRoutine(
+    protected static SysIdRoutine createSteerRoutine(
         SwerveOutput swerve,
         Subsystem subsystem
     ) {
@@ -72,7 +80,7 @@ public class DriveFactory {
         );
     }
 
-    public static SysIdRoutine createRotationRoutine(
+    protected static SysIdRoutine createRotationRoutine(
         SwerveOutput swerve,
         Subsystem subsystem
     ) {

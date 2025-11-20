@@ -53,7 +53,6 @@ public class RobotContainer {
     // pivot = Pivot.getInstance();
 
     drive = new Drive(DriveFactory.createSwerve());
-    drive.setDefaultCommand(getAutonomousCommand());
 
     Telemetry.initializeTabs(drive);
 
@@ -79,7 +78,7 @@ public class RobotContainer {
 
   /** Configures subsystem default commands for teleop */
   public void configureDefaultCommands() {
-    
+      drive.setDefaultCommand(getAutonomousCommand());
   }
 
   /** Configures controller bindings */
