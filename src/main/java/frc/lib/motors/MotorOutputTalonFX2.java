@@ -1,32 +1,19 @@
 package frc.lib.motors;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import frc.lib.CAN;
 import frc.lib.configs.MotorConfig;
+
+import static edu.wpi.first.units.Units.*;
 
 /** Motor output implementation for two TalonFX controlled motors */
 public class MotorOutputTalonFX2 implements MotorOutput {
@@ -39,6 +26,11 @@ public class MotorOutputTalonFX2 implements MotorOutput {
 
   /** Follower motor */
   private final TalonFX follower;
+
+    /**
+     * Position offset
+     */
+    private final MutAngle positionOffset;
 
   // Status signals
   private final StatusSignal<Angle> position;
@@ -71,6 +63,8 @@ public class MotorOutputTalonFX2 implements MotorOutput {
 
     follower.setControl(new Follower(leaderCAN.id(), invertFollower));
 
+      positionOffset = Rotations.mutable(0.0);
+
     position = leader.getPosition();
     velocity = leader.getVelocity();
     acceleration = leader.getAcceleration();
@@ -96,6 +90,12 @@ public class MotorOutputTalonFX2 implements MotorOutput {
     leader.setControl(this.voltage.withOutput(voltage));
   }
 
+    @Override
+    public void setPosition(Angle newPosition) {
+        BaseStatusSignal.refreshAll(position);
+        positionOffset.mut_replace(newPosition.minus(position.getValue()));
+  }
+
   @Override
   public void updateValues(MotorValues values, Time dt) {
     BaseStatusSignal.refreshAll(
@@ -107,7 +107,7 @@ public class MotorOutputTalonFX2 implements MotorOutput {
         statorCurrent,
         supplyCurrent);
 
-    values.position.mut_replace(position.getValueAsDouble(), Rotations);
+      values.position.mut_replace(position.getValueAsDouble() + positionOffset.in(Rotations), Rotations);
     values.velocity.mut_replace(velocity.getValueAsDouble(), RotationsPerSecond);
     values.acceleration.mut_replace(acceleration.getValueAsDouble(), RotationsPerSecondPerSecond);
     values.motorVoltage.mut_replace(motorVoltage.getValueAsDouble(), Volts);

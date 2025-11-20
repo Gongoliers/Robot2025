@@ -1,5 +1,6 @@
 package frc.lib.motors;
 
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 
@@ -17,6 +18,13 @@ public interface MotorOutput {
    * @param voltage new set voltage
    */
   public void setVoltage(Voltage voltage);
+
+    /**
+     * Sets the position of the motor output by setting an offset always added to output position
+     *
+     * @param newPostiion new position
+     */
+    public void setPosition(Angle newPostiion);
 
   /**
    * Updates values stored in a MotorValues class and updates sim (if there is a sim)

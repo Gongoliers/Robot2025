@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Meters;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -13,6 +11,8 @@ import frc.lib.Telemetry;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
 import frc.robot.pivot.Pivot;
+
+import static edu.wpi.first.units.Units.Meters;
 
 /** Robot container */
 public class RobotContainer {
@@ -74,7 +74,8 @@ public class RobotContainer {
     operatorController.a().onTrue(elevator.setTargetState(ElevatorState.STOW));
     operatorController.b().onTrue(elevator.setTargetState(ElevatorState.L1));
     operatorController.x().onTrue(elevator.setTargetState(ElevatorState.L2));
-    operatorController.y().onTrue(elevator.setElevatorPosition(Meters.of(0)));
+      operatorController.y().onTrue(elevator.setTargetState(ElevatorState.L3));
+      operatorController.povUp().onTrue(elevator.setElevatorPosition(Meters.of(0)));
   }
 
   public Command getAutonomousCommand() {
