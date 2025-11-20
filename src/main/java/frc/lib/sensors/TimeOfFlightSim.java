@@ -9,9 +9,7 @@ public class TimeOfFlightSim implements TimeOfFlight {
   private boolean beamBroken = false;
 
   @Override
-  public void configure() {
-    
-  }
+  public void configure() {}
 
   @Override
   public void getUpdatedVals(TimeOfFlightValues values) {
@@ -20,9 +18,7 @@ public class TimeOfFlightSim implements TimeOfFlight {
   }
 
   @Override
-  public void setBeambreakThreshold(Distance distance) {
-    
-  }
+  public void setBeambreakThreshold(Distance distance) {}
 
   @Override
   public void periodic() {

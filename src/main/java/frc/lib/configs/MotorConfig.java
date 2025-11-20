@@ -1,8 +1,8 @@
 package frc.lib.configs;
 
-/** 
+/**
  * Motor config
- * 
+ *
  * @param neutralBrake true means the motor will brake when given no voltage
  * @param ccwPositive true means positive voltage rotates the motor ccw
  * @param rotorToSensorRatio ratio of rotor rotations to sensor rotations
@@ -44,33 +44,27 @@ public record MotorConfig(
 
     /**
      * Returns a builder with default values
-     * 
+     *
      * @return a builder with default values
      */
     public static MotorBuilder defaults() {
-      return new MotorBuilder(
-        false, 
-        true, 
-        1.0,
-        1.0,
-        80.0, 
-        40.0);
+      return new MotorBuilder(false, true, 1.0, 1.0, 80.0, 40.0);
     }
 
     /**
      * Returns a builder with values copied from the input config
-     * 
+     *
      * @param config config to be copied
      * @return a builder with values copied from the input config
      */
     public static MotorBuilder edit(MotorConfig config) {
       return new MotorBuilder(
-        config.neutralBrake(), 
-        config.ccwPositive(), 
-        config.rotorToSensorRatio(),
-        config.sensorToMechRatio(),
-        config.statorCurrentLimit(), 
-        config.supplyCurrentLimit());
+          config.neutralBrake(),
+          config.ccwPositive(),
+          config.rotorToSensorRatio(),
+          config.sensorToMechRatio(),
+          config.statorCurrentLimit(),
+          config.supplyCurrentLimit());
     }
 
     public MotorBuilder neutralBrake(boolean neutralBrake) {
@@ -105,17 +99,17 @@ public record MotorConfig(
 
     /**
      * Returns the builder as a config with private immutable values
-     * 
+     *
      * @return the builder as a config with private immutable values
      */
     public MotorConfig build() {
       return new MotorConfig(
-        this.neutralBrake,
-        this.ccwPositive,
-        this.rotorToSensorRatio,
-        this.sensorToMechRatio,
-        this.statorCurrentLimit,
-        this.supplyCurrentLimit);
+          this.neutralBrake,
+          this.ccwPositive,
+          this.rotorToSensorRatio,
+          this.sensorToMechRatio,
+          this.statorCurrentLimit,
+          this.supplyCurrentLimit);
     }
   }
 }

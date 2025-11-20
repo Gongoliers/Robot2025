@@ -1,32 +1,17 @@
 package frc.lib.motors;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.MutAngle;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import frc.lib.CAN;
 import frc.lib.configs.MotorConfig;
 
@@ -57,19 +42,16 @@ public class MotorOutputTalonFX2 implements MotorOutput {
   /** Voltage control request object */
   private VoltageOut voltage = new VoltageOut(0.0);
 
-  /** 
+  /**
    * Motor output constructor
-   * 
+   *
    * @param config motor config used to configure motor
    * @param leaderCAN CAN id and bus for leader motor
    * @param followerCAN CAN id and bus for follower motor
    */
   public MotorOutputTalonFX2(
-      MotorConfig config,
-      CAN leaderCAN,
-      CAN followerCAN,
-      boolean invertFollower) {
-    
+      MotorConfig config, CAN leaderCAN, CAN followerCAN, boolean invertFollower) {
+
     // set config
     this.config = config;
 
@@ -89,7 +71,15 @@ public class MotorOutputTalonFX2 implements MotorOutput {
     statorCurrent = leader.getStatorCurrent();
     supplyCurrent = leader.getSupplyCurrent();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(100, position, velocity, acceleration, motorVoltage, supplyVoltage, statorCurrent, supplyCurrent);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        100,
+        position,
+        velocity,
+        acceleration,
+        motorVoltage,
+        supplyVoltage,
+        statorCurrent,
+        supplyCurrent);
     ParentDevice.optimizeBusUtilizationForAll(leader, follower);
   }
 
@@ -106,9 +96,17 @@ public class MotorOutputTalonFX2 implements MotorOutput {
 
   @Override
   public void updateValues(MotorValues values, Time dt) {
-    BaseStatusSignal.refreshAll(position, velocity, acceleration, motorVoltage, supplyVoltage, statorCurrent, supplyCurrent);
+    BaseStatusSignal.refreshAll(
+        position,
+        velocity,
+        acceleration,
+        motorVoltage,
+        supplyVoltage,
+        statorCurrent,
+        supplyCurrent);
 
-    values.position.mut_replace(position.getValueAsDouble() + positionOffset.in(Rotations), Rotations);
+    values.position.mut_replace(
+        position.getValueAsDouble() + positionOffset.in(Rotations), Rotations);
     values.velocity.mut_replace(velocity.getValueAsDouble(), RotationsPerSecond);
     values.acceleration.mut_replace(acceleration.getValueAsDouble(), RotationsPerSecondPerSecond);
     values.motorVoltage.mut_replace(motorVoltage.getValueAsDouble(), Volts);
@@ -123,16 +121,24 @@ public class MotorOutputTalonFX2 implements MotorOutput {
     TalonFXConfigurator leaderConfigurator = leader.getConfigurator();
     TalonFXConfigurator followerConfigurator = follower.getConfigurator();
 
-    TalonFXConfiguration motorConfiguration = new TalonFXConfiguration()
-      .withCurrentLimits(new CurrentLimitsConfigs()
-        .withStatorCurrentLimit(config.statorCurrentLimit())
-        .withSupplyCurrentLimit(config.supplyCurrentLimit()))
-      .withMotorOutput(new MotorOutputConfigs()
-        .withInverted(config.ccwPositive() ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive)
-        .withNeutralMode(config.neutralBrake() ? NeutralModeValue.Brake : NeutralModeValue.Coast))
-      .withFeedback(new FeedbackConfigs()
-        .withRotorToSensorRatio(config.rotorToSensorRatio())
-        .withSensorToMechanismRatio(config.sensorToMechRatio()));
+    TalonFXConfiguration motorConfiguration =
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(config.statorCurrentLimit())
+                    .withSupplyCurrentLimit(config.supplyCurrentLimit()))
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withInverted(
+                        config.ccwPositive()
+                            ? InvertedValue.CounterClockwise_Positive
+                            : InvertedValue.Clockwise_Positive)
+                    .withNeutralMode(
+                        config.neutralBrake() ? NeutralModeValue.Brake : NeutralModeValue.Coast))
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withRotorToSensorRatio(config.rotorToSensorRatio())
+                    .withSensorToMechanismRatio(config.sensorToMechRatio()));
 
     leaderConfigurator.apply(motorConfiguration);
     followerConfigurator.apply(motorConfiguration);

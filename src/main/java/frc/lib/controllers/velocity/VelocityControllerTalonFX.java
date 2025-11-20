@@ -13,7 +13,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.measure.Angle;
@@ -59,10 +58,8 @@ public class VelocityControllerTalonFX implements VelocityController {
   /** Value of manually set voltage */
   private Voltage setVoltage;
 
-  public VelocityControllerTalonFX(
-      MechanismConfig config,
-      CAN motorCAN) {
-    
+  public VelocityControllerTalonFX(MechanismConfig config, CAN motorCAN) {
+
     // Set config
     this.config = config;
 
@@ -77,7 +74,8 @@ public class VelocityControllerTalonFX implements VelocityController {
     statorCurrent = motor.getStatorCurrent();
     supplyCurrent = motor.getSupplyCurrent();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(100, position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        100, position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
     motor.optimizeBusUtilization();
 
     // Set up feedback and feedforward
@@ -95,23 +93,34 @@ public class VelocityControllerTalonFX implements VelocityController {
   public void configure() {
     TalonFXConfigurator motorConfigurator = motor.getConfigurator();
 
-    TalonFXConfiguration motorConfiguration = new TalonFXConfiguration()
-      .withCurrentLimits(new CurrentLimitsConfigs()
-        .withStatorCurrentLimit(config.motorConfig().statorCurrentLimit())
-        .withSupplyCurrentLimit(config.motorConfig().supplyCurrentLimit()))
-      .withMotorOutput(new MotorOutputConfigs()
-        .withInverted(config.motorConfig().ccwPositive() ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive)
-        .withNeutralMode(config.motorConfig().neutralBrake() ? NeutralModeValue.Brake : NeutralModeValue.Coast))
-      .withFeedback(new FeedbackConfigs()
-        .withRotorToSensorRatio(config.motorConfig().rotorToSensorRatio())
-        .withSensorToMechanismRatio(config.motorConfig().sensorToMechRatio()));
+    TalonFXConfiguration motorConfiguration =
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(config.motorConfig().statorCurrentLimit())
+                    .withSupplyCurrentLimit(config.motorConfig().supplyCurrentLimit()))
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withInverted(
+                        config.motorConfig().ccwPositive()
+                            ? InvertedValue.CounterClockwise_Positive
+                            : InvertedValue.Clockwise_Positive)
+                    .withNeutralMode(
+                        config.motorConfig().neutralBrake()
+                            ? NeutralModeValue.Brake
+                            : NeutralModeValue.Coast))
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withRotorToSensorRatio(config.motorConfig().rotorToSensorRatio())
+                    .withSensorToMechanismRatio(config.motorConfig().sensorToMechRatio()));
 
     motorConfigurator.apply(motorConfiguration);
   }
 
   @Override
   public void getUpdatedVals(VelocityControllerValues values) {
-    BaseStatusSignal.refreshAll(position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
+    BaseStatusSignal.refreshAll(
+        position, velocity, acceleration, motorVoltage, statorCurrent, supplyCurrent);
 
     values.position.mut_replace(position.getValue());
     values.velocity.mut_replace(velocity.getValue());
@@ -144,7 +153,9 @@ public class VelocityControllerTalonFX implements VelocityController {
     } else {
       AngularVelocity motorVelocity = velocity.getValue();
 
-      double feedbackVolts = feedback.calculate(motorVelocity.in(RadiansPerSecond), setpointVelocity.in(RadiansPerSecond));
+      double feedbackVolts =
+          feedback.calculate(
+              motorVelocity.in(RadiansPerSecond), setpointVelocity.in(RadiansPerSecond));
       double feedforwardVolts = feedforward.calculate(setpointVelocity.in(RadiansPerSecond));
 
       motor.setControl(voltage.withOutput(feedforwardVolts + feedbackVolts));

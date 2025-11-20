@@ -8,12 +8,12 @@ import edu.wpi.first.units.measure.AngularVelocity;
 
 /**
  * Basic interface for gyroscopes
- * 
- * Outlines required functions and variables all gyroscopes have to make implementing new types
+ *
+ * <p>Outlines required functions and variables all gyroscopes have to make implementing new types
  * of gyroscopes in the future much simpler
  */
 public interface Gyroscope {
-  
+
   /** Gyroscope values */
   public static class GyroscopeValues {
 
@@ -41,14 +41,14 @@ public interface Gyroscope {
 
   /**
    * Get the gyroscope's updated values and update the provided values class accordingly
-   * 
+   *
    * @param values values class to be updated
    */
   public void getUpdatedVals(GyroscopeValues values);
 
   /**
    * Sets the gyroscope's yaw
-   * 
+   *
    * @param newYaw new gyroscope yaw
    */
   public void setYaw(Angle newYaw);

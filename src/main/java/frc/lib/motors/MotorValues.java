@@ -14,7 +14,7 @@ import edu.wpi.first.units.measure.MutVoltage;
 
 /** Class that contains motor output values */
 public class MotorValues {
-  
+
   /** Current position of motor */
   public MutAngle position = Rotations.mutable(0.0);
 
@@ -24,7 +24,7 @@ public class MotorValues {
   /** Current acceleration of motor */
   public MutAngularAcceleration acceleration = RotationsPerSecondPerSecond.mutable(0.0);
 
-  /** Current armature voltage  */
+  /** Current armature voltage */
   public MutVoltage motorVoltage = Volts.mutable(0.0);
 
   /** Current supply voltage */
@@ -35,5 +35,4 @@ public class MotorValues {
 
   /** Current supply current */
   public MutCurrent supplyCurrent = Amps.mutable(0.0);
-  
 }

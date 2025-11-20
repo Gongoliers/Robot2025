@@ -25,7 +25,7 @@ public class VelocityControllerSim implements VelocityController {
 
     voltageSet = false;
     setVoltage = Volts.of(0.0);
-  } 
+  }
 
   @Override
   public void configure() {}
@@ -34,7 +34,7 @@ public class VelocityControllerSim implements VelocityController {
   public void getUpdatedVals(VelocityControllerValues values) {
     values.position.mut_replace(position);
     values.velocity.mut_replace(velocity);
-    
+
     if (voltageSet) {
       values.motorVoltage.mut_replace(setVoltage);
     } else {
@@ -54,7 +54,7 @@ public class VelocityControllerSim implements VelocityController {
     setVoltage = volts;
     voltageSet = true;
 
-    this.velocity = RotationsPerSecond.of(volts.in(Volts)*1);
+    this.velocity = RotationsPerSecond.of(volts.in(Volts) * 1);
   }
 
   @Override

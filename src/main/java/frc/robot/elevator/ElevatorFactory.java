@@ -1,9 +1,6 @@
 package frc.robot.elevator;
 
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.CAN;
@@ -19,40 +16,30 @@ import frc.robot.RobotConstants.Subsystem;
 /** Creates elevator hardware */
 public class ElevatorFactory {
 
-    /**
-     * Creates an elevator position controller
-     *
-     * @return an elevator position controller
-     */
-    public static MotorOutput createMotorOutput(MechanismConfig config) {
-        if (
-            Robot.isReal() &&
-            RobotConstants.ENABLED_SUBSYSTEMS.contains(Subsystem.ELEVATOR)
-        ) {
-            return new MotorOutputTalonFX2(
-                config.motorConfig(),
-                new CAN(10),
-                new CAN(11),
-                false
-            );
-        }
-
-        var motor = new MotorOutputSim(
-            Volts.per(RotationsPerSecond).ofNative(
-                config.feedforwardControllerConfig().kV()
-            ),
-            Volts.per(RotationsPerSecondPerSecond).ofNative(
-                config.feedforwardControllerConfig().kA()
-            ),
-            DCMotor.getKrakenX60(2)
-        );
-
-        return new LossyMotorOutputSim(
-            motor,
-            Volts.of(config.feedforwardControllerConfig().kS()),
-            (motorPosition) -> {
-                return (motorPosition.in(Rotations) > 0) ? Volts.of(config.feedforwardControllerConfig().kG()) : Volts.of(0.0);
-            }
-        );
+  /**
+   * Creates an elevator position controller
+   *
+   * @return an elevator position controller
+   */
+  public static MotorOutput createMotorOutput(MechanismConfig config) {
+    if (Robot.isReal() && RobotConstants.ENABLED_SUBSYSTEMS.contains(Subsystem.ELEVATOR)) {
+      return new MotorOutputTalonFX2(config.motorConfig(), new CAN(10), new CAN(11), false);
     }
+
+    var motor =
+        new MotorOutputSim(
+            Volts.per(RotationsPerSecond).ofNative(config.feedforwardControllerConfig().kV()),
+            Volts.per(RotationsPerSecondPerSecond)
+                .ofNative(config.feedforwardControllerConfig().kA()),
+            DCMotor.getKrakenX60(2));
+
+    return new LossyMotorOutputSim(
+        motor,
+        Volts.of(config.feedforwardControllerConfig().kS()),
+        (motorPosition) -> {
+          return (motorPosition.in(Rotations) > 0)
+              ? Volts.of(config.feedforwardControllerConfig().kG())
+              : Volts.of(0.0);
+        });
+  }
 }

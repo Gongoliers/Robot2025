@@ -54,35 +54,28 @@ public class Pivot extends MultithreadedSubsystem {
   private TrapezoidProfile.State profiledSetpoint;
 
   /** Mechanism config */
-  private final MechanismConfig config = MechanismBuilder.defaults()
-    .feedforwardControllerConfig(FeedforwardControllerBuilder.defaults()
-      .kV(0.0)
-      .kA(0.0)
-      .kG(0.0)
-      .kS(0.0)
-      .build())
-    .feedbackControllerConfig(FeedbackControllerBuilder.defaults()
-      .kP(0.0)
-      .kI(0.0)
-      .kD(0.0)
-      .build())
-    .motionProfileConfig(MotionProfileBuilder.defaults()
-      .maxVelocity(2)
-      .maxAcceleration(2)
-      .build())
-    .motorConfig(MotorBuilder.defaults()
-      .ccwPositive(false)
-      .rotorToSensorRatio(1.0)
-      .sensorToMechRatio(1.0)
-      .neutralBrake(true)
-      .statorCurrentLimit(80.0)
-      .supplyCurrentLimit(40.0)
-      .build())
-    .build();
+  private final MechanismConfig config =
+      MechanismBuilder.defaults()
+          .feedforwardControllerConfig(
+              FeedforwardControllerBuilder.defaults().kV(0.0).kA(0.0).kG(0.0).kS(0.0).build())
+          .feedbackControllerConfig(
+              FeedbackControllerBuilder.defaults().kP(0.0).kI(0.0).kD(0.0).build())
+          .motionProfileConfig(
+              MotionProfileBuilder.defaults().maxVelocity(2).maxAcceleration(2).build())
+          .motorConfig(
+              MotorBuilder.defaults()
+                  .ccwPositive(false)
+                  .rotorToSensorRatio(1.0)
+                  .sensorToMechRatio(1.0)
+                  .neutralBrake(true)
+                  .statorCurrentLimit(80.0)
+                  .supplyCurrentLimit(40.0)
+                  .build())
+          .build();
 
   /**
    * Gets instance of pivot subsystem singleton
-   * 
+   *
    * @return instance of pivot subsystem singleton
    */
   public static Pivot getInstance() {
@@ -105,7 +98,7 @@ public class Pivot extends MultithreadedSubsystem {
     motionProfile = config.motionProfileConfig().createTrapezoidProfile();
     profiledSetpoint = new TrapezoidProfile.State(targetState.getPosRotations(), 0);
   }
-  
+
   @Override
   public void initializeTab() {
     // Get tab
@@ -125,9 +118,13 @@ public class Pivot extends MultithreadedSubsystem {
     // Current state column
     ShuffleboardLayout stateColumn = tab.getLayout("Current state", BuiltInLayouts.kList);
 
-    stateColumn.addDouble("Pivot position (rot)", () -> positionControllerValues.position.in(Rotations));
-    stateColumn.addDouble("Pivot velocity (rot/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond));
-    stateColumn.addDouble("Pivot acceleration (rot/s/s)", () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond));
+    stateColumn.addDouble(
+        "Pivot position (rot)", () -> positionControllerValues.position.in(Rotations));
+    stateColumn.addDouble(
+        "Pivot velocity (rot/s)", () -> positionControllerValues.velocity.in(RotationsPerSecond));
+    stateColumn.addDouble(
+        "Pivot acceleration (rot/s/s)",
+        () -> positionControllerValues.acceleration.in(RotationsPerSecondPerSecond));
     stateColumn.addDouble("Motor voltage", () -> positionControllerValues.motorVoltage.in(Volts));
     stateColumn.addDouble("Stator current", () -> positionControllerValues.statorCurrent.in(Amps));
     stateColumn.addDouble("Supply current", () -> positionControllerValues.supplyCurrent.in(Amps));
@@ -138,11 +135,12 @@ public class Pivot extends MultithreadedSubsystem {
 
     // Get the current position of the controller
     Angle position;
-    synchronized(lock) {
+    synchronized (lock) {
       position = positionControllerValues.position;
     }
 
-    if (MathUtil.isNear(targetState.getPosRotations(), position.in(Rotations), stateTolerance.in(Rotations))) {
+    if (MathUtil.isNear(
+        targetState.getPosRotations(), position.in(Rotations), stateTolerance.in(Rotations))) {
       // If close enough to target state, consider the pivot to be at that state
       currentState = targetState;
     } else {
@@ -152,10 +150,11 @@ public class Pivot extends MultithreadedSubsystem {
 
     if (currentState != targetState) {
       // If not at target state yet, approach state with motion profile
-      profiledSetpoint = motionProfile.calculate(
-          RobotConstants.PERIODIC_DURATION, 
-          profiledSetpoint,
-          new TrapezoidProfile.State(targetState.getPosRotations(), 0));
+      profiledSetpoint =
+          motionProfile.calculate(
+              RobotConstants.PERIODIC_DURATION,
+              profiledSetpoint,
+              new TrapezoidProfile.State(targetState.getPosRotations(), 0));
 
       positionController.setSetpoint(
           Rotations.of(profiledSetpoint.position),
@@ -163,8 +162,7 @@ public class Pivot extends MultithreadedSubsystem {
     } else {
       // If reached target state, set setpoint to hold at that state
       positionController.setSetpoint(
-          Rotations.of(targetState.getPosRotations()), 
-          RotationsPerSecond.of(0.0));
+          Rotations.of(targetState.getPosRotations()), RotationsPerSecond.of(0.0));
     }
 
     positionController.periodic();
@@ -172,8 +170,8 @@ public class Pivot extends MultithreadedSubsystem {
 
   @Override
   public void fastPeriodic() {
-    synchronized(lock) {
+    synchronized (lock) {
       positionController.getUpdatedVals(positionControllerValues);
     }
-  }  
+  }
 }
