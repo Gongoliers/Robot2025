@@ -73,6 +73,11 @@ public class Drive extends Subsystem {
         state = swerve.getState();
         field.setRobotPose(state.Pose);
 
+        // NOTE This was taken from the generated project, unsure if it is needed
+        // trySettingPerspective();
+    }
+
+    private void trySettingPerspective() {
         if (!hasSetPerspective || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
                 swerve.setOperatorPerspectiveForward(

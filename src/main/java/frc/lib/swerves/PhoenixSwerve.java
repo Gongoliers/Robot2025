@@ -12,11 +12,10 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public class PhoenixSwerve
         extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
-    implements Subsystem, SwerveOutput {
+        implements SwerveOutput {
 
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
