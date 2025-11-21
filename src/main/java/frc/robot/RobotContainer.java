@@ -5,8 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -18,8 +16,6 @@ import frc.robot.drive.Drive;
 import frc.robot.drive.DriveFactory;
 import frc.robot.elevator.Elevator;
 import frc.robot.pivot.Pivot;
-
-import java.util.function.Supplier;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -100,9 +96,7 @@ public class RobotContainer {
   /** Configures controller bindings */
   private void configureBindings() {
       // NOTE I deleted the operator binds for testing
-      Pose2d target = new Pose2d(Inches.of(144), Inches.of(158.5), Rotation2d.kZero);
-      drive.getField().getObject("target").setPose(target);
-      driverController.rightTrigger().whileTrue(drive.driveToward(this::getFieldSpeeds, () -> target));
+      driverController.rightTrigger().whileTrue(drive.driveToward(this::getFieldSpeeds, drive::getNearestScoringPose));
   }
 
   public Command getAutonomousCommand() {

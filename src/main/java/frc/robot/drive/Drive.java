@@ -2,6 +2,9 @@ package frc.robot.drive;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -22,6 +25,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.Subsystem;
 import frc.lib.swerves.SwerveOutput;
 
+import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static edu.wpi.first.units.Units.*;
@@ -34,12 +39,21 @@ public class Drive extends Subsystem {
 
     private final Field2d field;
 
+    private final AprilTagFieldLayout tagLayout;
+
+    private final List<Pose2d> scoringPoses;
+
     private boolean hasSetPerspective = false;
 
     public Drive(SwerveOutput swerve) {
         this.swerve = swerve;
         this.state = new SwerveDrivetrain.SwerveDriveState();
         this.field = new Field2d();
+        this.tagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+
+        Predicate<AprilTag> isBlueScoringTag = tag -> 17 <= tag.ID && tag.ID <= 22;
+        Predicate<AprilTag> isRedScoringTag = tag -> 6 <= tag.ID && tag.ID <= 11;
+        this.scoringPoses = tagLayout.getTags().stream().filter(isBlueScoringTag.or(isRedScoringTag)).map(tag -> tag.pose.toPose2d()).toList();
     }
 
     @Override
@@ -81,6 +95,7 @@ public class Drive extends Subsystem {
     public void periodic() {
         state = swerve.getState();
         field.setRobotPose(state.Pose);
+        field.getObject("target").setPose(getNearestScoringPose());
 
         // NOTE This was taken from the generated project, unsure if it is needed
         // trySettingPerspective();
@@ -101,6 +116,10 @@ public class Drive extends Subsystem {
 
     public Pose2d getPose() {
         return state.Pose;
+    }
+
+    public Pose2d getNearestScoringPose() {
+        return getPose().nearest(scoringPoses);
     }
 
     public Field2d getField() { return field; }
@@ -186,10 +205,12 @@ public class Drive extends Subsystem {
            SmartDashboard.putNumber("Distance (m)", distance.in(Meters));
            Rotation2d direction = error.getAngle();
 
-           Translation2d min_direction = new Translation2d(MIN_DISTANCE.in(Meters), direction);
-           field.getObject("min").setPose(new Pose2d(targetPose.getTranslation().minus(min_direction), direction));
-           Translation2d max_direction = new Translation2d(MAX_DISTANCE.in(Meters), direction);
-           field.getObject("max").setPose(new Pose2d(targetPose.getTranslation().minus(max_direction), direction));
+           Translation2d minDirection = new Translation2d(MIN_DISTANCE.in(Meters), direction);
+           Pose2d minPose = new Pose2d(targetPose.getTranslation().minus(minDirection), direction);
+           field.getObject("min").setPose(minPose);
+           Translation2d maxDirection = new Translation2d(MAX_DISTANCE.in(Meters), direction);
+           Pose2d maxPose = new Pose2d(targetPose.getTranslation().minus(maxDirection), direction);
+           field.getObject("max").setPose(maxPose);
 
            if (distance.gt(MAX_DISTANCE)) {
                return fieldSpeeds;
