@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -85,7 +86,7 @@ public class RobotContainer {
           var y = MathUtil.applyDeadband(-driverController.getLeftX(), 0.1);
           var omega = MathUtil.applyDeadband(-driverController.getRightX(), 0.1);
           return ChassisSpeeds.fromFieldRelativeSpeeds(MAX_VELOCITY.times(x), MAX_VELOCITY.times(y), MAX_ANGULAR_VELOCITY.times(omega
-          ), drive.getPose().getRotation());
+          ), new Rotation2d(0));
       }));
   }
 
