@@ -21,8 +21,7 @@ import frc.robot.pivot.Pivot;
 
 import java.util.function.Supplier;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.*;
 
 /** Robot container */
 public class RobotContainer {
@@ -103,7 +102,7 @@ public class RobotContainer {
       // NOTE I deleted the operator binds for testing
       Pose2d target = new Pose2d(Meters.of(3.286), Meters.of(1.34), Rotation2d.kZero);
       drive.getField().getObject("target").setPose(target);
-      driverController.rightTrigger().whileTrue(drive.driveToward(this::getDriverChassisSpeeds, () -> target));
+      driverController.rightTrigger().whileTrue(drive.driveToward(this::getFieldSpeeds, () -> target));
   }
 
   public Command getAutonomousCommand() {
