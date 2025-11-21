@@ -5,8 +5,8 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -19,7 +19,8 @@ import frc.robot.drive.DriveFactory;
 import frc.robot.elevator.Elevator;
 import frc.robot.pivot.Pivot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 /** Robot container */
 public class RobotContainer {
@@ -77,19 +78,17 @@ public class RobotContainer {
     return instance;
   }
 
-  private ChassisSpeeds getDriverChassisSpeeds() {
-      LinearVelocity MAX_VELOCITY = MetersPerSecond.of(2);
-      AngularVelocity MAX_ANGULAR_VELOCITY = RotationsPerSecond.of(0.5);
-      var x = MathUtil.applyDeadband(-driverController.getLeftY(), 0.1);
-      var y = MathUtil.applyDeadband(-driverController.getLeftX(), 0.1);
-      var omega = MathUtil.applyDeadband(-driverController.getRightX(), 0.1);
-      return ChassisSpeeds.fromFieldRelativeSpeeds(MAX_VELOCITY.times(x), MAX_VELOCITY.times(y), MAX_ANGULAR_VELOCITY.times(omega
-      ), drive.getPose().getRotation());
-  }
-
   /** Configures subsystem default commands for teleop */
   public void configureDefaultCommands() {
-      drive.setDefaultCommand(drive.drive(this::getDriverChassisSpeeds));
+      drive.setDefaultCommand(drive.drive(() -> {
+          LinearVelocity MAX_VELOCITY = MetersPerSecond.of(2);
+          AngularVelocity MAX_ANGULAR_VELOCITY = RotationsPerSecond.of(0.5);
+          var x = MathUtil.applyDeadband(-driverController.getLeftY(), 0.1);
+          var y = MathUtil.applyDeadband(-driverController.getLeftX(), 0.1);
+          var omega = MathUtil.applyDeadband(-driverController.getRightX(), 0.1);
+          return ChassisSpeeds.fromFieldRelativeSpeeds(MAX_VELOCITY.times(x), MAX_VELOCITY.times(y), MAX_ANGULAR_VELOCITY.times(omega
+          ), new Rotation2d(0));
+      }));
   }
 
   /** Configures controller bindings */
