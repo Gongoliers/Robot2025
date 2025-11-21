@@ -197,7 +197,11 @@ public class Drive extends Subsystem {
            }
 
            LinearVelocity assistAmount = distance.timesConversionFactor(GAIN);
-           ChassisSpeeds assistSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(assistAmount.times(direction.getCos()), assistAmount.times(direction.getSin()), RotationsPerSecond.zero(), pose.getRotation());
+           ChassisSpeeds assistSpeeds = new ChassisSpeeds(
+               assistAmount.times(direction.getCos()),
+               assistAmount.times(direction.getSin()),
+               RotationsPerSecond.zero()
+           );
 
            if (distance.lt(MIN_DISTANCE)) {
                return assistSpeeds;
