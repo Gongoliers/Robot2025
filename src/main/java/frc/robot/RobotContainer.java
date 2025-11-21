@@ -18,6 +18,8 @@ import frc.robot.drive.DriveFactory;
 import frc.robot.elevator.Elevator;
 import frc.robot.pivot.Pivot;
 
+import java.util.function.Supplier;
+
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -49,9 +51,9 @@ public class RobotContainer {
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
 
-      elevator = Elevator.getInstance();
+    elevator = Elevator.getInstance();
 
-      pivot = Pivot.getInstance();
+    pivot = Pivot.getInstance();
 
     drive = new Drive(DriveFactory.createSwerve());
 
@@ -77,17 +79,22 @@ public class RobotContainer {
     return instance;
   }
 
+  private ChassisSpeeds getFieldSpeeds() {
+      LinearVelocity MAX_VELOCITY = MetersPerSecond.of(2);
+      AngularVelocity MAX_ANGULAR_VELOCITY = RotationsPerSecond.of(0.5);
+      var x = MathUtil.applyDeadband(-driverController.getLeftY(), 0.1);
+      var y = MathUtil.applyDeadband(-driverController.getLeftX(), 0.1);
+      var omega = MathUtil.applyDeadband(-driverController.getRightX(), 0.1);
+      return new ChassisSpeeds(
+          MAX_VELOCITY.times(x),
+          MAX_VELOCITY.times(y),
+          MAX_ANGULAR_VELOCITY.times(omega)
+      );
+  }
+
   /** Configures subsystem default commands for teleop */
   public void configureDefaultCommands() {
-      drive.setDefaultCommand(drive.drive(() -> {
-          LinearVelocity MAX_VELOCITY = MetersPerSecond.of(2);
-          AngularVelocity MAX_ANGULAR_VELOCITY = RotationsPerSecond.of(0.5);
-          var x = MathUtil.applyDeadband(-driverController.getLeftY(), 0.1);
-          var y = MathUtil.applyDeadband(-driverController.getLeftX(), 0.1);
-          var omega = MathUtil.applyDeadband(-driverController.getRightX(), 0.1);
-          return ChassisSpeeds.fromFieldRelativeSpeeds(MAX_VELOCITY.times(x), MAX_VELOCITY.times(y), MAX_ANGULAR_VELOCITY.times(omega
-          ), new Rotation2d(0));
-      }));
+      drive.setDefaultCommand(drive.drive(this::getFieldSpeeds));
   }
 
   /** Configures controller bindings */
