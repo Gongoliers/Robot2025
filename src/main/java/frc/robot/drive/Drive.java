@@ -4,7 +4,6 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -13,7 +12,6 @@ import edu.wpi.first.units.LinearVelocityUnit;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Per;
-import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -169,9 +167,9 @@ public class Drive extends Subsystem {
     }
 
     public Command driveToward(Supplier<ChassisSpeeds> fieldSpeedsSupplier, Supplier<Pose2d> targetPoseSupplier) {
-        final Per<LinearVelocityUnit, DistanceUnit> GAIN = MetersPerSecond.of(4).per(Meter);
-        final Distance MIN_DISTANCE = Meters.of(0.5);
-        final Distance MAX_DISTANCE = Meters.of(3);
+        final Per<LinearVelocityUnit, DistanceUnit> GAIN = MetersPerSecond.of(8).per(Meter);
+        final Distance MIN_DISTANCE = Meters.of(1);
+        final Distance MAX_DISTANCE = Meters.of(5);
 
         SmartDashboard.putNumber("Min Distance (m)", MIN_DISTANCE.in(Meters));
         SmartDashboard.putNumber("Max Distance (m)", MAX_DISTANCE.in(Meters));
@@ -179,6 +177,7 @@ public class Drive extends Subsystem {
         // TODO Make utility class with closures for mutations
        return driveFacing(() -> {
            ChassisSpeeds fieldSpeeds = fieldSpeedsSupplier.get();
+           Translation2d fieldVelocity = new Translation2d(fieldSpeeds.vxMetersPerSecond, fieldSpeeds.vyMetersPerSecond);
            Pose2d pose = getPose();
            Pose2d targetPose = targetPoseSupplier.get();
 
@@ -208,7 +207,11 @@ public class Drive extends Subsystem {
            }
 
            // TODO In the in-between range, maybe clamp the velocity to prevent a sudden spike
-           return fieldSpeeds.plus(assistSpeeds);
+           ChassisSpeeds combinedSpeeds = fieldSpeeds.plus(assistSpeeds);
+           Translation2d combined = new Translation2d(combinedSpeeds.vxMetersPerSecond, combinedSpeeds.vyMetersPerSecond);
+           double velocity = Math.min(combined.getNorm(), fieldVelocity.getNorm());
+           Translation2d clamped = new Translation2d(velocity, combined.getAngle());
+           return new ChassisSpeeds(clamped.getX(), clamped.getY(), combinedSpeeds.omegaRadiansPerSecond);
        }, () -> targetPoseSupplier.get().getRotation());
     }
 }
