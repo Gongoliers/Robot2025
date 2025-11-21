@@ -53,7 +53,7 @@ public class Drive extends Subsystem {
 
         Predicate<AprilTag> isBlueScoringTag = tag -> 17 <= tag.ID && tag.ID <= 22;
         Predicate<AprilTag> isRedScoringTag = tag -> 6 <= tag.ID && tag.ID <= 11;
-        this.scoringPoses = tagLayout.getTags().stream().filter(isBlueScoringTag.or(isRedScoringTag)).map(tag -> tag.pose.toPose2d()).toList();
+        this.scoringPoses = tagLayout.getTags().stream().filter(isBlueScoringTag.or(isRedScoringTag)).map(tag -> tag.pose.toPose2d()).map(pose -> pose.rotateAround(pose.getTranslation(), Rotation2d.k180deg)).toList();
     }
 
     @Override
@@ -171,7 +171,7 @@ public class Drive extends Subsystem {
     ) {
         // TODO Make factory for requests
         SwerveRequest.FieldCentricFacingAngle request =
-            new SwerveRequest.FieldCentricFacingAngle();
+            new SwerveRequest.FieldCentricFacingAngle().withHeadingPID(5, 0, 0);
 
         return run(() -> {
             ChassisSpeeds fieldSpeeds = fieldSpeedsSupplier.get();
