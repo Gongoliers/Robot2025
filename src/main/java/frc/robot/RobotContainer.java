@@ -80,7 +80,7 @@ public class RobotContainer {
   }
 
   private ChassisSpeeds getFieldSpeeds() {
-      LinearVelocity MAX_VELOCITY = MetersPerSecond.of(2);
+      LinearVelocity MAX_VELOCITY = MetersPerSecond.of(4);
       AngularVelocity MAX_ANGULAR_VELOCITY = RotationsPerSecond.of(0.5);
       var x = MathUtil.applyDeadband(-driverController.getLeftY(), 0.1);
       var y = MathUtil.applyDeadband(-driverController.getLeftX(), 0.1);
@@ -100,7 +100,7 @@ public class RobotContainer {
   /** Configures controller bindings */
   private void configureBindings() {
       // NOTE I deleted the operator binds for testing
-      Pose2d target = new Pose2d(Meters.of(3.286), Meters.of(1.34), Rotation2d.kZero);
+      Pose2d target = new Pose2d(Inches.of(144), Inches.of(158.5), Rotation2d.kZero);
       drive.getField().getObject("target").setPose(target);
       driverController.rightTrigger().whileTrue(drive.driveToward(this::getFieldSpeeds, () -> target));
   }
