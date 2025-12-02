@@ -93,6 +93,8 @@ public class RobotContainer {
 
   /** Configures controller bindings */
   private void configureBindings() {
+    driverController.rightTrigger().whileTrue(drive.driveToward(this::getFieldSpeeds, drive::getNearestScoringPose));
+
     operatorController.a().onTrue(elevator.setTargetState(ElevatorState.STOW));
     operatorController.b().onTrue(elevator.setTargetState(ElevatorState.L1));
     operatorController.x().onTrue(elevator.setTargetState(ElevatorState.L2));
