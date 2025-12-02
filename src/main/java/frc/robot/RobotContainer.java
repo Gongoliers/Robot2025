@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -17,7 +19,6 @@ import frc.robot.drive.DriveFactory;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.ElevatorState;
 import frc.robot.pivot.Pivot;
-import static edu.wpi.first.units.Units.*;
 
 /** Robot container */
 public class RobotContainer {
@@ -76,21 +77,18 @@ public class RobotContainer {
   }
 
   private ChassisSpeeds getFieldSpeeds() {
-      LinearVelocity MAX_VELOCITY = MetersPerSecond.of(2);
-      AngularVelocity MAX_ANGULAR_VELOCITY = RotationsPerSecond.of(0.5);
-      var x = MathUtil.applyDeadband(-driverController.getLeftY(), 0.1);
-      var y = MathUtil.applyDeadband(-driverController.getLeftX(), 0.1);
-      var omega = MathUtil.applyDeadband(-driverController.getRightX(), 0.1);
-      return new ChassisSpeeds(
-          MAX_VELOCITY.times(x),
-          MAX_VELOCITY.times(y),
-          MAX_ANGULAR_VELOCITY.times(omega)
-      );
+    LinearVelocity MAX_VELOCITY = MetersPerSecond.of(2);
+    AngularVelocity MAX_ANGULAR_VELOCITY = RotationsPerSecond.of(0.5);
+    var x = MathUtil.applyDeadband(-driverController.getLeftY(), 0.1);
+    var y = MathUtil.applyDeadband(-driverController.getLeftX(), 0.1);
+    var omega = MathUtil.applyDeadband(-driverController.getRightX(), 0.1);
+    return new ChassisSpeeds(
+        MAX_VELOCITY.times(x), MAX_VELOCITY.times(y), MAX_ANGULAR_VELOCITY.times(omega));
   }
 
   /** Configures subsystem default commands for teleop */
   public void configureDefaultCommands() {
-      drive.setDefaultCommand(drive.drive(this::getFieldSpeeds));
+    drive.setDefaultCommand(drive.drive(this::getFieldSpeeds));
   }
 
   /** Configures controller bindings */
@@ -103,6 +101,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-      return Commands.print("No autonomous command selected...");
+    return Commands.print("No autonomous command selected...");
   }
 }

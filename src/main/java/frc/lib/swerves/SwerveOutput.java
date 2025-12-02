@@ -10,14 +10,14 @@ import edu.wpi.first.math.numbers.N3;
 
 public interface SwerveOutput {
 
-    void setControl(SwerveRequest request);
+  void setControl(SwerveRequest request);
 
-    SwerveDrivetrain.SwerveDriveState getState();
+  SwerveDrivetrain.SwerveDriveState getState();
 
-    void addVisionMeasurement(Pose2d visionPose, double timestampSeconds);
+  void addVisionMeasurement(Pose2d visionPose, double timestampSeconds);
 
-    void addVisionMeasurement(Pose2d visionPose, double timestampSeconds, Matrix<N3, N1> visionStdDevs);
+  void addVisionMeasurement(
+      Pose2d visionPose, double timestampSeconds, Matrix<N3, N1> visionStdDevs);
 
-    void setOperatorPerspectiveForward(Rotation2d fieldDirection);
-
+  void setOperatorPerspectiveForward(Rotation2d fieldDirection);
 }
