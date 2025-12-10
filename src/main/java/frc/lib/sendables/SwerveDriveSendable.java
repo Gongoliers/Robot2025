@@ -31,6 +31,29 @@ public class SwerveDriveSendable implements Sendable {
     this.robotAngleSupplier = robotAngleSupplier;
   }
 
+  /**
+   * Constructs a swerve drive state sendable given 4 module state suppliers and a robot angle supplier
+   * 
+   * @param NWStateSupplier NW module state supplier
+   * @param NEStateSupplier NE module state supplier
+   * @param SWStateSupplier SW module state supplier
+   * @param SEStateSupplier SE module state supplier
+   * @param robotAngleSupplier robot angle supplier
+   */
+  public SwerveDriveSendable(
+      Supplier<SwerveModuleState> NWStateSupplier,
+      Supplier<SwerveModuleState> NEStateSupplier,
+      Supplier<SwerveModuleState> SWStateSupplier,
+      Supplier<SwerveModuleState> SEStateSupplier,
+      Supplier<Rotation2d> robotAngleSupplier) {
+
+    this.statesSupplier = () -> {
+      SwerveModuleState[] states = {NWStateSupplier.get(), NEStateSupplier.get(), SWStateSupplier.get(), SEStateSupplier.get()};
+      return states;
+    };
+    this.robotAngleSupplier = robotAngleSupplier;
+  }
+
   @Override
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("SwerveDrive");
