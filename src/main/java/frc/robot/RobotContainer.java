@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
 import frc.robot.drive.Drive;
@@ -105,6 +106,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return drive.driveToTarget(() -> new ChassisSpeeds(1.5, -0.5, 0));
+    return Commands.print("No autonomous command selected...");
   }
 }
