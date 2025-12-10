@@ -31,22 +31,22 @@ public class DriverAssistance {
 
   public boolean hasDeadSpots(LinearVelocity maxSpeed) {
     // TODO Document this formula
-    return MAX_DISTANCE.get().timesConversionFactor(GAIN.get()).lte(maxSpeed.times(2));
+    return MIN_DISTANCE.get().timesConversionFactor(GAIN.get()).lte(maxSpeed.times(2));
   }
 
-  private Translation2d getError(Pose2d pose, Pose2d target) {
+  private Translation2d error(Pose2d pose, Pose2d target) {
     return target.getTranslation().minus(pose.getTranslation());
   }
 
-  private Distance getErrorMagnitude(Pose2d pose, Pose2d target) {
-    return Meters.of(getError(pose, target).getNorm());
+  private Distance errorMagnitude(Pose2d pose, Pose2d target) {
+    return Meters.of(error(pose, target).getNorm());
   }
 
-  private Rotation2d getErrorDirection(Pose2d pose, Pose2d target) {
-    return getError(pose, target).getAngle();
+  private Rotation2d errorDirection(Pose2d pose, Pose2d target) {
+    return error(pose, target).getAngle();
   }
 
-  private Pose2d getPoseAlongLine(Pose2d target, Rotation2d direction, Distance distance) {
+  private Pose2d poseAlongLine(Pose2d target, Rotation2d direction, Distance distance) {
     Translation2d offset = new Translation2d(distance.in(Meters), direction);
     Translation2d alongLine = target.getTranslation().minus(offset);
     return new Pose2d(alongLine, direction);
@@ -79,20 +79,20 @@ public class DriverAssistance {
   public void drawDebugObjects(Field2d field, Pose2d pose, Pose2d target) {
     field.getObject("DriverAssistance.TargetPose").setPose(target);
 
-    Rotation2d direction = getErrorDirection(pose, target);
+    Rotation2d direction = errorDirection(pose, target);
 
     field
         .getObject("DriverAssistance.MinPose")
-        .setPose(getPoseAlongLine(target, direction, (Distance) MIN_DISTANCE.get()));
+        .setPose(poseAlongLine(target, direction, (Distance) MIN_DISTANCE.get()));
     field
         .getObject("DriverAssistance.MaxPose")
-        .setPose(getPoseAlongLine(target, direction, (Distance) MAX_DISTANCE.get()));
+        .setPose(poseAlongLine(target, direction, (Distance) MAX_DISTANCE.get()));
   }
 
   public ChassisSpeeds applyDriverAssistance(
       ChassisSpeeds fieldSpeeds, Pose2d pose, Pose2d target) {
-    Distance distance = getErrorMagnitude(pose, target);
-    Rotation2d direction = getErrorDirection(pose, target);
+    Distance distance = errorMagnitude(pose, target);
+    Rotation2d direction = errorDirection(pose, target);
 
     if (distance.gt(MAX_DISTANCE.get())) {
       return fieldSpeeds;

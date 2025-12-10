@@ -141,7 +141,7 @@ public class Drive extends Subsystem {
   }
 
   public void setTargetPose(Pose2d targetPose) {
-    targetSupplier = () -> targetPose;
+    setTargetPose(() -> targetPose);
   }
 
   public SysIdRoutine createDriveRoutine() {
