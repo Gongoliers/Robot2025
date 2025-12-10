@@ -5,7 +5,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -39,15 +38,11 @@ public class Drive extends Subsystem {
 
     tab.add("Field", field);
     tab.add(
-      "States", 
-      new SwerveDriveSendable(
-        () -> state.ModuleStates, 
-        () -> this.getPose().getRotation()));
+        "States",
+        new SwerveDriveSendable(() -> state.ModuleStates, () -> this.getPose().getRotation()));
     tab.add(
-      "Targets",
-      new SwerveDriveSendable(
-        () -> state.ModuleTargets, 
-        () -> this.getPose().getRotation()));
+        "Targets",
+        new SwerveDriveSendable(() -> state.ModuleTargets, () -> this.getPose().getRotation()));
   }
 
   @Override
