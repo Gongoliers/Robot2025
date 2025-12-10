@@ -4,9 +4,6 @@ import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -22,8 +19,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.NTDouble;
 import frc.lib.Subsystem;
 import frc.lib.swerves.SwerveOutput;
-import java.util.List;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Drive extends Subsystem {
@@ -33,10 +28,6 @@ public class Drive extends Subsystem {
   private SwerveDrivetrain.SwerveDriveState state;
 
   private final Field2d field;
-
-  private final AprilTagFieldLayout tagLayout;
-
-  private final List<Pose2d> scoringPoses;
 
   private Supplier<Pose2d> targetSupplier;
 
@@ -48,19 +39,9 @@ public class Drive extends Subsystem {
     this.swerve = swerve;
     this.state = new SwerveDrivetrain.SwerveDriveState();
     this.field = new Field2d();
-    this.tagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
     this.driverAssistance =
         new DriverAssistance(MetersPerSecond.per(Meter).ofNative(8), Meters.of(1), Meters.of(2));
     this.targetSupplier = Pose2d::new;
-
-    Predicate<AprilTag> isBlueScoringTag = tag -> 17 <= tag.ID && tag.ID <= 22;
-    Predicate<AprilTag> isRedScoringTag = tag -> 6 <= tag.ID && tag.ID <= 11;
-    this.scoringPoses =
-        tagLayout.getTags().stream()
-            .filter(isBlueScoringTag.or(isRedScoringTag))
-            .map(tag -> tag.pose.toPose2d())
-            .map(pose -> pose.rotateAround(pose.getTranslation(), Rotation2d.k180deg))
-            .toList();
   }
 
   @Override
