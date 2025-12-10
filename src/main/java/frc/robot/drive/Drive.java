@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.NTDouble;
 import frc.lib.Subsystem;
+import frc.lib.sendables.SwerveDriveSendable;
 import frc.lib.swerves.SwerveOutput;
 import java.util.function.Supplier;
 
@@ -48,39 +49,13 @@ public class Drive extends Subsystem {
   public void initializeTab() {
     ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
 
-    tab.add(field);
-    tab.addDoubleArray(
+    tab.add("Field", field);
+    tab.add(
         "States",
-        () -> {
-          SwerveModuleState[] states = state.ModuleStates;
-          double[] doubles = new double[8];
-
-          if (states != null) {
-            for (int i = 0; i < 4; i++) {
-              SwerveModuleState state = states[i];
-              doubles[2 * i] = state.angle.getDegrees();
-              doubles[2 * i + 1] = state.speedMetersPerSecond;
-            }
-          }
-
-          return doubles;
-        });
-    tab.addDoubleArray(
+        new SwerveDriveSendable(() -> state.ModuleStates, () -> this.getPose().getRotation()));
+    tab.add(
         "Targets",
-        () -> {
-          SwerveModuleState[] states = state.ModuleTargets;
-          double[] doubles = new double[8];
-
-          if (states != null) {
-            for (int i = 0; i < 4; i++) {
-              SwerveModuleState state = states[i];
-              doubles[2 * i] = state.angle.getDegrees();
-              doubles[2 * i + 1] = state.speedMetersPerSecond;
-            }
-          }
-
-          return doubles;
-        });
+        new SwerveDriveSendable(() -> state.ModuleTargets, () -> this.getPose().getRotation()));
   }
 
   @Override
