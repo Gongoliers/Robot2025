@@ -37,6 +37,7 @@ public class Drive extends Subsystem {
   public void initializeTab() {
     ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
 
+    tab.add("Field", field);
     tab.add(
       "States", 
       new SwerveDriveSendable(

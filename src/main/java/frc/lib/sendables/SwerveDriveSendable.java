@@ -58,18 +58,18 @@ public class SwerveDriveSendable implements Sendable {
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("SwerveDrive");
 
-    builder.addDoubleProperty("Front Left Angle", () -> statesSupplier.get()[0].angle.getDegrees(), null);
+    builder.addDoubleProperty("Front Left Angle", () -> statesSupplier.get()[0].angle.getRadians(), null);
     builder.addDoubleProperty("Front Left Velocity", () -> statesSupplier.get()[0].speedMetersPerSecond, null);
 
-    builder.addDoubleProperty("Front Right Angle", () -> statesSupplier.get()[1].angle.getDegrees(), null);
+    builder.addDoubleProperty("Front Right Angle", () -> statesSupplier.get()[1].angle.getRadians(), null);
     builder.addDoubleProperty("Front Right Velocity", () -> statesSupplier.get()[1].speedMetersPerSecond, null);
 
-    builder.addDoubleProperty("Back Left Angle", () -> statesSupplier.get()[2].angle.getDegrees(), null);
+    builder.addDoubleProperty("Back Left Angle", () -> statesSupplier.get()[2].angle.getRadians(), null);
     builder.addDoubleProperty("Back Left Velocity", () -> statesSupplier.get()[2].speedMetersPerSecond, null);
 
-    builder.addDoubleProperty("Back Right Angle", () -> statesSupplier.get()[3].angle.getDegrees(), null);
+    builder.addDoubleProperty("Back Right Angle", () -> statesSupplier.get()[3].angle.getRadians(), null);
     builder.addDoubleProperty("Back Right Velocity", () -> statesSupplier.get()[3].speedMetersPerSecond, null);
 
-    builder.addDoubleProperty("Robot Angle", () -> robotAngleSupplier.get().getDegrees(), null);
+    builder.addDoubleProperty("Robot Angle", () -> robotAngleSupplier.get().getRadians(), null);
   }
 }
