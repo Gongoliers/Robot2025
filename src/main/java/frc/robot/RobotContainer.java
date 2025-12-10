@@ -55,7 +55,7 @@ public class RobotContainer {
     pivot = Pivot.getInstance();
 
     drive = new Drive(DriveFactory.createSwerve());
-    drive.setTargetPose(new Pose2d(3.616, -0.869, Rotation2d.kZero));
+    drive.setTargetPose(new Pose2d(1.68, 0.75, Rotation2d.kZero));
     /*
         drive.setTargetPose(
             () ->
