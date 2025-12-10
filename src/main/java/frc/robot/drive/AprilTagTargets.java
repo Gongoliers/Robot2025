@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class AprilTagTargets {
@@ -39,10 +40,14 @@ public class AprilTagTargets {
   }
 
   public static List<Pose2d> reefTargets(
-      AprilTagFieldLayout layout, DriverStation.Alliance alliance) {
-    return switch (alliance) {
-      case Blue -> blueReefTargets(layout);
-      case Red -> redReefTargets(layout);
-    };
+      AprilTagFieldLayout layout, Optional<DriverStation.Alliance> alliance) {
+    return alliance
+        .map(
+            value ->
+                switch (value) {
+                  case Blue -> blueReefTargets(layout);
+                  case Red -> redReefTargets(layout);
+                })
+        .orElseGet(List::of);
   }
 }

@@ -6,8 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
-import frc.robot.drive.AprilTagTargets;
 import frc.robot.drive.Drive;
 import frc.robot.drive.DriveFactory;
 import frc.robot.elevator.Elevator;
@@ -59,13 +56,16 @@ public class RobotContainer {
 
     drive = new Drive(DriveFactory.createSwerve());
     drive.setTargetPose(new Pose2d(3.616, -0.869, Rotation2d.kZero));
-    drive.setTargetPose(
-        () ->
-            drive
-                .getPose()
-                .nearest(
-                    AprilTagTargets.blueReefTargets(
-                        AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark))));
+    /*
+        drive.setTargetPose(
+            () ->
+                drive
+                    .getPose()
+                    .nearest(
+                        AprilTagTargets.reefTargets(
+                            AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark),
+                            DriverStation.getAlliance())));
+    */
 
     Telemetry.initializeTabs(elevator, pivot, drive);
 
