@@ -13,7 +13,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.Telemetry;
 import frc.robot.drive.Drive;
@@ -55,6 +54,7 @@ public class RobotContainer {
     pivot = Pivot.getInstance();
 
     drive = new Drive(DriveFactory.createSwerve());
+    drive.setTargetPose(new Pose2d(3.616, -0.869, Rotation2d.kZero));
 
     Telemetry.initializeTabs(elevator, pivot, drive);
 
@@ -95,11 +95,7 @@ public class RobotContainer {
 
   /** Configures controller bindings */
   private void configureBindings() {
-    driverController
-        .rightTrigger()
-        .whileTrue(
-            drive.driveToward(
-                this::getFieldSpeeds, () -> new Pose2d(3.616, -0.869, Rotation2d.kZero)));
+    driverController.rightTrigger().whileTrue(drive.driveToTarget(this::getFieldSpeeds));
 
     operatorController.a().onTrue(elevator.setTargetState(ElevatorState.STOW));
     operatorController.b().onTrue(elevator.setTargetState(ElevatorState.L1));
@@ -109,7 +105,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-      return drive.driveToward(
-              () -> new ChassisSpeeds(1.5, -0.5, 0), () -> new Pose2d(3.616, -0.869, Rotation2d.kZero));
+    return drive.driveToTarget(() -> new ChassisSpeeds(1.5, -0.5, 0));
   }
 }

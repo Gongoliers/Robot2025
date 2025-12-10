@@ -9,17 +9,9 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.AngularVelocityUnit;
-import edu.wpi.first.units.DistanceUnit;
-import edu.wpi.first.units.LinearVelocityUnit;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Per;
+import edu.wpi.first.units.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -46,13 +38,20 @@ public class Drive extends Subsystem {
 
   private final List<Pose2d> scoringPoses;
 
+  private Supplier<Pose2d> targetSupplier;
+
   private boolean hasSetPerspective = false;
+
+  private final DriverAssistance driverAssistance;
 
   public Drive(SwerveOutput swerve) {
     this.swerve = swerve;
     this.state = new SwerveDrivetrain.SwerveDriveState();
     this.field = new Field2d();
     this.tagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    this.driverAssistance =
+        new DriverAssistance(MetersPerSecond.per(Meter).ofNative(8), Meters.of(1), Meters.of(2));
+    this.targetSupplier = Pose2d::new;
 
     Predicate<AprilTag> isBlueScoringTag = tag -> 17 <= tag.ID && tag.ID <= 22;
     Predicate<AprilTag> isRedScoringTag = tag -> 6 <= tag.ID && tag.ID <= 11;
@@ -107,7 +106,9 @@ public class Drive extends Subsystem {
   public void periodic() {
     state = swerve.getState();
     field.setRobotPose(state.Pose);
-    // field.getObject("target").setPose(getNearestScoringPose());
+    driverAssistance.drawDebugObjects(field, getPose(), getTargetPose());
+    SmartDashboard.putBoolean(
+        "Dead Spots?", driverAssistance.hasDeadSpots(TunerConstants.kSpeedAt12Volts));
 
     // NOTE This was taken from the generated project, unsure if it is needed
     // trySettingPerspective();
@@ -131,12 +132,16 @@ public class Drive extends Subsystem {
     return state.Pose;
   }
 
-  public Pose2d getNearestScoringPose() {
-    return getPose().nearest(scoringPoses);
+  public Pose2d getTargetPose() {
+    return targetSupplier.get();
   }
 
-  public Field2d getField() {
-    return field;
+  public void setTargetPose(Supplier<Pose2d> targetPose) {
+    targetSupplier = targetPose;
+  }
+
+  public void setTargetPose(Pose2d targetPose) {
+    targetSupplier = () -> targetPose;
   }
 
   public SysIdRoutine createDriveRoutine() {
@@ -179,8 +184,10 @@ public class Drive extends Subsystem {
     // TODO Make factory for requests
     SwerveRequest.FieldCentricFacingAngle request = new SwerveRequest.FieldCentricFacingAngle();
 
-    final NTDouble KP = new NTDouble<>("driveFacing.KP", RotationsPerSecond.per(Rotation));
-    final NTDouble MAX_ROTATIONAL_RATE = new NTDouble("driveFacing.MAX_ROTATIONAL_RATE", RotationsPerSecond);
+    final NTDouble<PerUnit<AngularVelocityUnit, AngleUnit>> KP =
+        new NTDouble<>("DriveFacing.KP", RotationsPerSecond.per(Rotation));
+    final NTDouble<AngularVelocityUnit> MAX_ROTATIONAL_RATE =
+        new NTDouble<>("DriveFacing.MaxRotationalRate", RotationsPerSecond);
 
     return run(
         () -> {
@@ -196,65 +203,9 @@ public class Drive extends Subsystem {
         });
   }
 
-  public Command driveToward(
-      Supplier<ChassisSpeeds> fieldSpeedsSupplier, Supplier<Pose2d> targetPoseSupplier) {
-
-    final NTDouble GAIN = new NTDouble("driveToward.GAIN", MetersPerSecond.per(Meter), MetersPerSecond.per(Meter).ofNative(16));
-    final NTDouble MIN_DISTANCE = new NTDouble("driveToward.MIN_DISTANCE", Meters, Meters.of(0.5));
-    final NTDouble MAX_DISTANCE = new NTDouble("driveToward.MAX_DISTANCE", Meters, Meters.of(1));
-
-    // TODO Make utility class with closures for mutations
+  public Command driveToTarget(Supplier<ChassisSpeeds> fieldSpeeds) {
     return driveFacing(
-        () -> {
-          Per<LinearVelocityUnit, DistanceUnit> gain  = (Per<LinearVelocityUnit, DistanceUnit>) GAIN.get();
-          Distance minDistance = (Distance) MIN_DISTANCE.get();
-          Distance maxDistance = (Distance) MAX_DISTANCE.get();
-
-          SmartDashboard.putBoolean("No Dead Spots?", maxDistance.timesConversionFactor(gain).gt(TunerConstants.kSpeedAt12Volts.times(2)));
-
-          ChassisSpeeds fieldSpeeds = fieldSpeedsSupplier.get();
-          Translation2d fieldVelocity =
-              new Translation2d(fieldSpeeds.vxMetersPerSecond, fieldSpeeds.vyMetersPerSecond);
-          Pose2d pose = getPose();
-          Pose2d targetPose = targetPoseSupplier.get();
-          field.getObject("target").setPose(targetPose);
-
-          Translation2d error = targetPose.getTranslation().minus(pose.getTranslation());
-          Distance distance = Meters.of(error.getNorm());
-          SmartDashboard.putNumber("Distance (m)", distance.in(Meters));
-          Rotation2d direction = error.getAngle();
-
-          Translation2d minDirection = new Translation2d(minDistance.in(Meters), direction);
-          Pose2d minPose = new Pose2d(targetPose.getTranslation().minus(minDirection), direction);
-          field.getObject("min").setPose(minPose);
-          Translation2d maxDirection = new Translation2d(maxDistance.in(Meters), direction);
-          Pose2d maxPose = new Pose2d(targetPose.getTranslation().minus(maxDirection), direction);
-          field.getObject("max").setPose(maxPose);
-
-          if (distance.gt(maxDistance)) {
-            return fieldSpeeds;
-          }
-
-          LinearVelocity assistAmount = distance.timesConversionFactor(gain);
-          ChassisSpeeds assistSpeeds =
-              new ChassisSpeeds(
-                  assistAmount.times(direction.getCos()),
-                  assistAmount.times(direction.getSin()),
-                  RotationsPerSecond.zero());
-
-          if (distance.lt(minDistance)) {
-            return assistSpeeds;
-          }
-
-          // TODO In the in-between range, maybe clamp the velocity to prevent a sudden spike
-          ChassisSpeeds combinedSpeeds = fieldSpeeds.plus(assistSpeeds);
-          Translation2d combined =
-              new Translation2d(combinedSpeeds.vxMetersPerSecond, combinedSpeeds.vyMetersPerSecond);
-          double velocity = Math.min(combined.getNorm(), fieldVelocity.getNorm());
-          Translation2d clamped = new Translation2d(velocity, combined.getAngle());
-          return new ChassisSpeeds(
-              clamped.getX(), clamped.getY(), combinedSpeeds.omegaRadiansPerSecond);
-        },
-        () -> targetPoseSupplier.get().getRotation());
+        () -> driverAssistance.applyDriverAssistance(fieldSpeeds.get(), getPose(), getTargetPose()),
+        () -> getTargetPose().getRotation());
   }
 }
