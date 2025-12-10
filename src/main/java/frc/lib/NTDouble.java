@@ -20,13 +20,13 @@ public class NTDouble<U extends Unit> implements DoubleSupplier, Supplier<Measur
   }
 
   public NTDouble(String name, U Unit) {
-      // TODO Unchecked cast warning; pretty sure this is safe
-      this(name, Unit, (Measure<U>) Unit.of(0.0));
+    // TODO Unchecked cast warning; pretty sure this is safe
+    this(name, Unit, (Measure<U>) Unit.of(0.0));
   }
 
   private DoubleTopic createTopic(String name) {
-      String nameWithUnit = name + " (" + Unit.name() + ")";
-      return NetworkTableInstance.getDefault().getDoubleTopic(nameWithUnit);
+    String nameWithUnit = name + " (" + Unit.name() + ")";
+    return NetworkTableInstance.getDefault().getDoubleTopic(nameWithUnit);
   }
 
   private DoubleSubscriber getSubscriber(DoubleTopic topic, Measure<U> defaultValue) {
