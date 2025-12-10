@@ -7,6 +7,8 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -95,7 +97,7 @@ public class RobotContainer {
   private void configureBindings() {
     driverController
         .rightTrigger()
-        .whileTrue(drive.driveToward(this::getFieldSpeeds, drive::getNearestScoringPose));
+        .whileTrue(drive.driveToward(this::getFieldSpeeds, () -> new Pose2d(3.616, -0.869, Rotation2d.kZero)));
 
     operatorController.a().onTrue(elevator.setTargetState(ElevatorState.STOW));
     operatorController.b().onTrue(elevator.setTargetState(ElevatorState.L1));

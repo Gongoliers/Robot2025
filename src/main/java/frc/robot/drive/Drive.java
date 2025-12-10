@@ -103,7 +103,7 @@ public class Drive extends Subsystem {
   public void periodic() {
     state = swerve.getState();
     field.setRobotPose(state.Pose);
-    field.getObject("target").setPose(getNearestScoringPose());
+    // field.getObject("target").setPose(getNearestScoringPose());
 
     // NOTE This was taken from the generated project, unsure if it is needed
     // trySettingPerspective();
@@ -189,9 +189,9 @@ public class Drive extends Subsystem {
 
   public Command driveToward(
       Supplier<ChassisSpeeds> fieldSpeedsSupplier, Supplier<Pose2d> targetPoseSupplier) {
-    final Per<LinearVelocityUnit, DistanceUnit> GAIN = MetersPerSecond.of(8).per(Meter);
-    final Distance MIN_DISTANCE = Meters.of(1);
-    final Distance MAX_DISTANCE = Meters.of(5);
+    final Per<LinearVelocityUnit, DistanceUnit> GAIN = MetersPerSecond.of(4).per(Meter);
+    final Distance MIN_DISTANCE = Meters.of(0.5);
+    final Distance MAX_DISTANCE = Meters.of(2);
 
     SmartDashboard.putNumber("Min Distance (m)", MIN_DISTANCE.in(Meters));
     SmartDashboard.putNumber("Max Distance (m)", MAX_DISTANCE.in(Meters));
@@ -204,6 +204,7 @@ public class Drive extends Subsystem {
               new Translation2d(fieldSpeeds.vxMetersPerSecond, fieldSpeeds.vyMetersPerSecond);
           Pose2d pose = getPose();
           Pose2d targetPose = targetPoseSupplier.get();
+          field.getObject("target").setPose(targetPose);
 
           Translation2d error = targetPose.getTranslation().minus(pose.getTranslation());
           Distance distance = Meters.of(error.getNorm());
