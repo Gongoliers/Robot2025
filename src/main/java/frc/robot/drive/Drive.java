@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.NTDouble;
 import frc.lib.Subsystem;
 import frc.lib.swerves.SwerveOutput;
 import java.util.List;
@@ -177,8 +178,9 @@ public class Drive extends Subsystem {
       Supplier<ChassisSpeeds> fieldSpeedsSupplier, Supplier<Rotation2d> directionSupplier) {
     // TODO Make factory for requests
     SwerveRequest.FieldCentricFacingAngle request = new SwerveRequest.FieldCentricFacingAngle();
-    final Per<AngularVelocityUnit, AngleUnit> KP = RotationsPerSecond.per(Rotation).ofNative(10);
-    final AngularVelocity MAX_ROTATIONAL_RATE = RotationsPerSecond.of(1);
+
+    final NTDouble KP = new NTDouble<>("driveFacing.KP", RotationsPerSecond.per(Rotation));
+    final NTDouble MAX_ROTATIONAL_RATE = new NTDouble("driveFacing.MAX_ROTATIONAL_RATE", RotationsPerSecond);
 
     return run(
         () -> {
@@ -189,23 +191,27 @@ public class Drive extends Subsystem {
                   .withVelocityX(fieldSpeeds.vxMetersPerSecond)
                   .withVelocityY(fieldSpeeds.vyMetersPerSecond)
                   .withTargetDirection(direction)
-                  .withHeadingPID(KP.in(RadiansPerSecond.per(Radian)), 0, 0)
-                  .withMaxAbsRotationalRate(MAX_ROTATIONAL_RATE));
+                  .withHeadingPID(KP.get().in(RadiansPerSecond.per(Radian)), 0, 0)
+                  .withMaxAbsRotationalRate(MAX_ROTATIONAL_RATE.get().in(RadiansPerSecond)));
         });
   }
 
   public Command driveToward(
       Supplier<ChassisSpeeds> fieldSpeedsSupplier, Supplier<Pose2d> targetPoseSupplier) {
-    final Per<LinearVelocityUnit, DistanceUnit> GAIN = MetersPerSecond.of(4).per(Meter);
-    final Distance MIN_DISTANCE = Meters.of(0.5);
-    final Distance MAX_DISTANCE = Meters.of(2);
 
-    SmartDashboard.putNumber("Min Distance (m)", MIN_DISTANCE.in(Meters));
-    SmartDashboard.putNumber("Max Distance (m)", MAX_DISTANCE.in(Meters));
+    final NTDouble GAIN = new NTDouble("driveToward.GAIN", MetersPerSecond.per(Meter), MetersPerSecond.per(Meter).ofNative(16));
+    final NTDouble MIN_DISTANCE = new NTDouble("driveToward.MIN_DISTANCE", Meters, Meters.of(0.5));
+    final NTDouble MAX_DISTANCE = new NTDouble("driveToward.MAX_DISTANCE", Meters, Meters.of(1));
 
     // TODO Make utility class with closures for mutations
     return driveFacing(
         () -> {
+          Per<LinearVelocityUnit, DistanceUnit> gain  = (Per<LinearVelocityUnit, DistanceUnit>) GAIN.get();
+          Distance minDistance = (Distance) MIN_DISTANCE.get();
+          Distance maxDistance = (Distance) MAX_DISTANCE.get();
+
+          SmartDashboard.putBoolean("No Dead Spots?", maxDistance.timesConversionFactor(gain).gt(TunerConstants.kSpeedAt12Volts.times(2)));
+
           ChassisSpeeds fieldSpeeds = fieldSpeedsSupplier.get();
           Translation2d fieldVelocity =
               new Translation2d(fieldSpeeds.vxMetersPerSecond, fieldSpeeds.vyMetersPerSecond);
@@ -218,25 +224,25 @@ public class Drive extends Subsystem {
           SmartDashboard.putNumber("Distance (m)", distance.in(Meters));
           Rotation2d direction = error.getAngle();
 
-          Translation2d minDirection = new Translation2d(MIN_DISTANCE.in(Meters), direction);
+          Translation2d minDirection = new Translation2d(minDistance.in(Meters), direction);
           Pose2d minPose = new Pose2d(targetPose.getTranslation().minus(minDirection), direction);
           field.getObject("min").setPose(minPose);
-          Translation2d maxDirection = new Translation2d(MAX_DISTANCE.in(Meters), direction);
+          Translation2d maxDirection = new Translation2d(maxDistance.in(Meters), direction);
           Pose2d maxPose = new Pose2d(targetPose.getTranslation().minus(maxDirection), direction);
           field.getObject("max").setPose(maxPose);
 
-          if (distance.gt(MAX_DISTANCE)) {
+          if (distance.gt(maxDistance)) {
             return fieldSpeeds;
           }
 
-          LinearVelocity assistAmount = distance.timesConversionFactor(GAIN);
+          LinearVelocity assistAmount = distance.timesConversionFactor(gain);
           ChassisSpeeds assistSpeeds =
               new ChassisSpeeds(
                   assistAmount.times(direction.getCos()),
                   assistAmount.times(direction.getSin()),
                   RotationsPerSecond.zero());
 
-          if (distance.lt(MIN_DISTANCE)) {
+          if (distance.lt(minDistance)) {
             return assistSpeeds;
           }
 

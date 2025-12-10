@@ -109,6 +109,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command selected...");
+      return drive.driveToward(
+              () -> new ChassisSpeeds(1.5, -0.5, 0), () -> new Pose2d(3.616, -0.869, Rotation2d.kZero));
   }
 }
