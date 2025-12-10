@@ -97,7 +97,9 @@ public class RobotContainer {
   private void configureBindings() {
     driverController
         .rightTrigger()
-        .whileTrue(drive.driveToward(this::getFieldSpeeds, () -> new Pose2d(3.616, -0.869, Rotation2d.kZero)));
+        .whileTrue(
+            drive.driveToward(
+                this::getFieldSpeeds, () -> new Pose2d(3.616, -0.869, Rotation2d.kZero)));
 
     operatorController.a().onTrue(elevator.setTargetState(ElevatorState.STOW));
     operatorController.b().onTrue(elevator.setTargetState(ElevatorState.L1));

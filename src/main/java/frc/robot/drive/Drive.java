@@ -12,8 +12,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.LinearVelocityUnit;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Per;
@@ -174,6 +177,8 @@ public class Drive extends Subsystem {
       Supplier<ChassisSpeeds> fieldSpeedsSupplier, Supplier<Rotation2d> directionSupplier) {
     // TODO Make factory for requests
     SwerveRequest.FieldCentricFacingAngle request = new SwerveRequest.FieldCentricFacingAngle();
+    final Per<AngularVelocityUnit, AngleUnit> KP = RotationsPerSecond.per(Rotation).ofNative(10);
+    final AngularVelocity MAX_ROTATIONAL_RATE = RotationsPerSecond.of(1);
 
     return run(
         () -> {
@@ -183,7 +188,9 @@ public class Drive extends Subsystem {
               request
                   .withVelocityX(fieldSpeeds.vxMetersPerSecond)
                   .withVelocityY(fieldSpeeds.vyMetersPerSecond)
-                  .withTargetDirection(direction));
+                  .withTargetDirection(direction)
+                  .withHeadingPID(KP.in(RadiansPerSecond.per(Radian)), 0, 0)
+                  .withMaxAbsRotationalRate(MAX_ROTATIONAL_RATE));
         });
   }
 
