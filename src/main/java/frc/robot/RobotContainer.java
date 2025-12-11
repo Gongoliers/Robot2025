@@ -7,6 +7,8 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -53,6 +55,17 @@ public class RobotContainer {
     pivot = Pivot.getInstance();
 
     drive = new Drive(DriveFactory.createSwerve());
+    drive.setTargetPose(new Pose2d(1.68, 0.75, Rotation2d.kZero));
+    /*
+        drive.setTargetPose(
+            () ->
+                drive
+                    .getPose()
+                    .nearest(
+                        AprilTagTargets.reefTargets(
+                            AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark),
+                            DriverStation.getAlliance())));
+    */
 
     Telemetry.initializeTabs(elevator, pivot, drive);
 
@@ -93,6 +106,8 @@ public class RobotContainer {
 
   /** Configures controller bindings */
   private void configureBindings() {
+    driverController.rightTrigger().whileTrue(drive.driveToTarget(this::getFieldSpeeds));
+
     operatorController.a().onTrue(elevator.setTargetState(ElevatorState.STOW));
     operatorController.b().onTrue(elevator.setTargetState(ElevatorState.L1));
     operatorController.x().onTrue(elevator.setTargetState(ElevatorState.L2));

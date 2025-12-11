@@ -1,16 +1,21 @@
 package frc.robot.drive;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.NTDouble;
 import frc.lib.Subsystem;
 import frc.lib.sendables.SwerveDriveSendable;
 import frc.lib.swerves.SwerveOutput;
@@ -24,12 +29,19 @@ public class Drive extends Subsystem {
 
   private final Field2d field;
 
+  private Supplier<Pose2d> targetSupplier;
+
   private boolean hasSetPerspective = false;
+
+  private final DriverAssistance driverAssistance;
 
   public Drive(SwerveOutput swerve) {
     this.swerve = swerve;
     this.state = new SwerveDrivetrain.SwerveDriveState();
     this.field = new Field2d();
+    this.driverAssistance =
+        new DriverAssistance(MetersPerSecond.per(Meter).ofNative(8), Meters.of(1), Meters.of(2));
+    this.targetSupplier = Pose2d::new;
   }
 
   @Override
@@ -49,6 +61,9 @@ public class Drive extends Subsystem {
   public void periodic() {
     state = swerve.getState();
     field.setRobotPose(state.Pose);
+    driverAssistance.drawDebugObjects(field, getPose(), getTargetPose());
+    SmartDashboard.putBoolean(
+        "Dead Spots?", driverAssistance.hasDeadSpots(TunerConstants.kSpeedAt12Volts));
 
     // NOTE This was taken from the generated project, unsure if it is needed
     // trySettingPerspective();
@@ -70,6 +85,18 @@ public class Drive extends Subsystem {
 
   public Pose2d getPose() {
     return state.Pose;
+  }
+
+  public Pose2d getTargetPose() {
+    return targetSupplier.get();
+  }
+
+  public void setTargetPose(Supplier<Pose2d> targetPose) {
+    targetSupplier = targetPose;
+  }
+
+  public void setTargetPose(Pose2d targetPose) {
+    setTargetPose(() -> targetPose);
   }
 
   public SysIdRoutine createDriveRoutine() {
@@ -112,6 +139,11 @@ public class Drive extends Subsystem {
     // TODO Make factory for requests
     SwerveRequest.FieldCentricFacingAngle request = new SwerveRequest.FieldCentricFacingAngle();
 
+    final NTDouble<PerUnit<AngularVelocityUnit, AngleUnit>> KP =
+        new NTDouble<>("DriveFacing.KP", RotationsPerSecond.per(Rotation));
+    final NTDouble<AngularVelocityUnit> MAX_ROTATIONAL_RATE =
+        new NTDouble<>("DriveFacing.MaxRotationalRate", RotationsPerSecond);
+
     return run(
         () -> {
           ChassisSpeeds fieldSpeeds = fieldSpeedsSupplier.get();
@@ -120,7 +152,15 @@ public class Drive extends Subsystem {
               request
                   .withVelocityX(fieldSpeeds.vxMetersPerSecond)
                   .withVelocityY(fieldSpeeds.vyMetersPerSecond)
-                  .withTargetDirection(direction));
+                  .withTargetDirection(direction)
+                  .withHeadingPID(KP.get().in(RadiansPerSecond.per(Radian)), 0, 0)
+                  .withMaxAbsRotationalRate(MAX_ROTATIONAL_RATE.get().in(RadiansPerSecond)));
         });
+  }
+
+  public Command driveToTarget(Supplier<ChassisSpeeds> fieldSpeeds) {
+    return driveFacing(
+        () -> driverAssistance.applyDriverAssistance(fieldSpeeds.get(), getPose(), getTargetPose()),
+        () -> getTargetPose().getRotation());
   }
 }
