@@ -15,6 +15,8 @@ public interface SwerveOutput {
 
   SwerveDrivetrain.SwerveDriveState getState();
 
+  void setVisionMeasurementStdDevs(Matrix<N3, N1> visionStdDevs);
+
   void addVisionMeasurement(Pose2d visionPose, double timestampSeconds);
 
   void addVisionMeasurement(

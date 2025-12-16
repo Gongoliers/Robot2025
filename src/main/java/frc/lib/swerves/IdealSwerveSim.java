@@ -62,6 +62,10 @@ public class IdealSwerveSim implements SwerveOutput {
     return state;
   }
 
+  public void setVisionMeasurementStdDevs(Matrix<N3, N1> visionStdDevs) {
+    // No-op for simulation, pose estimates are fully trusted in sim
+  }
+
   @Override
   public void addVisionMeasurement(Pose2d visionPose, double timestampSeconds) {
     state.Pose = visionPose;
