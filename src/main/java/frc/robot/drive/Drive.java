@@ -19,6 +19,8 @@ import frc.lib.NTDouble;
 import frc.lib.Subsystem;
 import frc.lib.sendables.SwerveDriveSendable;
 import frc.lib.swerves.SwerveOutput;
+import frc.robot.LimelightHelpers;
+
 import java.util.function.Supplier;
 
 public class Drive extends Subsystem {
@@ -42,6 +44,23 @@ public class Drive extends Subsystem {
     this.driverAssistance =
         new DriverAssistance(MetersPerSecond.per(Meter).ofNative(8), Meters.of(1), Meters.of(2));
     this.targetSupplier = Pose2d::new;
+
+    LimelightHelpers.setCameraPose_RobotSpace(
+      "limelight-east",
+      0.2715768,
+      0.0809498,
+      0.1539494,
+      5,
+      25,
+      30);
+    LimelightHelpers.setCameraPose_RobotSpace(
+      "limelight-west", 
+      0.2715768,
+      -0.0812292,
+      0.1539494,
+      5,
+      25,
+      -30);
   }
 
   @Override
@@ -63,10 +82,33 @@ public class Drive extends Subsystem {
     field.setRobotPose(state.Pose);
     driverAssistance.drawDebugObjects(field, getPose(), getTargetPose());
     SmartDashboard.putBoolean(
-        "Dead Spots?", driverAssistance.hasDeadSpots(TunerConstants.kSpeedAt12Volts));
+      "Dead Spots?", driverAssistance.hasDeadSpots(TunerConstants.kSpeedAt12Volts));
 
     // NOTE This was taken from the generated project, unsure if it is needed
     // trySettingPerspective();
+
+    LimelightHelpers.SetRobotOrientation(
+      "limelight-east", 
+      state.Pose.getRotation().getDegrees(), 
+      state.Speeds.omegaRadiansPerSecond*(180/Math.PI), 
+      0, 
+      0, 
+      0, 
+      0);
+    LimelightHelpers.SetRobotOrientation(
+      "limelight-west", 
+      state.Pose.getRotation().getDegrees(), 
+      state.Speeds.omegaRadiansPerSecond*(180/Math.PI), 
+      0, 
+      0, 
+      0, 
+      0);
+
+    LimelightHelpers.PoseEstimate mt2EstimateEast = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-east");
+    LimelightHelpers.PoseEstimate mt2EstimateWest = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-west");
+
+    swerve.addVisionMeasurement(mt2EstimateEast.pose, mt2EstimateEast.timestampSeconds);
+    swerve.addVisionMeasurement(mt2EstimateWest.pose, mt2EstimateWest.timestampSeconds);
   }
 
   private void trySettingPerspective() {
@@ -162,5 +204,13 @@ public class Drive extends Subsystem {
     return driveFacing(
         () -> driverAssistance.applyDriverAssistance(fieldSpeeds.get(), getPose(), getTargetPose()),
         () -> getTargetPose().getRotation());
+  }
+
+  public Command trustMegatag1Estimate(String limelightName) {
+    return runOnce(
+      () -> {
+        LimelightHelpers.PoseEstimate mt1Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
+        swerve.resetPose(mt1Estimate.pose);
+      });
   }
 }
