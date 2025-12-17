@@ -6,6 +6,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.*;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -107,8 +108,12 @@ public class Drive extends Subsystem {
     LimelightHelpers.PoseEstimate mt2EstimateEast = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-east");
     LimelightHelpers.PoseEstimate mt2EstimateWest = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-west");
 
-    swerve.addVisionMeasurement(mt2EstimateEast.pose, mt2EstimateEast.timestampSeconds);
-    swerve.addVisionMeasurement(mt2EstimateWest.pose, mt2EstimateWest.timestampSeconds);
+    if (mt2EstimateEast.tagCount >= 1) {
+      swerve.addVisionMeasurement(mt2EstimateEast.pose, mt2EstimateEast.timestampSeconds);
+    }
+    if (mt2EstimateWest.tagCount >= 1) {
+      swerve.addVisionMeasurement(mt2EstimateWest.pose, mt2EstimateWest.timestampSeconds);
+    }
   }
 
   private void trySettingPerspective() {
